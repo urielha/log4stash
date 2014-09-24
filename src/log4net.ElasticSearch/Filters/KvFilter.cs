@@ -43,7 +43,7 @@ namespace log4net.ElasticSearch.Filters
             TrimKey = "";
         }
 
-        public void PrepareConfiguration(ElasticClient client)
+        public void PrepareConfiguration(IElasticClientProxy client)
         {
             var valueRxString = "(?:\"([^\"]+)\"" +
                          "|'([^']+)'" +
@@ -55,7 +55,7 @@ namespace log4net.ElasticSearch.Filters
                 , RegexOptions.Compiled | RegexOptions.Multiline);
         }
 
-        public void PrepareEvent(JObject logEvent, ElasticClient client)
+        public void PrepareEvent(JObject logEvent, IElasticClientProxy client)
         {
             string input;
             if (!logEvent.TryGetStringValue(SourceKey, out input))

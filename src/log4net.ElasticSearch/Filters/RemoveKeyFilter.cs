@@ -16,11 +16,11 @@ namespace log4net.ElasticSearch.Filters
             set { _key = value; }
         }
 
-        public void PrepareConfiguration(ElasticClient client)
+        public void PrepareConfiguration(IElasticClientProxy client)
         {
         }
 
-        public void PrepareEvent(JObject logEvent, ElasticClient client)
+        public void PrepareEvent(JObject logEvent, IElasticClientProxy client)
         {
             logEvent.Remove(_key.Format(logEvent));
         }

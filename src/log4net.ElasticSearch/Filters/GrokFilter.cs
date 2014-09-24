@@ -40,11 +40,11 @@ namespace log4net.ElasticSearch.Filters
             SourceKey = "Message";
         }
 
-        public void PrepareConfiguration(ElasticClient client)
+        public void PrepareConfiguration(IElasticClientProxy client)
         {
         }
 
-        public void PrepareEvent(JObject logEvent, ElasticClient client)
+        public void PrepareEvent(JObject logEvent, IElasticClientProxy client)
         {
             string input;
             if (!logEvent.TryGetStringValue(SourceKey, out input))

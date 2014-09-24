@@ -13,7 +13,7 @@ namespace log4net.ElasticSearch
     {
         private readonly List<IElasticAppenderFilter> _filters = new List<IElasticAppenderFilter>();
 
-        public void PrepareConfiguration(ElasticClient client)
+        public void PrepareConfiguration(IElasticClientProxy client)
         {
             foreach (var filter in _filters)
             {
@@ -22,7 +22,7 @@ namespace log4net.ElasticSearch
             }
         }
 
-        public void PrepareEvent(JObject logEvent, ElasticClient client)
+        public void PrepareEvent(JObject logEvent, IElasticClientProxy client)
         {
             foreach (var filter in _filters)
             {

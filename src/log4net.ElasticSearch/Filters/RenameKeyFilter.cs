@@ -32,11 +32,11 @@ namespace log4net.ElasticSearch.Filters
             Overwrite = true;
         }
 
-        public void PrepareConfiguration(ElasticClient client)
+        public void PrepareConfiguration(IElasticClientProxy client)
         {
         }
 
-        public void PrepareEvent(JObject logEvent, ElasticClient client)
+        public void PrepareEvent(JObject logEvent, IElasticClientProxy client)
         {
             JToken token;
             if (logEvent.TryGetValue(_key.Format(logEvent), out token))

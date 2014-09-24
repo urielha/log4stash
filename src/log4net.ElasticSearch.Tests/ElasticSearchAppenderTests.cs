@@ -22,7 +22,8 @@ namespace log4net.ElasticSearch.Tests
         [TestFixtureSetUp]
         public void FixtureSetup()
         {
-            string host = null, port = null;
+            string host = null;
+            int port = 0;
             QueryConfiguration(appender =>
             {
                 appender.IndexName = TestIndex;

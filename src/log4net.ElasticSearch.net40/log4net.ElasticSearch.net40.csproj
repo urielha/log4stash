@@ -59,9 +59,6 @@
     <Compile Include="..\log4net.ElasticSearch\AssemblyVersionInfo.cs">
       <Link>AssemblyVersionInfo.cs</Link>
     </Compile>
-    <Compile Include="..\log4net.ElasticSearch\BulkProxy.cs">
-      <Link>BulkProxy.cs</Link>
-    </Compile>
     <Compile Include="..\log4net.ElasticSearch\ElasticAppenderFilters.cs">
       <Link>ElasticAppenderFilters.cs</Link>
     </Compile>

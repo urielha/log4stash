@@ -26,11 +26,11 @@ namespace log4net.ElasticSearch.Filters
 
         public bool Overwrite { get; set; }
 
-        public void PrepareConfiguration(ElasticClient client)
+        public void PrepareConfiguration(IElasticClientProxy client)
         {
         }
 
-        public void PrepareEvent(JObject logEvent, ElasticClient client)
+        public void PrepareEvent(JObject logEvent, IElasticClientProxy client)
         {
             var key = _key.Format(logEvent);
             var value = _value.Format(logEvent);

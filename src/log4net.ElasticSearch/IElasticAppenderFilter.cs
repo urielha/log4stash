@@ -5,7 +5,7 @@ namespace log4net.ElasticSearch
 {
     public interface IElasticAppenderFilter 
     {
-        void PrepareConfiguration(ElasticClient client);
-        void PrepareEvent(JObject logEvent, ElasticClient client);
+        void PrepareConfiguration(IElasticClientProxy client);
+        void PrepareEvent(JObject logEvent, IElasticClientProxy client);
     }
 }

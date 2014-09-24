@@ -32,11 +32,11 @@ namespace log4net.ElasticSearch.Filters
             Seperator = ", ";
         }
 
-        public void PrepareConfiguration(ElasticClient client)
+        public void PrepareConfiguration(IElasticClientProxy client)
         {
         }
 
-        public void PrepareEvent(JObject logEvent, ElasticClient client)
+        public void PrepareEvent(JObject logEvent, IElasticClientProxy client)
         {
             string formattedKey = _sourceKey.Format(logEvent);
             string value;
