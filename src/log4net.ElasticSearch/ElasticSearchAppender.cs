@@ -2,104 +2,19 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using System.Threading.Tasks;
-using Elasticsearch.Net;
-using log4net.ElasticSearch.InnerExceptions;
-using log4net.ElasticSearch.Models;
 using log4net.ElasticSearch.SmartFormatters;
 using log4net.Util;
-using Nest;
 using log4net.Appender;
 using log4net.Core;
 using Newtonsoft.Json.Linq;
 
 namespace log4net.ElasticSearch
 {
-    public interface IElasticClientProxy
-    {
-        string Server { get; }
-        int Port { get; }
-        void PutTemplateRaw(string templateName, string rawBody);
-        void IndexBulk<T>(IEnumerable<IInnerBulkOperation<T>> bulk) where T : class;
-        Task IndexBulkAsync<T>(IEnumerable<IInnerBulkOperation<T>> bulk) where T : class;
-    }
-
-    public interface IInnerBulkOperation<out T> where T : class
-    {
-        string IndexName { get; }
-        string IndexType { get; }
-        T Document { get;  }
-    }
-
-    public class InnerBulkOperation<T> : IInnerBulkOperation<T> where T : class
-    {
-        public string IndexName { get; set; }
-        public string IndexType { get; set; }
-        public T Document { get; set; }
-    }
-
-    class NestElasticClient : IElasticClientProxy
-    {
-        private readonly ElasticClient _client;
-
-        public string Server { get; private set; }
-        public int Port { get; private set; }
-
-        public NestElasticClient(string server, int port, int maxAsyncConnections)
-        {
-            Server = server;
-            Port = port;
-            var connectionSettings = new ConnectionSettings(new Uri(string.Format("http://{0}:{1}", Server, Port)));
-            connectionSettings.SetMaximumAsyncConnections(maxAsyncConnections);
-            _client = new ElasticClient(connectionSettings);
-        }
-
-        public void PutTemplateRaw(string templateName, string rawBody)
-        {
-            var res = _client.Raw.IndicesPutTemplateForAll(templateName, rawBody);
-            if (!res.Success)
-            {
-                throw new ErrorSettingTemplateException(res);
-            }
-        }
-
-        public void IndexBulk<T>(IEnumerable<IInnerBulkOperation<T>> bulk) where T : class
-        {
-            var bulkRequest = PrepareBulk(bulk);
-            _client.Bulk(bulkRequest);
-        }
-
-        public Task IndexBulkAsync<T>(IEnumerable<IInnerBulkOperation<T>> bulk) where T : class
-        {
-            var bulkRequest = PrepareBulk(bulk);
-            return _client.BulkAsync(bulkRequest);
-        }
-
-        private static BulkRequest PrepareBulk<T>(IEnumerable<IInnerBulkOperation<T>> bulk) where T : class
-        {
-            var bulkRequest = new BulkRequest();
-            bulkRequest.Operations = new List<IBulkOperation>();
-
-            foreach (var operation in bulk)
-            {
-                var nestOperation = new BulkIndexOperation<T>(operation.Document)
-                {
-                    Index = operation.IndexName,
-                    Type = operation.IndexType
-                };
-
-                bulkRequest.Operations.Add(nestOperation);
-            }
-            return bulkRequest;
-        }
-    }
-
     public class ElasticSearchAppender : AppenderSkeleton
     {
         private static readonly string MachineName = Environment.MachineName;
-        private readonly object syncObject = new object();
 
-        private List<IInnerBulkOperation<JObject>> _bulk = new List<IInnerBulkOperation<JObject>>();
+        private List<IInnerBulkOperation> _bulk = new List<IInnerBulkOperation>();
         private IElasticClientProxy _client;
         private LogEventSmartFormatter _indexName;
         private LogEventSmartFormatter _indexType;
@@ -153,8 +68,9 @@ namespace log4net.ElasticSearch
 
         public override void ActivateOptions()
         {
-            _client = new NestElasticClient(Server, Port, MaxAsyncConnections);
-            
+            //_client = new NestElasticClient(Server, Port, MaxAsyncConnections);
+            _client = new WebElasticClient(Server, Port);
+
             if (Template != null && Template.IsValid)
             {
                 _client.PutTemplateRaw(Template.Name, File.ReadAllText(Template.FileName));
@@ -172,7 +88,7 @@ namespace log4net.ElasticSearch
         }
 
         /// <summary>
-        /// On case of error or when the appender is closed on configuration change.
+        /// On case of error or when the appender is closed before loading configuration change.
         /// </summary>
         protected override void OnClose()
         {
@@ -196,7 +112,7 @@ namespace log4net.ElasticSearch
             }
 
             var logEvent = CreateLogEvent(loggingEvent);
-            PrepareAndAddToBulk(logEvent, loggingEvent);
+            PrepareAndAddToBulk(logEvent);
 
             if (_bulk.Count >= BulkSize && BulkSize > 0)
             {
@@ -208,22 +124,23 @@ namespace log4net.ElasticSearch
         /// Prepare the event and add it to the BulkDescriptor.
         /// </summary>
         /// <param name="logEvent"></param>
-        /// <param name="loggingEvent"></param>
-        private void PrepareAndAddToBulk(JObject logEvent, LoggingEvent loggingEvent)
+        private void PrepareAndAddToBulk(JObject logEvent)
         {
             ElasticFilters.PrepareEvent(logEvent, _client);
 
-            var indexName = _indexName.Format(logEvent).ToLower();
+            var indexName = _indexName.Format(logEvent).ToLower(); 
             var indexType = _indexType.Format(logEvent);
-            
-            lock (syncObject)
+
+            var operation = new InnerBulkOperation
             {
-                _bulk.Add(new InnerBulkOperation<JObject>
-                {
-                    Document = logEvent,
-                    IndexName = indexName,
-                    IndexType = indexType
-                });
+                Document = logEvent,
+                IndexName = indexName,
+                IndexType = indexType
+            };
+
+            lock (_bulk)
+            {
+                _bulk.Add(operation);
             }
         }
 
@@ -232,19 +149,26 @@ namespace log4net.ElasticSearch
             DoIndexNow();
         }
 
+        /// <summary>
+        /// Send the bulk to Elasticsearch and creating new bluk.
+        /// </summary>
         private void DoIndexNow()
-        { 
+        {
+            // avoid blocking further inserts by creating new bulk before the lock
+            var bulkToSend = _bulk;
+            _bulk = new List<IInnerBulkOperation>();
+
             try
             {
-                lock (syncObject)
+                lock (bulkToSend)
                 {
                     if (IndexAsync)
                     {
-                        _client.IndexBulkAsync(_bulk);
+                        _client.IndexBulkAsync(bulkToSend);
                     }
                     else
                     {
-                        _client.IndexBulk(_bulk);
+                        _client.IndexBulk(bulkToSend);
                     }
                 }
             }
@@ -252,8 +176,6 @@ namespace log4net.ElasticSearch
             {
                 LogLog.Error(GetType(), "Invalid connection to ElasticSearch", ex);
             }
-
-            _bulk = new List<IInnerBulkOperation<JObject>>();
         }
 
         private JObject CreateLogEvent(LoggingEvent loggingEvent)

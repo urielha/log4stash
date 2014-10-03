@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace log4net.ElasticSearch.Tests
@@ -12,6 +13,7 @@ namespace log4net.ElasticSearch.Tests
         public static void Main()
         {
             ElasticSearchAppenderTests.Performance();
+            Console.ReadLine();
         }
 
         public static void PerformanceTest(int numberOfTasks, int numberOfCycles)
@@ -23,7 +25,6 @@ namespace log4net.ElasticSearch.Tests
                 tasks.Add(Task.Run(() => Runner(i1, numberOfCycles)));
             }
             Task.WaitAll(tasks.ToArray());
-            //Console.ReadLine();
         }
 
         public static void Runner(int t, int numberOfCycles)
