@@ -1,6 +1,5 @@
-using log4net.ElasticSearch.Models;
+using System.Collections.Generic;
 using log4net.ElasticSearch.SmartFormatters;
-using Newtonsoft.Json.Linq;
 
 namespace log4net.ElasticSearch.Filters
 {
@@ -19,7 +18,7 @@ namespace log4net.ElasticSearch.Filters
         {
         }
 
-        public void PrepareEvent(JObject logEvent)
+        public void PrepareEvent(Dictionary<string, object> logEvent)
         {
             logEvent.Remove(_key.Format(logEvent));
         }

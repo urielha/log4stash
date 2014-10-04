@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using System.Text.RegularExpressions;
-using log4net.ElasticSearch.Models;
-using Newtonsoft.Json.Linq;
 
 namespace log4net.ElasticSearch.SmartFormatters
 {
@@ -25,7 +22,7 @@ namespace log4net.ElasticSearch.SmartFormatters
 
         }
 
-        protected override bool TryProcessMatch(IDictionary<string, JToken> logEvent, Match match, out string replacementString)
+        protected override bool TryProcessMatch(Dictionary<string, object> logEvent, Match match, out string replacementString)
         {
             replacementString = string.Empty;
             string innerMatch = match.Groups[1].Value;
@@ -37,10 +34,10 @@ namespace log4net.ElasticSearch.SmartFormatters
                 return true;
             }
 
-            JToken token;
+            object token;
             if (logEvent.TryGetValue(innerMatch, out token))
             {
-                replacementString = token.Value<string>();
+                replacementString = token.ToString();
                 return true;
             }
 

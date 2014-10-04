@@ -6,7 +6,6 @@ using log4net.ElasticSearch.SmartFormatters;
 using log4net.Util;
 using log4net.Appender;
 using log4net.Core;
-using Newtonsoft.Json.Linq;
 
 namespace log4net.ElasticSearch
 {
@@ -68,7 +67,6 @@ namespace log4net.ElasticSearch
 
         public override void ActivateOptions()
         {
-            //_client = new NestElasticClient(Server, Port, MaxAsyncConnections);
             _client = new WebElasticClient(Server, Port);
 
             if (Template != null && Template.IsValid)
@@ -124,7 +122,7 @@ namespace log4net.ElasticSearch
         /// Prepare the event and add it to the BulkDescriptor.
         /// </summary>
         /// <param name="logEvent"></param>
-        private void PrepareAndAddToBulk(JObject logEvent)
+        private void PrepareAndAddToBulk(Dictionary<string, object> logEvent)
         {
             ElasticFilters.PrepareEvent(logEvent);
 
@@ -178,14 +176,14 @@ namespace log4net.ElasticSearch
             }
         }
 
-        private JObject CreateLogEvent(LoggingEvent loggingEvent)
+        private Dictionary<string, object> CreateLogEvent(LoggingEvent loggingEvent)
         {
             if (loggingEvent == null)
             {
                 throw new ArgumentNullException("loggingEvent");
             }
 
-            var logEvent = new JObject();
+            var logEvent = new Dictionary<string, object>();
 
             logEvent["@timestamp"] = loggingEvent.TimeStamp.ToUniversalTime().ToString("O");
             logEvent["LoggerName"] = loggingEvent.LoggerName;
@@ -214,7 +212,9 @@ namespace log4net.ElasticSearch
 
             if (FixedFields.HasFlag(FixFlags.LocationInfo) && loggingEvent.LocationInformation != null)
             {
-                var locationInfo = logEvent["LocationInformation"] = new JObject();
+                var locationInfo = new Dictionary<string, object>();
+                logEvent["LocationInformation"] = locationInfo;
+
                 locationInfo["ClassName"] = loggingEvent.LocationInformation.ClassName;
                 locationInfo["FileName"] = loggingEvent.LocationInformation.FileName;
                 locationInfo["LineNumber"] = loggingEvent.LocationInformation.LineNumber;

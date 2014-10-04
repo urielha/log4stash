@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json.Linq;
 
 namespace log4net.ElasticSearch.SmartFormatters
 {
@@ -21,10 +20,10 @@ namespace log4net.ElasticSearch.SmartFormatters
 
         public string Format()
         {
-            return Format(new JObject());
+            return Format(new Dictionary<string, object>());
         }
 
-        public string Format(IDictionary<string, JToken> jObj)
+        public string Format(Dictionary<string, object> jObj)
         {
             if (_dontBother)
             {
@@ -44,7 +43,7 @@ namespace log4net.ElasticSearch.SmartFormatters
             return result.ToString();
         }
 
-        protected abstract bool TryProcessMatch(IDictionary<string, JToken> dictionary, Match match, out string replacementString);
+        protected abstract bool TryProcessMatch(Dictionary<string, object> dictionary, Match match, out string replacementString);
 
         public override string ToString()
         {

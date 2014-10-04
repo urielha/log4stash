@@ -1,6 +1,7 @@
-﻿using System.Linq;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
-using Newtonsoft.Json.Linq;
 using log4net.ElasticSearch.Models;
 
 namespace log4net.ElasticSearch.Filters
@@ -54,7 +55,7 @@ namespace log4net.ElasticSearch.Filters
                 , RegexOptions.Compiled | RegexOptions.Multiline);
         }
 
-        public void PrepareEvent(JObject logEvent)
+        public void PrepareEvent(Dictionary<string, object> logEvent)
         {
             string input;
             if (!logEvent.TryGetStringValue(SourceKey, out input))
@@ -66,7 +67,7 @@ namespace log4net.ElasticSearch.Filters
             ScanMessage(logEvent, input);
         }
 
-        protected void ScanMessage(JObject logEvent, string input)
+        protected void ScanMessage(Dictionary<string, object> logEvent, string input)
         {
             foreach (Match match in _kvRegex.Matches(input))
             {
@@ -87,14 +88,14 @@ namespace log4net.ElasticSearch.Filters
             }
         }
 
-        private void ProcessValueAndStore(JObject logEvent, string key, string value)
+        private void ProcessValueAndStore(Dictionary<string, object> logEvent, string key, string value)
         {   
             if (Recursive)
             {
-                var innerEvent = new JObject();
+                var innerEvent = new Dictionary<string, object>();
                 ScanMessage(innerEvent, value);
 
-                if (innerEvent.HasValues)
+                if (innerEvent.Count > 0)
                 {
                     logEvent.AddOrSet(key, innerEvent);
                     return;

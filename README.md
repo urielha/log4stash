@@ -115,7 +115,7 @@ Note that the filters got called by the order they appeared in the config (as sh
 ### Thanks:
 Thanks to [@jptoto](https://github.com/jptoto) for the idea and the first working ElasticAppender.
 Many thanks to [@mpdreamz](https://github.com/Mpdreamz) and the team for their great work on the NEST library!
-Thanks to [@gluck](https://github.com/gluck) for the package [il-repack](https://github.com/gluck/il-repack).
+<!-- Thanks to [@gluck](https://github.com/gluck) for the package [il-repack](https://github.com/gluck/il-repack). -->
 The inspiration to the filters and style had taken from [elasticsearch/logstash](https://github.com/elasticsearch/logstash) project.
 
 ### Build status:

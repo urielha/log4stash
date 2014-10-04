@@ -1,8 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using log4net.ElasticSearch.Models;
 using log4net.ElasticSearch.SmartFormatters;
-using Newtonsoft.Json.Linq;
 
 namespace log4net.ElasticSearch.Filters
 {
@@ -35,7 +35,7 @@ namespace log4net.ElasticSearch.Filters
         {
         }
 
-        public void PrepareEvent(JObject logEvent)
+        public void PrepareEvent(Dictionary<string, object> logEvent)
         {
             string formattedKey = _sourceKey.Format(logEvent);
             string value;
@@ -44,7 +44,7 @@ namespace log4net.ElasticSearch.Filters
                 return;
             }
 
-            logEvent[formattedKey] = new JArray(_seperateRegex.Split(value).Where(s => !string.IsNullOrEmpty(s)));
+            logEvent[formattedKey] = _seperateRegex.Split(value).Where(s => !string.IsNullOrEmpty(s)).ToList();
         }
     }
 }

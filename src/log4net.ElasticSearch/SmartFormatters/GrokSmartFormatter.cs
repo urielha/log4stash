@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 
 namespace log4net.ElasticSearch.SmartFormatters
 {
@@ -23,15 +18,15 @@ namespace log4net.ElasticSearch.SmartFormatters
         {
         }
 
-        protected override bool TryProcessMatch(IDictionary<string, JToken> jObj, Match match, out string replacementString)
+        protected override bool TryProcessMatch(Dictionary<string, object> jObj, Match match, out string replacementString)
         {
             var patternName = match.Groups[1].Value;
             var groupNameMatch = match.Groups[2];
 
-            JToken token;
+            object token;
             if (jObj.TryGetValue(patternName, out token))
             {
-                var pattern = token.Value<string>();
+                var pattern = token.ToString();
                 if (groupNameMatch.Success)
                 {
                     replacementString = string.Format("(?<{0}>{1})", groupNameMatch.Value, pattern);

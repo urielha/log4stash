@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using System.Web.Script.Serialization;
 
 namespace log4net.ElasticSearch
 {
@@ -76,10 +75,10 @@ namespace log4net.ElasticSearch
                     operation.IndexName, operation.IndexType);
                 sb.Append("\n");
 
-                //string json = new JavaScriptSerializer().Serialize(logEvent);
-                JObject jo = operation.Document as JObject ?? JObject.FromObject(operation.Document);
-
-                sb.Append(jo.ToString(Formatting.None));
+                string json = new JavaScriptSerializer().Serialize(operation.Document);
+                sb.Append(json);
+                //JObject jo = operation.Document as JObject ?? JObject.FromObject(operation.Document);
+                //sb.Append(jo.ToString(Formatting.None));
 
                 sb.Append("\n");
             }

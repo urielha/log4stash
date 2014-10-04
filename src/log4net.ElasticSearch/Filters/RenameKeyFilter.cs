@@ -1,6 +1,6 @@
+using System.Collections.Generic;
 using log4net.ElasticSearch.Models;
 using log4net.ElasticSearch.SmartFormatters;
-using Newtonsoft.Json.Linq;
 
 namespace log4net.ElasticSearch.Filters
 {
@@ -35,22 +35,23 @@ namespace log4net.ElasticSearch.Filters
         {
         }
 
-        public void PrepareEvent(JObject logEvent)
+        public void PrepareEvent(Dictionary<string, object> logEvent)
         {
-            JToken token;
-            if (logEvent.TryGetValue(_key.Format(logEvent), out token))
+            object token;
+            string key = _key.Format(logEvent);
+            if (logEvent.TryGetValue(key, out token))
             {
-                token.Parent.Remove();
+                logEvent.Remove(key);
 
-                var renameTo = _renameTo.Format(logEvent);
+                var newName = _renameTo.Format(logEvent);
 
-                if (!Overwrite && logEvent.HasKey(renameTo))
+                if (!Overwrite && logEvent.ContainsKey(newName))
                 {
                     logEvent.AddTag(FailedToRename);
                     return;
                 }
 
-                logEvent[renameTo] = token;
+                logEvent[newName] = token;
             }
         }
     }

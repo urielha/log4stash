@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using log4net.ElasticSearch.Models;
 using log4net.ElasticSearch.SmartFormatters;
-using Newtonsoft.Json.Linq;
 
 namespace log4net.ElasticSearch.Filters
 {
@@ -12,7 +11,7 @@ namespace log4net.ElasticSearch.Filters
     {
         private const string FailedGrok = "GrokMatchFailed";
         private readonly string[] _exceptGroups = new[] { "0" };
-        private static readonly Dictionary<string, JToken> GrokPatternsKeyValue = GetGrokPatternsKeyValue();
+        private static readonly Dictionary<string, object> GrokPatternsKeyValue = GetGrokPatternsKeyValue();
 
         private Regex _regex;
         private string[] _groupNames;
@@ -43,7 +42,7 @@ namespace log4net.ElasticSearch.Filters
         {
         }
 
-        public void PrepareEvent(JObject logEvent)
+        public void PrepareEvent(Dictionary<string, object> logEvent)
         {
             string input;
             if (!logEvent.TryGetStringValue(SourceKey, out input))
@@ -55,7 +54,7 @@ namespace log4net.ElasticSearch.Filters
             ScanMessage(logEvent, input);
         }
         
-        protected void ScanMessage(JObject logEvent, string input)
+        protected void ScanMessage(Dictionary<string, object> logEvent, string input)
         {
             var match = _regex.Match(input);
             
@@ -80,7 +79,7 @@ namespace log4net.ElasticSearch.Filters
             }
         }
 
-        private static Dictionary<string, JToken> GetGrokPatternsKeyValue()
+        private static Dictionary<string, object> GetGrokPatternsKeyValue()
         {
             var splittedRaw = grokPatternsRaw.Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
 
@@ -90,7 +89,7 @@ namespace log4net.ElasticSearch.Filters
                 where !string.IsNullOrWhiteSpace(trimedLine) && !trimedLine.StartsWith("#")
                 select trimedLine.Split(space, 2, StringSplitOptions.RemoveEmptyEntries);
             
-            var dictionary = new Dictionary<string, JToken>();
+            var dictionary = new Dictionary<string, object>();
             foreach (var keyVal in splitted)
             {
                 dictionary[keyVal[0]] = new GrokSmartFormatter(keyVal[1]).Format(dictionary);

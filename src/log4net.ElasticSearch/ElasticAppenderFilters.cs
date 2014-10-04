@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using log4net.ElasticSearch.Filters;
 using log4net.ElasticSearch.InnerExceptions;
-using Newtonsoft.Json.Linq;
 
 namespace log4net.ElasticSearch
 {
@@ -21,7 +20,7 @@ namespace log4net.ElasticSearch
             }
         }
 
-        public void PrepareEvent(JObject logEvent)
+        public void PrepareEvent(Dictionary<string, object> logEvent)
         {
             foreach (var filter in _filters)
             {

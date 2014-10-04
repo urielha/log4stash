@@ -1,4 +1,5 @@
-using Newtonsoft.Json.Linq;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace log4net.ElasticSearch.Models
 {
@@ -6,50 +7,44 @@ namespace log4net.ElasticSearch.Models
     {
         public static readonly string TagsKeyName = "@Tags";
 
-        public static void AddOrSet(this JObject jObject, string key, JToken value)
+        public static void AddOrSet(this Dictionary<string, object> loggingEvent, string key, object value)
         {
-            JToken token;
-            if (jObject.TryGetValue(key, out token))
+            object token;
+            if (loggingEvent.TryGetValue(key, out token))
             {
-                var array = token as JArray;
+                var array = token as IList;
                 if (array == null)
                 {
-                    array = new JArray(token);
-                    jObject[key] = array;
+                    array = new List<object>(new[] {token});
+                    loggingEvent[key] = array;
                 }
                 array.Add(value);
             }
             else
             {
-                jObject[key] = value;
+                loggingEvent[key] = value;
             }
         }
 
-        public static bool HasKey(this JObject jObject, string key)
+        public static void AddTag(this Dictionary<string, object> loggingEvent, string tag)
         {
-            return jObject[key] != null;
+            loggingEvent.AddOrSet(TagsKeyName, tag);
         }
 
-        public static void AddTag(this JObject jObject, string tag)
-        {
-            jObject.AddOrSet(TagsKeyName, tag);
-        }
-
-        public static bool TryGetStringValue(this JObject jObject, string key, out string value)
+        public static bool TryGetStringValue(this Dictionary<string, object> loggingEvent, string key, out string value)
         {
             value = string.Empty;
-
-            var token = jObject[key];
-            if (token == null)
-                return false;
-
-            if (token.Type != JTokenType.String)
+            object token;
+            if(loggingEvent.TryGetValue(key, out token))
             {
-                return false;
+                value = token as string;
+                if (value != null)
+                {
+                    return true;
+                }
             }
 
-            value = token.Value<string>();
-            return true;
+            return false;
         }
     }
 }
