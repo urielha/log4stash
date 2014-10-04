@@ -84,13 +84,14 @@ namespace log4net.ElasticSearch.Filters
             var splittedRaw = grokPatternsRaw.Split(new[] {Environment.NewLine}, StringSplitOptions.RemoveEmptyEntries);
 
             var space = new[] { " " };
-            var splitted = from line in splittedRaw
+            // extract patterns, ingore empty or patterns starts with '#'
+            var patterns = from line in splittedRaw
                 let trimedLine = line.Trim()
                 where !string.IsNullOrWhiteSpace(trimedLine) && !trimedLine.StartsWith("#")
                 select trimedLine.Split(space, 2, StringSplitOptions.RemoveEmptyEntries);
             
             var dictionary = new Dictionary<string, object>();
-            foreach (var keyVal in splitted)
+            foreach (var keyVal in patterns)
             {
                 dictionary[keyVal[0]] = new GrokSmartFormatter(keyVal[1]).Format(dictionary);
             }
