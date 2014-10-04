@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading;
 using log4net.Appender;
 using log4net.ElasticSearch.Filters;
@@ -281,7 +280,7 @@ namespace log4net.ElasticSearch.Tests
                 appender.BulkSize = 4000;
                 appender.BulkIdleTimeout = -1;
             });
-            Program.PerformanceTest(1, 12000);
+            Program.PerformanceTest(1, 32000);
         }
 
         private static void QueryConfiguration(Action<ElasticSearchAppender> action)
