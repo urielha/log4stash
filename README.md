@@ -13,6 +13,9 @@ The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.Elast
 * Uses the excellent [NEST](https://github.com/Mpdreamz/NEST) library which has great support for the newest ElasticSearch revisions
 * Ability to analyze the log event before sending it to elasticsearch using built-in filters and custom filters similar to [logstash](http://logstash.net/docs/1.4.2/).
 
+### Breaking Changes:
+* The definition of IElasticAppenderFilter has been changed, PrepareEvent has only one parameter and PrepareConfiguration's parameter type has changed to IElasticsearchClient.
+
 ### Filters:
 * **Add** - add new key and value to the event.
 * **Remove** - remove key from the event.
