@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -15,7 +14,7 @@ namespace log4net.ElasticSearch
         int Port { get; }
         void PutTemplateRaw(string templateName, string rawBody);
         void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
-        Task IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
+        IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
     }
     
     public class InnerBulkOperation 
@@ -46,6 +45,10 @@ namespace log4net.ElasticSearch
             webRequest.ContentType = "text/json";
             webRequest.Method = "PUT";
             SendRequest(webRequest, rawBody);
+            using (var httpResponse = (HttpWebResponse)webRequest.GetResponse())
+            {
+                CheckResponse(httpResponse);
+            }
         }
 
         public void IndexBulk(IEnumerable<InnerBulkOperation> bulk)
@@ -57,6 +60,10 @@ namespace log4net.ElasticSearch
             webRequest.Method = "POST";
 
             SendRequest(webRequest, requestString);
+            using (var httpResponse = (HttpWebResponse) webRequest.GetResponse())
+            {
+                CheckResponse(httpResponse);
+            }
         }
 
         private static string PrepareBulk(IEnumerable<InnerBulkOperation> bulk)
@@ -85,30 +92,46 @@ namespace log4net.ElasticSearch
             {
                 stream.Write(requestString);
             }
+        }
 
-            using (var httpResponse = (HttpWebResponse)webRequest.GetResponse())
+        private static void CheckResponse(HttpWebResponse httpResponse)
+        {
+            if (httpResponse.StatusCode != HttpStatusCode.OK)
             {
-                if (httpResponse.StatusCode != HttpStatusCode.OK)
+                var buff = new byte[httpResponse.ContentLength];
+                using (var response = httpResponse.GetResponseStream())
                 {
-                    var buff = new byte[httpResponse.ContentLength];
-                    using (var response = httpResponse.GetResponseStream())
+                    if (response != null)
                     {
-                        if (response != null)
-                        {
-                            response.Read(buff, 0, (int)httpResponse.ContentLength);
-                        }
+                        response.Read(buff, 0, (int) httpResponse.ContentLength);
                     }
-
-                    throw new InvalidOperationException(
-                        string.Format("Some error occurred while sending request to Elasticsearch.{0}{1}",
-                            Environment.NewLine, Encoding.UTF8.GetString(buff)));
                 }
+
+                throw new InvalidOperationException(
+                    string.Format("Some error occurred while sending request to Elasticsearch.{0}{1}",
+                        Environment.NewLine, Encoding.UTF8.GetString(buff)));
             }
         }
 
-        public Task IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
+        public IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
         {
-            throw new NotImplementedException();
+            var requestString = PrepareBulk(bulk);
+
+            var webRequest = WebRequest.Create(string.Concat(_url, "_bulk"));
+            webRequest.ContentType = "text/plain";
+            webRequest.Method = "POST";
+            webRequest.Timeout = 10000;
+            SendRequest(webRequest, requestString);
+            return webRequest.BeginGetResponse(FinishGetResponse, webRequest);
+        }
+
+        private void FinishGetResponse(IAsyncResult result)
+        {
+            var webRequest = (WebRequest) result.AsyncState;
+            using (var httpResponse = (HttpWebResponse) webRequest.EndGetResponse(result))
+            {
+                CheckResponse(httpResponse);
+            }
         }
     }
 }
