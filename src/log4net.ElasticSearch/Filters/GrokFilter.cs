@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using log4net.ElasticSearch.Models;
 using log4net.ElasticSearch.SmartFormatters;
-using Nest;
 using Newtonsoft.Json.Linq;
 
 namespace log4net.ElasticSearch.Filters
@@ -40,11 +39,11 @@ namespace log4net.ElasticSearch.Filters
             SourceKey = "Message";
         }
 
-        public void PrepareConfiguration(IElasticClientProxy client)
+        public void PrepareConfiguration(IElasticsearchClient client)
         {
         }
 
-        public void PrepareEvent(JObject logEvent, IElasticClientProxy client)
+        public void PrepareEvent(JObject logEvent)
         {
             string input;
             if (!logEvent.TryGetStringValue(SourceKey, out input))

@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Text.RegularExpressions;
-using Nest;
 using Newtonsoft.Json.Linq;
 using log4net.ElasticSearch.Models;
 
@@ -43,7 +42,7 @@ namespace log4net.ElasticSearch.Filters
             TrimKey = "";
         }
 
-        public void PrepareConfiguration(IElasticClientProxy client)
+        public void PrepareConfiguration(IElasticsearchClient client)
         {
             var valueRxString = "(?:\"([^\"]+)\"" +
                          "|'([^']+)'" +
@@ -55,7 +54,7 @@ namespace log4net.ElasticSearch.Filters
                 , RegexOptions.Compiled | RegexOptions.Multiline);
         }
 
-        public void PrepareEvent(JObject logEvent, IElasticClientProxy client)
+        public void PrepareEvent(JObject logEvent)
         {
             string input;
             if (!logEvent.TryGetStringValue(SourceKey, out input))

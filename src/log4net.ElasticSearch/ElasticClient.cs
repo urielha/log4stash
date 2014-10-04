@@ -4,93 +4,28 @@ using System.IO;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
-using log4net.ElasticSearch.InnerExceptions;
-using Nest;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace log4net.ElasticSearch
 {
-    public interface IElasticClientProxy
+    public interface IElasticsearchClient
     {
         string Server { get; }
         int Port { get; }
         void PutTemplateRaw(string templateName, string rawBody);
-        void IndexBulk(IEnumerable<IInnerBulkOperation> bulk);
-        Task IndexBulkAsync(IEnumerable<IInnerBulkOperation> bulk);
+        void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
+        Task IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
     }
-
-    public interface IInnerBulkOperation
-    {
-        string IndexName { get; }
-        string IndexType { get; }
-        object Document { get; }
-    }
-
-    public class InnerBulkOperation : IInnerBulkOperation
+    
+    public class InnerBulkOperation 
     {
         public string IndexName { get; set; }
         public string IndexType { get; set; }
         public object Document { get; set; }
     }
 
-    class NestElasticClient : IElasticClientProxy
-    {
-        private readonly ElasticClient _client;
-
-        public string Server { get; private set; }
-        public int Port { get; private set; }
-
-        public NestElasticClient(string server, int port, int maxAsyncConnections)
-        {
-            Server = server;
-            Port = port;
-            var connectionSettings = new ConnectionSettings(new Uri(string.Format("http://{0}:{1}", Server, Port)));
-            connectionSettings.SetMaximumAsyncConnections(maxAsyncConnections);
-            _client = new ElasticClient(connectionSettings);
-        }
-
-        public void PutTemplateRaw(string templateName, string rawBody)
-        {
-            var res = _client.Raw.IndicesPutTemplateForAll(templateName, rawBody);
-            if (!res.Success)
-            {
-                throw new ErrorSettingTemplateException(res);
-            }
-        }
-
-        public void IndexBulk(IEnumerable<IInnerBulkOperation> bulk) 
-        {
-            var bulkRequest = PrepareBulk(bulk);
-            _client.Bulk(bulkRequest);
-        }
-
-        public Task IndexBulkAsync(IEnumerable<IInnerBulkOperation> bulk) 
-        {
-            var bulkRequest = PrepareBulk(bulk);
-            return _client.BulkAsync(bulkRequest);
-        }
-
-        private static BulkRequest PrepareBulk(IEnumerable<IInnerBulkOperation> bulk) 
-        {
-            var bulkRequest = new BulkRequest();
-            bulkRequest.Operations = new List<IBulkOperation>();
-
-            foreach (var operation in bulk)
-            {
-                var nestOperation = new BulkIndexOperation<object>(operation.Document)
-                {
-                    Index = operation.IndexName,
-                    Type = operation.IndexType
-                };
-
-                bulkRequest.Operations.Add(nestOperation);
-            }
-            return bulkRequest;
-        }
-    }
-
-    public class WebElasticClient : IElasticClientProxy
+    public class WebElasticClient : IElasticsearchClient
     {
         public string Server { get; private set; }
         public int Port { get; private set; }
@@ -113,7 +48,7 @@ namespace log4net.ElasticSearch
             SendRequest(webRequest, rawBody);
         }
 
-        public void IndexBulk(IEnumerable<IInnerBulkOperation> bulk)
+        public void IndexBulk(IEnumerable<InnerBulkOperation> bulk)
         {
             var requestString = PrepareBulk(bulk);
 
@@ -124,12 +59,7 @@ namespace log4net.ElasticSearch
             SendRequest(webRequest, requestString);
         }
 
-        public Task IndexBulkAsync(IEnumerable<IInnerBulkOperation> bulk)
-        {
-            throw new NotImplementedException();
-        }
-
-        private static string PrepareBulk(IEnumerable<IInnerBulkOperation> bulk)
+        private static string PrepareBulk(IEnumerable<InnerBulkOperation> bulk)
         {
             var sb = new StringBuilder();
             foreach (var operation in bulk)
@@ -174,6 +104,11 @@ namespace log4net.ElasticSearch
                             Environment.NewLine, Encoding.UTF8.GetString(buff)));
                 }
             }
+        }
+
+        public Task IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
+        {
+            throw new NotImplementedException();
         }
     }
 }

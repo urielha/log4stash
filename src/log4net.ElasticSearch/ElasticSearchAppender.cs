@@ -14,8 +14,8 @@ namespace log4net.ElasticSearch
     {
         private static readonly string MachineName = Environment.MachineName;
 
-        private List<IInnerBulkOperation> _bulk = new List<IInnerBulkOperation>();
-        private IElasticClientProxy _client;
+        private List<InnerBulkOperation> _bulk = new List<InnerBulkOperation>();
+        private IElasticsearchClient _client;
         private LogEventSmartFormatter _indexName;
         private LogEventSmartFormatter _indexType;
  
@@ -126,7 +126,7 @@ namespace log4net.ElasticSearch
         /// <param name="logEvent"></param>
         private void PrepareAndAddToBulk(JObject logEvent)
         {
-            ElasticFilters.PrepareEvent(logEvent, _client);
+            ElasticFilters.PrepareEvent(logEvent);
 
             var indexName = _indexName.Format(logEvent).ToLower(); 
             var indexType = _indexType.Format(logEvent);
@@ -156,7 +156,7 @@ namespace log4net.ElasticSearch
         {
             // avoid blocking further inserts by creating new bulk before the lock
             var bulkToSend = _bulk;
-            _bulk = new List<IInnerBulkOperation>();
+            _bulk = new List<InnerBulkOperation>();
 
             try
             {
@@ -187,7 +187,6 @@ namespace log4net.ElasticSearch
 
             var logEvent = new JObject();
 
-            //logEvent["Id"] = UniqueIdGenerator.Instance.GenerateUniqueId();
             logEvent["@timestamp"] = loggingEvent.TimeStamp.ToUniversalTime().ToString("O");
             logEvent["LoggerName"] = loggingEvent.LoggerName;
             logEvent["ThreadName"] = loggingEvent.ThreadName;
@@ -195,7 +194,6 @@ namespace log4net.ElasticSearch
             logEvent["Message"] = loggingEvent.MessageObject == null ? "" : loggingEvent.MessageObject.ToString();
             logEvent["Exception"] = loggingEvent.ExceptionObject == null ? "" : loggingEvent.ExceptionObject.ToString();
             //logEvent["Message"] = loggingEvent.RenderedMessage;
-            //logEvent["Fix"] = loggingEvent.Fix.ToString(); // We need this?
             logEvent["AppDomain"] = loggingEvent.Domain;
             logEvent["HostName"] = MachineName;
 

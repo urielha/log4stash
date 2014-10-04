@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using log4net.ElasticSearch.Filters;
 using log4net.ElasticSearch.InnerExceptions;
-using Nest;
 using Newtonsoft.Json.Linq;
 
 namespace log4net.ElasticSearch
@@ -13,7 +12,7 @@ namespace log4net.ElasticSearch
     {
         private readonly List<IElasticAppenderFilter> _filters = new List<IElasticAppenderFilter>();
 
-        public void PrepareConfiguration(IElasticClientProxy client)
+        public void PrepareConfiguration(IElasticsearchClient client)
         {
             foreach (var filter in _filters)
             {
@@ -22,11 +21,11 @@ namespace log4net.ElasticSearch
             }
         }
 
-        public void PrepareEvent(JObject logEvent, IElasticClientProxy client)
+        public void PrepareEvent(JObject logEvent)
         {
             foreach (var filter in _filters)
             {
-                filter.PrepareEvent(logEvent, client);
+                filter.PrepareEvent(logEvent);
             }
         }
 

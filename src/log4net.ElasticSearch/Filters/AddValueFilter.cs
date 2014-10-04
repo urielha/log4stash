@@ -1,6 +1,5 @@
 using log4net.ElasticSearch.Models;
 using log4net.ElasticSearch.SmartFormatters;
-using Nest;
 using Newtonsoft.Json.Linq;
 
 namespace log4net.ElasticSearch.Filters
@@ -26,11 +25,11 @@ namespace log4net.ElasticSearch.Filters
 
         public bool Overwrite { get; set; }
 
-        public void PrepareConfiguration(IElasticClientProxy client)
+        public void PrepareConfiguration(IElasticsearchClient client)
         {
         }
 
-        public void PrepareEvent(JObject logEvent, IElasticClientProxy client)
+        public void PrepareEvent(JObject logEvent)
         {
             var key = _key.Format(logEvent);
             var value = _value.Format(logEvent);
