@@ -1,105 +1,19 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using log4net.Appender;
+using System.Threading.Tasks;
 using log4net.ElasticSearch.Filters;
-using log4net.Repository.Hierarchy;
-using Nest;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
 namespace log4net.ElasticSearch.Tests
 {
     [TestFixture]
-    public class ElasticSearchAppenderTests
+    public class ElasticsearchAppenderTests : TestsSetup
     {
-        public ElasticClient Client;
-        public readonly string TestIndex = "log_test_" + DateTime.Now.ToString("yyyy-MM-dd");
-
-        private static readonly ILog _log = LogManager.GetLogger(typeof(ElasticSearchAppenderTests));
-
-        [TestFixtureSetUp]
-        public void FixtureSetup()
-        {
-            string host = null;
-            int port = 0;
-            QueryConfiguration(appender =>
-            {
-                appender.IndexName = TestIndex;
-
-                host = appender.Server;
-                port = appender.Port;
-            });
-
-            ConnectionSettings elasticSettings =
-                new ConnectionSettings(new Uri(string.Format("http://{0}:{1}", host, port)))
-                    .SetDefaultIndex(TestIndex);
-
-            Client = new ElasticClient(elasticSettings);
-        }
-
-        [TestFixtureTearDown]
-        public void FixtureTearDown()
-        {
-            try
-            {
-                Client.DeleteIndex(descriptor => descriptor.Index(TestIndex));
-            }
-            catch
-            {
-                // we don't care if the index does not exists
-            }
-        }
-
-        [SetUp]
-        public void TestSetup()
-        {
-            FixtureTearDown();
-            QueryConfiguration(appender =>
-            {
-                appender.BulkSize = 1;
-                appender.BulkIdleTimeout = -1;
-            });
-        }
-
-        [Test]
-        public void Can_insert_record()
-        {
-            var logEvent = new
-                {
-                    ClassName = "IntegrationTestClass",
-                    Domain = "TestDomain",
-                    Exception = "This is a test exception",
-                    FileName = "c:\\test\\file.txt",
-                    Fix = "none",
-                    FullInfo = "A whole bunch of error info dump",
-                    Identity = "localhost\\user",
-                    Level = "9",
-                    LineNumber = "99",
-                    TimeStamp = DateTime.Now
-                };
-
-            var results = Client.Index(logEvent, descriptor => descriptor.Type("anonymous"));
-
-            Assert.IsNotNullOrEmpty(results.Id);
-        }
-
-        [Test]
-        public void Can_read_inserted_record()
-        {
-            var logEvent = new
-            {
-                ClassName = "IntegrationTestClass",
-                Exception = "ReadingTest"
-            };
-
-            Client.Index(logEvent, descriptor => descriptor.Type("anonymous"));
-            Client.Refresh();
-
-            var searchResults = Client.Search<dynamic>(s => s.AllTypes().MatchAll());
-            Assert.AreEqual(1, searchResults.Total);
-            Assert.AreEqual("ReadingTest", searchResults.Documents.First().exception.ToString());
-        }
+        private static readonly ILog _log = LogManager.GetLogger(typeof(ElasticsearchAppenderTests));
 
         [Test]
         public void Can_create_an_event_from_log4net()
@@ -280,24 +194,37 @@ namespace log4net.ElasticSearch.Tests
                 appender.BulkSize = 4000;
                 appender.BulkIdleTimeout = -1;
             });
-            Program.PerformanceTest(1, 32000);
+            PerformanceTests.Test(1, 32000);
+        }
+    }
+
+    static class PerformanceTests
+    {
+        private static readonly ILog Logger = LogManager.GetLogger(typeof(ElasticSearchAppender));
+
+        public static void Test(int numberOfTasks, int numberOfCycles)
+        {
+            var tasks = new List<Task>();
+            for (int i = 0; i < numberOfTasks; i++)
+            {
+                int i1 = i;
+                tasks.Add(Task.Run(() => Runner(i1, numberOfCycles)));
+            }
+            Task.WaitAll(tasks.ToArray());
         }
 
-        private static void QueryConfiguration(Action<ElasticSearchAppender> action)
+        private static void Runner(int t, int numberOfCycles)
         {
-            var hierarchy = LogManager.GetRepository() as Hierarchy;
-            if (hierarchy != null)
+            log4net.ThreadContext.Properties["taskNumber"] = t;
+            var sw = Stopwatch.StartNew();
+            for (int i = 0; i < numberOfCycles; i++)
             {
-                IAppender[] appenders = hierarchy.GetAppenders();
-                foreach (IAppender appender in appenders)
-                {
-                    var elsAppender = appender as ElasticSearchAppender;
-                    if (elsAppender != null && action != null)
-                    {
-                        action(elsAppender);
-                    }
-                }
+                Logger.InfoFormat("testNum: {0}, name is someName and guid {1}", i, Guid.NewGuid());
             }
+            sw.Stop();
+
+            Console.WriteLine("Ellapsed: {0}, numPerSec: {1}",
+                sw.ElapsedMilliseconds, numberOfCycles / (sw.ElapsedMilliseconds / (double)1000));
         }
     }
 }
