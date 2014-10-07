@@ -42,7 +42,7 @@ namespace log4net.ElasticSearch
 
             if (invalidProperties.Any())
             {
-                var properties = string.Join(",", invalidProperties);
+                var properties = string.Join(",", invalidProperties.ToArray());
                 throw new InvalidFilterConfigurationException(
                     string.Format("The properties ({0}) of {1} are invalid.", properties, filter.GetType().Name));
             }

@@ -87,7 +87,7 @@ namespace log4net.ElasticSearch.Filters
             // extract patterns, ingore empty or patterns starts with '#'
             var patterns = from line in splittedRaw
                 let trimedLine = line.Trim()
-                where !string.IsNullOrWhiteSpace(trimedLine) && !trimedLine.StartsWith("#")
+                where !string.IsNullOrEmpty(trimedLine) && !trimedLine.StartsWith("#")
                 select trimedLine.Split(space, 2, StringSplitOptions.RemoveEmptyEntries);
             
             var dictionary = new Dictionary<string, object>();

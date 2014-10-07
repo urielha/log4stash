@@ -10,8 +10,8 @@ namespace log4net.ElasticSearch.Filters
     {
         private const string FailedKv = "KvFilterFailed";
         private Regex _kvRegex;
-        private char[] _trimValue;
-        private char[] _trimKey;
+        private string _trimValue;
+        private string _trimKey;
 
         [PropertyNotEmpty]
         public string ValueSplit { get; set; }
@@ -22,14 +22,14 @@ namespace log4net.ElasticSearch.Filters
 
         public string TrimValue
         {
-            get { return string.Join("", _trimValue ?? Enumerable.Empty<char>()); }
-            set { _trimValue = value.ToCharArray(); }
+            get { return _trimValue; }
+            set { _trimValue = value; }
         }
 
         public string TrimKey
         {
-            get { return string.Join("", _trimKey ?? Enumerable.Empty<char>()); }
-            set { _trimKey = value.ToCharArray(); }
+            get { return _trimKey; }
+            set { _trimKey = value; }
         }
 
         public bool Recursive { get; set; }
@@ -75,13 +75,13 @@ namespace log4net.ElasticSearch.Filters
                 var key = groups[1].Value;
                 var value = groups[2].Value;
 
-                if (_trimKey.Length > 0)
+                if (!string.IsNullOrEmpty(_trimKey))
                 {
-                    key = key.Trim(_trimKey);
+                    key = key.Trim(_trimKey.ToCharArray());
                 }
-                if (_trimValue.Length > 0)
+                if (!string.IsNullOrEmpty(_trimValue))
                 {
-                    value = value.Trim(_trimValue);
+                    value = value.Trim(_trimValue.ToCharArray());
                 }
 
                 ProcessValueAndStore(logEvent, key, value);

@@ -200,17 +200,17 @@ namespace log4net.ElasticSearch
                 logEvent["Level"] = loggingEvent.Level.DisplayName;
             }
 
-            if (FixedFields.HasFlag(FixFlags.Identity))
+            if ((FixedFields & FixFlags.Identity) != 0)
             {
                 logEvent["Identity"] = loggingEvent.Identity;
             }
 
-            if (FixedFields.HasFlag(FixFlags.UserName))
+            if ((FixedFields & FixFlags.UserName) != 0)
             {
                 logEvent["UserName"] = loggingEvent.UserName;
             }
 
-            if (FixedFields.HasFlag(FixFlags.LocationInfo) && loggingEvent.LocationInformation != null)
+            if ((FixedFields & FixFlags.LocationInfo) != 0 && loggingEvent.LocationInformation != null)
             {
                 var locationInfo = new Dictionary<string, object>();
                 logEvent["LocationInformation"] = locationInfo;
@@ -222,7 +222,7 @@ namespace log4net.ElasticSearch
                 locationInfo["MethodName"] = loggingEvent.LocationInformation.MethodName;
             }
 
-            if (FixedFields.HasFlag(FixFlags.Properties))
+            if ((FixedFields & FixFlags.Properties) != 0)
             {
                 var properties = loggingEvent.GetProperties();
                 foreach (var propertyKey in properties.GetKeys())
