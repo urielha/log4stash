@@ -25,6 +25,8 @@ namespace log4net.ElasticSearch
 
     public class WebElasticClient : IElasticsearchClient
     {
+        private static readonly JavaScriptSerializer JsonSerializer = new JavaScriptSerializer();
+
         public string Server { get; private set; }
         public int Port { get; private set; }
 
@@ -75,10 +77,8 @@ namespace log4net.ElasticSearch
                     operation.IndexName, operation.IndexType);
                 sb.Append("\n");
 
-                string json = new JavaScriptSerializer().Serialize(operation.Document);
+                string json = JsonSerializer.Serialize(operation.Document);
                 sb.Append(json);
-                //JObject jo = operation.Document as JObject ?? JObject.FromObject(operation.Document);
-                //sb.Append(jo.ToString(Formatting.None));
 
                 sb.Append("\n");
             }

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using log4net.ElasticSearch.Models;
@@ -8,7 +7,6 @@ namespace log4net.ElasticSearch.Filters
 {
     public class KvFilter : IElasticAppenderFilter
     {
-        private const string FailedKv = "KvFilterFailed";
         private Regex _kvRegex;
         private string _trimValue;
         private string _trimKey;

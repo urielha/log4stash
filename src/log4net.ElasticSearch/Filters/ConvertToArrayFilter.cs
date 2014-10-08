@@ -19,7 +19,7 @@ namespace log4net.ElasticSearch.Filters
         }
 
         [PropertyNotEmpty]
-        public string Seperator
+        public string Seperators
         {
             get { return _seperateRegex != null ? _seperateRegex.ToString() : string.Empty; }
             set { _seperateRegex = new Regex("[" + value + "]+", RegexOptions.Compiled | RegexOptions.Multiline); }
@@ -28,7 +28,7 @@ namespace log4net.ElasticSearch.Filters
         public ConvertToArrayFilter()
         {
             SourceKey = "Message";
-            Seperator = ", ";
+            Seperators = ", ";
         }
 
         public void PrepareConfiguration(IElasticsearchClient client)

@@ -63,7 +63,6 @@
     <Compile Include="SmartFormatters\LogEventSmartFormatter.cs" />
     <Compile Include="SmartFormatters\SmartFormatter.cs" />
     <Compile Include="Models\LoggingEventExtensions.cs" />
-    <Compile Include="Models\UniqueIdGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Filters\RemoveKeyFilter.cs" />
     <Compile Include="Filters\RenameKeyFilter.cs" />

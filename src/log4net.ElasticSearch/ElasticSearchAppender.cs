@@ -52,8 +52,6 @@ namespace log4net.ElasticSearch
             BulkIdleTimeout = 5000;
             TimeoutToWaitForTimer = 5000;
 
-            _timer = new Timer(TimerElapsed, "timer", -1, -1);
-
             Server = "localhost";
             Port = 9200;
             IndexName = "LogEvent-%{+yyyy.MM.dd}";
@@ -62,6 +60,7 @@ namespace log4net.ElasticSearch
             MaxAsyncConnections = 10;
             Template = null;
 
+            _timer = new Timer(TimerElapsed, null, Timeout.Infinite, Timeout.Infinite);
             ElasticFilters = new ElasticAppenderFilters();
         }
 
@@ -160,6 +159,12 @@ namespace log4net.ElasticSearch
             {
                 lock (bulkToSend)
                 {
+                    // I didnt use double-check in purpose.
+                    if (bulkToSend.Count == 0)
+                    {
+                        return;
+                    }
+
                     if (IndexAsync)
                     {
                         _client.IndexBulkAsync(bulkToSend);

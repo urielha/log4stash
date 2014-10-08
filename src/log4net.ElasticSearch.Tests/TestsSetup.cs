@@ -34,13 +34,10 @@ namespace log4net.ElasticSearch.Tests
         [TestFixtureTearDown]
         public void FixtureTearDown()
         {
-            try
+            var response = Client.IndexExists(descriptor => descriptor.Index(TestIndex));
+            if (response.Exists)
             {
                 Client.DeleteIndex(descriptor => descriptor.Index(TestIndex));
-            }
-            catch
-            {
-                // we don't care if the index does not exists
             }
         }
 
