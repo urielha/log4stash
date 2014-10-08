@@ -8,9 +8,8 @@ log4stash provide few logging filters similar to the filters on [logstash](http:
 The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.ElasticSearch](https://github.com/jptoto/log4net.ElasticSearch) repository.
 
 ### Features:
-* Supports .NET 4.0+
-* Easy installation and setup via [Nuget](https://nuget.org/packages/log4stash/)
-* Uses the excellent [NEST](https://github.com/Mpdreamz/NEST) library which has great support for the newest ElasticSearch revisions
+* Supports .NET 3.5+
+* Easy installation and setup via [Nuget](https://nuget.org/packages/log4stash/
 * Ability to analyze the log event before sending it to elasticsearch using built-in filters and custom filters similar to [logstash](http://logstash.net/docs/1.4.2/).
 
 ### Breaking Changes:
@@ -22,6 +21,7 @@ The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.Elast
 * **Rename** - rename key to another name.
 * **Kv** - analyze value (default is to analyze the 'Message' value) and export key-value pairs using regex (similar to logstash's kv filter).
 * **Grok** - analyze value (default is 'Message') using custom regex and saved patterns (similar to logstash's grok filter).
+* **ConvertToArray** - split raw string to an array by given seperators. 
 
 #### Custom filter:
 To add your own filters you just need to implement the interface IElasticAppenderFilter on your assembly and configure it on the log4net configuration file.
@@ -42,11 +42,8 @@ You can also set any public property in the appender/filter which didn't appear 
 <appender name="ElasticSearchAppender" type="log4net.ElasticSearch.ElasticSearchAppender, log4stash">
     <Server>localhost</Server>
     <Port>9200</Port>
-    <IndexName>log_test_%{+yyyy.MM.dd}</IndexName>
-    <IndexType>LogEvent</IndexType>
-    <Bulksize>2000</Bulksize>
     <ElasticFilters>
-      <!-- use kv filter with default parameters -->
+      <!-- example of using filter with default parameters -->
       <kv /> 
     </ElasticFilters>
 </appender>
