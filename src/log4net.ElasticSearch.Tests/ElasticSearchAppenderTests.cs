@@ -189,12 +189,19 @@ namespace log4net.ElasticSearch.Tests
         [Ignore("the build agent have problems on running performance")]
         public static void Performance()
         {
+            ElasticAppenderFilters oldFilters = null;
             QueryConfiguration(appender =>
             {
                 appender.BulkSize = 4000;
                 appender.BulkIdleTimeout = -1;
+                oldFilters = appender.ElasticFilters;
+                appender.ElasticFilters = new ElasticAppenderFilters();
+                appender.ElasticFilters.AddFilter(new GrokFilter() { Pattern = "testNum: {INT:testNum}, name is {WORD:name} and guid {UUID:guid}" });
             });
+
             PerformanceTests.Test(1, 32000);
+
+            QueryConfiguration(appender => appender.ElasticFilters = oldFilters);
         }
     }
 

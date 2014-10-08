@@ -64,6 +64,7 @@ namespace log4net.ElasticSearch.Tests
                     if (elsAppender != null && action != null)
                     {
                         action(elsAppender);
+                        elsAppender.ActivateOptions();
                     }
                 }
             }
