@@ -25,8 +25,6 @@ namespace log4net.ElasticSearch
 
     public class WebElasticClient : IElasticsearchClient
     {
-        private static readonly JavaScriptSerializer JsonSerializer = new JavaScriptSerializer();
-
         public string Server { get; private set; }
         public int Port { get; private set; }
 
@@ -54,17 +52,39 @@ namespace log4net.ElasticSearch
 
         public void IndexBulk(IEnumerable<InnerBulkOperation> bulk)
         {
+            var webRequest = PrepareBulkAndSend(bulk);
+            using (var httpResponse = (HttpWebResponse) webRequest.GetResponse())
+            {
+                CheckResponse(httpResponse);
+            }
+        }
+        
+        public IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
+        {
+            var webRequest = PrepareBulkAndSend(bulk);
+            return webRequest.BeginGetResponse(FinishGetResponse, webRequest);
+        }
+
+        private void FinishGetResponse(IAsyncResult result)
+        {
+            var webRequest = (WebRequest)result.AsyncState;
+            using (var httpResponse = (HttpWebResponse)webRequest.EndGetResponse(result))
+            {
+                CheckResponse(httpResponse);
+            }
+        }
+
+        private WebRequest PrepareBulkAndSend(IEnumerable<InnerBulkOperation> bulk)
+        {
             var requestString = PrepareBulk(bulk);
 
             var webRequest = WebRequest.Create(string.Concat(_url, "_bulk"));
             webRequest.ContentType = "text/plain";
             webRequest.Method = "POST";
+            webRequest.Timeout = 10000;
 
             SendRequest(webRequest, requestString);
-            using (var httpResponse = (HttpWebResponse) webRequest.GetResponse())
-            {
-                CheckResponse(httpResponse);
-            }
+            return webRequest;
         }
 
         private static string PrepareBulk(IEnumerable<InnerBulkOperation> bulk)
@@ -77,7 +97,7 @@ namespace log4net.ElasticSearch
                     operation.IndexName, operation.IndexType);
                 sb.Append("\n");
 
-                string json = JsonSerializer.Serialize(operation.Document);
+                string json = new JavaScriptSerializer().Serialize(operation.Document);
                 sb.Append(json);
 
                 sb.Append("\n");
@@ -109,27 +129,6 @@ namespace log4net.ElasticSearch
                 throw new InvalidOperationException(
                     string.Format("Some error occurred while sending request to Elasticsearch.{0}{1}",
                         Environment.NewLine, Encoding.UTF8.GetString(buff)));
-            }
-        }
-
-        public IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
-        {
-            var requestString = PrepareBulk(bulk);
-
-            var webRequest = WebRequest.Create(string.Concat(_url, "_bulk"));
-            webRequest.ContentType = "text/plain";
-            webRequest.Method = "POST";
-            webRequest.Timeout = 10000;
-            SendRequest(webRequest, requestString);
-            return webRequest.BeginGetResponse(FinishGetResponse, webRequest);
-        }
-
-        private void FinishGetResponse(IAsyncResult result)
-        {
-            var webRequest = (WebRequest) result.AsyncState;
-            using (var httpResponse = (HttpWebResponse) webRequest.EndGetResponse(result))
-            {
-                CheckResponse(httpResponse);
             }
         }
     }

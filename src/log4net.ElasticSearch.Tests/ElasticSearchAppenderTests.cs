@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net.Core;
 using log4net.ElasticSearch.Filters;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
@@ -195,7 +196,7 @@ namespace log4net.ElasticSearch.Tests
                 appender.BulkSize = 4000;
                 appender.BulkIdleTimeout = -1;
                 oldFilters = appender.ElasticFilters;
-                appender.ElasticFilters = new ElasticAppenderFilters();
+                //appender.ElasticFilters = new ElasticAppenderFilters();
                 appender.ElasticFilters.AddFilter(new GrokFilter() { Pattern = "testNum: {INT:testNum}, name is {WORD:name} and guid {UUID:guid}" });
             });
 
