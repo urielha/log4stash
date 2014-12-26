@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using log4net.ElasticSearch.SmartFormatters;
+using log4net.ElasticSearch.Models;
 using log4net.Util;
 using log4net.Appender;
 using log4net.Core;
@@ -232,7 +233,7 @@ namespace log4net.ElasticSearch
                 var properties = loggingEvent.GetProperties();
                 foreach (var propertyKey in properties.GetKeys())
                 {
-                    logEvent.Add(propertyKey, properties[propertyKey].ToString());
+                    logEvent.AddOrSet(propertyKey, properties[propertyKey].ToString());
                 }
             }
             return logEvent;
