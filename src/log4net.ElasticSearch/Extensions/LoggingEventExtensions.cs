@@ -1,7 +1,8 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace log4net.ElasticSearch.Models
+namespace log4net.ElasticSearch.Extensions
 {
     public static class LoggingEventExtensions
     {

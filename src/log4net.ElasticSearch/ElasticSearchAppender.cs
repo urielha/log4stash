@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using log4net.ElasticSearch.SmartFormatters;
-using log4net.ElasticSearch.Models;
+using log4net.ElasticSearch.Extensions;
 using log4net.Util;
 using log4net.Appender;
 using log4net.Core;
@@ -18,7 +18,7 @@ namespace log4net.ElasticSearch
         private IElasticsearchClient _client;
         private LogEventSmartFormatter _indexName;
         private LogEventSmartFormatter _indexType;
- 
+
         private readonly Timer _timer;
 
         public FixFlags FixedFields { get; set; }
@@ -126,7 +126,7 @@ namespace log4net.ElasticSearch
         {
             ElasticFilters.PrepareEvent(logEvent);
 
-            var indexName = _indexName.Format(logEvent).ToLower(); 
+            var indexName = _indexName.Format(logEvent).ToLower();
             var indexType = _indexType.Format(logEvent);
 
             var operation = new InnerBulkOperation
@@ -193,30 +193,45 @@ namespace log4net.ElasticSearch
 
             logEvent["@timestamp"] = loggingEvent.TimeStamp.ToUniversalTime().ToString("O");
             logEvent["LoggerName"] = loggingEvent.LoggerName;
-            logEvent["ThreadName"] = loggingEvent.ThreadName;
-
-            logEvent["Message"] = loggingEvent.MessageObject == null ? "" : loggingEvent.MessageObject.ToString();
-            logEvent["Exception"] = loggingEvent.ExceptionObject == null ? "" : loggingEvent.ExceptionObject.ToString();
-            //logEvent["Message"] = loggingEvent.RenderedMessage;
-            logEvent["AppDomain"] = loggingEvent.Domain;
             logEvent["HostName"] = MachineName;
+
+            if (FixedFields.ContainsFlag(FixFlags.ThreadName))
+            {
+                logEvent["ThreadName"] = loggingEvent.ThreadName;
+            }
+
+            if (FixedFields.ContainsFlag(FixFlags.Message) && loggingEvent.MessageObject != null)
+            {
+                logEvent["Message"] = loggingEvent.MessageObject.ToString();
+                //logEvent["Message"] = loggingEvent.RenderedMessage;
+            }
+
+            if (FixedFields.ContainsFlag(FixFlags.Exception) && loggingEvent.ExceptionObject != null)
+            {
+                logEvent["Exception"] = loggingEvent.ExceptionObject.ToString();
+            }
+
+            if (FixedFields.ContainsFlag(FixFlags.Domain))
+            {
+                logEvent["AppDomain"] = loggingEvent.Domain;
+            }
 
             if (loggingEvent.Level != null)
             {
                 logEvent["Level"] = loggingEvent.Level.DisplayName;
             }
 
-            if ((FixedFields & FixFlags.Identity) != 0)
+            if (FixedFields.ContainsFlag(FixFlags.Identity))
             {
                 logEvent["Identity"] = loggingEvent.Identity;
             }
 
-            if ((FixedFields & FixFlags.UserName) != 0)
+            if (FixedFields.ContainsFlag(FixFlags.UserName))
             {
                 logEvent["UserName"] = loggingEvent.UserName;
             }
 
-            if ((FixedFields & FixFlags.LocationInfo) != 0 && loggingEvent.LocationInformation != null)
+            if (FixedFields.ContainsFlag(FixFlags.LocationInfo) && loggingEvent.LocationInformation != null)
             {
                 var locationInfo = new Dictionary<string, object>();
                 logEvent["LocationInformation"] = locationInfo;
@@ -228,7 +243,7 @@ namespace log4net.ElasticSearch
                 locationInfo["MethodName"] = loggingEvent.LocationInformation.MethodName;
             }
 
-            if ((FixedFields & FixFlags.Properties) != 0)
+            if (FixedFields.ContainsFlag(FixFlags.Properties))
             {
                 var properties = loggingEvent.GetProperties();
                 foreach (var propertyKey in properties.GetKeys())

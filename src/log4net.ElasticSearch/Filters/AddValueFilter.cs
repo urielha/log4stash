@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using log4net.ElasticSearch.Models;
+using log4net.ElasticSearch.Extensions;
 using log4net.ElasticSearch.SmartFormatters;
 
 namespace log4net.ElasticSearch.Filters

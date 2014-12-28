@@ -63,6 +63,12 @@
     <Compile Include="..\log4net.ElasticSearch\ElasticSearchAppender.cs">
       <Link>ElasticSearchAppender.cs</Link>
     </Compile>
+    <Compile Include="..\log4net.ElasticSearch\Extensions\FixFlagsExtensions.cs">
+      <Link>Extensions\FixFlagsExtensions.cs</Link>
+    </Compile>
+    <Compile Include="..\log4net.ElasticSearch\Extensions\LoggingEventExtensions.cs">
+      <Link>Extensions\LoggingEventExtensions.cs</Link>
+    </Compile>
     <Compile Include="..\log4net.ElasticSearch\Filters\AddValueFilter.cs">
       <Link>Filters\AddValueFilter.cs</Link>
     </Compile>
@@ -86,9 +92,6 @@
     </Compile>
     <Compile Include="..\log4net.ElasticSearch\InnerExceptions\InvalidFilterConfigurationException.cs">
       <Link>InnerExceptions\InvalidFilterConfigurationException.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\Models\LoggingEventExtensions.cs">
-      <Link>Models\LoggingEventExtensions.cs</Link>
     </Compile>
     <Compile Include="..\log4net.ElasticSearch\SmartFormatters\GrokSmartFormatter.cs">
       <Link>SmartFormatters\GrokSmartFormatter.cs</Link>
