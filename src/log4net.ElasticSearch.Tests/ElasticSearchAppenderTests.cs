@@ -63,6 +63,23 @@ namespace log4net.ElasticSearch.Tests
         }
 
         [Test]
+        public void Properties_with_same_key()
+        {
+            var value = "level-value";
+            log4net.LogicalThreadContext.Properties["Level"] = value;
+            _log.Debug("lkjl");
+
+            Client.Refresh();
+
+            var searchResults = Client.Search<JObject>(s => s.AllTypes().Take(1));
+
+            Assert.AreEqual(1, searchResults.Total);
+            var doc = searchResults.Documents.First();
+
+            Assert.AreEqual(doc["Level"].ToString(), value);
+        }
+
+        [Test]
         [TestCase(new[] { ",", " " }, new[] { ":", "=" }, "", TestName = "Can_read_KvFilter_properties: Regular1")]
         [TestCase(new[] { ";", " " }, new[] { "~" }, "", TestName = "Can_read_KvFilter_properties: Regular2")]
         [TestCase(new[] { ";" }, new[] { "~" }, "", TestName = "Can_read_KvFilter_properties: No whiteSpace on fieldSplit causes the 'another ' key and raise spaces issue", ExpectedException = typeof(Exception), ExpectedMessage = "spaces issue")]

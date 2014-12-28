@@ -248,7 +248,7 @@ namespace log4net.ElasticSearch
                 var properties = loggingEvent.GetProperties();
                 foreach (var propertyKey in properties.GetKeys())
                 {
-                    logEvent.AddOrSet(propertyKey, properties[propertyKey].ToString());
+                    logEvent[propertyKey] = properties[propertyKey].ToString();
                 }
             }
             return logEvent;
