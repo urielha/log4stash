@@ -34,7 +34,7 @@ I do my best to reply to issues or questions ASAP. Please use the [ISSUES](https
 
 ### Configuration Examples:
 
-Almost all the parameters are optional, to see the default values check the [c'tor](https://github.com/urielha/log4stash/blob/master/src/log4net.ElasticSearch/ElasticSearchAppender.cs#L51) of the appender and the c'tor of every filter. 
+Almost all the parameters are optional, to see the default values check the [c'tor](https://github.com/urielha/log4stash/blob/master/src/log4net.ElasticSearch/ElasticSearchAppender.cs#L48) of the appender and the c'tor of every filter. 
 You can also set any public property in the appender/filter which didn't appear in the example.
 
 ##### Simple configuration:
@@ -59,7 +59,10 @@ You can also set any public property in the appender/filter which didn't appear 
     <Bulksize>2000</Bulksize>
     <BulkIdleTimeout>10000</BulkIdleTimeout>
     <IndexAsync>False</IndexAsync>
+
+    <!-- for more information read about log4net.Core.FixFlags -->
     <FixedFields>Partial</FixedFields>
+    
     <Template>
       <Name>templateName</Name>
       <FileName>path2template.json</FileName>
@@ -112,7 +115,6 @@ Note that the filters got called by the order they appeared in the config (as sh
 ### Thanks:
 Thanks to [@jptoto](https://github.com/jptoto) for the idea and the first working ElasticAppender.
 Many thanks to [@mpdreamz](https://github.com/Mpdreamz) and the team for their great work on the NEST library!
-<!-- Thanks to [@gluck](https://github.com/gluck) for the package [il-repack](https://github.com/gluck/il-repack). -->
 The inspiration to the filters and style had taken from [elasticsearch/logstash](https://github.com/elasticsearch/logstash) project.
 
 ### Build status:
@@ -122,7 +124,7 @@ The inspiration to the filters and style had taken from [elasticsearch/logstash]
 | [![Build status][TravisImg]][TravisLink] | Mono CI provided by [travis-ci][] |
 | [![Build Status][AppVeyorImg]][AppVeyorLink] | Windows CI provided by [AppVeyor][] (without tests for now) |
 
-[TravisImg]:https://travis-ci.org/urielha/log4stash.svg?branch=Dev
+[TravisImg]:https://travis-ci.org/urielha/log4stash.svg?branch=master
 [TravisLink]:https://travis-ci.org/urielha/log4stash
 [AppVeyorImg]:https://ci.appveyor.com/api/projects/status/byp4s7vl8cuhyae0
 [AppVeyorLink]:https://ci.appveyor.com/project/urielha/log4stash
