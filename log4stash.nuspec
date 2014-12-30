@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>log4stash</id>
-    <version>1.0.1-Pre</version>
+    <version>1.0.1</version>
     <authors>urielha</authors>
     <owners>urielha</owners>
     <title>log4stash - Elasticsearch log4net appender</title>
@@ -16,11 +16,14 @@
     </description>
     <releaseNotes>
       * Supports .net 3.5+
+      * Fixed issue #2 (properties with same key throws exception)
+      * Add full support of FixedFields like log4net.
+      
       Breaking Changes:
       * The definition of IElasticAppenderFilter has been changed, PrepareEvent has only one parameter and PrepareConfiguration's parameter type has changed to IElasticsearchClient.
     </releaseNotes>
     <copyright>Copyright 2014</copyright>
-    <tags>log logging exception elasticsearch log4net appender logstash</tags>
+    <tags>log logging exception elasticsearch log4net appender logstash filters</tags>
     <dependencies>
       <group>
         <dependency id="log4net" version="2.0.3.0" />

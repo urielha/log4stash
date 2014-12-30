@@ -67,7 +67,7 @@ namespace log4net.ElasticSearch.Tests
         {
             var value = "level-value";
             log4net.LogicalThreadContext.Properties["Level"] = value;
-            _log.Debug("lkjl");
+            _log.Debug("debug kuku");
 
             Client.Refresh();
 
