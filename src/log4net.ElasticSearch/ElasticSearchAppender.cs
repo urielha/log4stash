@@ -30,6 +30,10 @@ namespace log4net.ElasticSearch
         // elastic configuration
         public string Server { get; set; }
         public int Port { get; set; }
+        public bool Ssl { get; set; }
+        public bool AllowSelfSignedServerCert { get; set; }
+        public string BasicAuthUsername { get; set; }
+        public string BasicAuthPassword { get; set; }
         public bool IndexAsync { get; set; }
         public int MaxAsyncConnections { get; set; }
         public TemplateInfo Template { get; set; }
@@ -67,7 +71,7 @@ namespace log4net.ElasticSearch
 
         public override void ActivateOptions()
         {
-            _client = new WebElasticClient(Server, Port);
+            _client = new WebElasticClient(Server, Port, Ssl, AllowSelfSignedServerCert, BasicAuthUsername, BasicAuthPassword);
 
             if (Template != null && Template.IsValid)
             {
