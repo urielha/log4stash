@@ -9,7 +9,7 @@ using System.Web.Script.Serialization;
 
 namespace log4net.ElasticSearch
 {
-    public interface IElasticsearchClient
+    public interface IElasticsearchClient : IDisposable
     {
         string Server { get; }
         int Port { get; }
@@ -37,35 +37,43 @@ namespace log4net.ElasticSearch
         public bool AllowSelfSignedServerCert { get; private set; }
         public string BasicAuthUsername { get; private set; }
         public string BasicAuthPassword { get; private set; }
+        public string Url { get { return _url; } }
 
-        private string _url { 
-            get 
-            {
-                return string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", Server, Port);
-            }
-        }
+        private readonly string _url;
+        private readonly string _credentials;
 
         public WebElasticClient(string server, int port)
+            : this(server, port, false, false, string.Empty, string.Empty)
         {
-            Server = server;
-            Port = port;
-            ServicePointManager.Expect100Continue = false;
         }
 
         public WebElasticClient(string server, int port,
                                 bool ssl, bool allowSelfSignedServerCert, 
                                 string basicAuthUsername, string basicAuthPassword)
-            : this(server, port)
         {
+            Server = server;
+            Port = port;
+            ServicePointManager.Expect100Continue = false;
+
+            // SSL related properties
             Ssl = ssl;
             AllowSelfSignedServerCert = allowSelfSignedServerCert;
             BasicAuthPassword = basicAuthPassword;
             BasicAuthUsername = basicAuthUsername;
 
-            if (true == Ssl && true == AllowSelfSignedServerCert)
+            if (Ssl && AllowSelfSignedServerCert)
             {
-                AcceptSelfSignedServerCert(server);
+                ServicePointManager.ServerCertificateValidationCallback += AcceptSelfSignedServerCertCallback;
             }
+
+            if(BasicAuthUsername != null && !string.IsNullOrEmpty(BasicAuthUsername.Trim()))
+            {
+                string authInfo = string.Format("{0}:{1}", BasicAuthUsername, BasicAuthPassword);
+                string encodedAuthInfo = Convert.ToBase64String(Encoding.ASCII.GetBytes(authInfo));
+                _credentials = string.Format("{0} {1}", "Basic", encodedAuthInfo);
+            }
+
+            _url = string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", Server, Port);
         }
 
         public void PutTemplateRaw(string templateName, string rawBody)
@@ -73,7 +81,7 @@ namespace log4net.ElasticSearch
             var webRequest = WebRequest.Create(string.Concat(_url, "_template/", templateName));
             webRequest.ContentType = "text/json";
             webRequest.Method = "PUT";
-            SetBasicAuthHeader(webRequest, BasicAuthUsername, BasicAuthPassword);
+            SetBasicAuthHeader(webRequest);
             SendRequest(webRequest, rawBody);
             using (var httpResponse = (HttpWebResponse)webRequest.GetResponse())
             {
@@ -113,7 +121,7 @@ namespace log4net.ElasticSearch
             webRequest.ContentType = "text/plain";
             webRequest.Method = "POST";
             webRequest.Timeout = 10000;
-            SetBasicAuthHeader(webRequest, BasicAuthUsername, BasicAuthPassword);
+            SetBasicAuthHeader(webRequest);
             SendRequest(webRequest, requestString);
             return webRequest;
         }
@@ -144,36 +152,31 @@ namespace log4net.ElasticSearch
             }
         }
 
-        private static void SetBasicAuthHeader(WebRequest request, string username, string password)
+        private void SetBasicAuthHeader(WebRequest request)
         {
-            if (false == string.IsNullOrEmpty(username)) /* IsNullOrWhiteSpace will be better, but .Net 3.5 doesn't support IsNullOrWhiteSpace but only IsNullOrEmpty */
+            if (!string.IsNullOrEmpty(_credentials)) 
             {
-                string authInfo = string.Format("{0}:{1}", username, password);
-                string encodedAuthInfo = Convert.ToBase64String(Encoding.ASCII.GetBytes(authInfo));
-                string credentials = string.Format("{0} {1}", "Basic", encodedAuthInfo);
-                request.Headers[HttpRequestHeader.Authorization] = credentials;
+                request.Headers[HttpRequestHeader.Authorization] = _credentials;
             }
         }
 
-        private static void AcceptSelfSignedServerCert(string server)
+        private bool AcceptSelfSignedServerCertCallback(
+            object sender,
+            X509Certificate certificate,
+            X509Chain chain,
+            SslPolicyErrors sslPolicyErrors)
         {
-            ServicePointManager.ServerCertificateValidationCallback +=
-                new System.Net.Security.RemoteCertificateValidationCallback(
-                delegate(Object sender,
-                          X509Certificate certificate,
-                          X509Chain chain,
-                          SslPolicyErrors sslPolicyErrors)
-                {
-                    string subjectCN = (certificate as X509Certificate2).GetNameInfo(X509NameType.DnsName, false);
-                    string issuerCN = (certificate as X509Certificate2).GetNameInfo(X509NameType.DnsName, true);
-                    if (sslPolicyErrors == SslPolicyErrors.None
-                        || (server.Equals(subjectCN) && subjectCN.Equals(issuerCN)))
-                    {
-                        return true;
-                    }
-                    else
-                        return false;
-                });
+            var certificate2 = (certificate as X509Certificate2);
+
+            string subjectCn = certificate2.GetNameInfo(X509NameType.DnsName, false);
+            string issuerCn = certificate2.GetNameInfo(X509NameType.DnsName, true);
+            if (sslPolicyErrors == SslPolicyErrors.None
+                || (Server.Equals(subjectCn) && subjectCn.Equals(issuerCn)))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         private static void CheckResponse(HttpWebResponse httpResponse)
@@ -193,6 +196,11 @@ namespace log4net.ElasticSearch
                     string.Format("Some error occurred while sending request to Elasticsearch.{0}{1}",
                         Environment.NewLine, Encoding.UTF8.GetString(buff)));
             }
+        }
+
+        public void Dispose()
+        {
+            ServicePointManager.ServerCertificateValidationCallback -= AcceptSelfSignedServerCertCallback;
         }
     }
 }
