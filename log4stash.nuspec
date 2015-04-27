@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>log4stash</id>
-    <version>1.0.1-pr4</version>
+    <version>1.0.2</version>
     <authors>urielha</authors>
     <owners>urielha</owners>
     <title>log4stash - Elasticsearch log4net appender</title>
@@ -15,9 +15,9 @@
       You can configure few filters to analyze log events before they got sended to Elasticsearch similar to the filters on logstash.
     </description>
     <releaseNotes>
-      * SSL support
+      * SSL support (thanks to @zhengziying)
     </releaseNotes>
-    <copyright>Copyright 2014</copyright>
+    <copyright>Copyright 2015</copyright>
     <tags>log logging exception elasticsearch log4net appender logstash filters</tags>
     <dependencies>
       <group>
