@@ -34,7 +34,7 @@ I do my best to reply to issues or questions ASAP. Please use the [ISSUES](https
 
 ### Configuration Examples:
 
-Almost all the parameters are optional, to see the default values check the [c'tor](https://github.com/urielha/log4stash/blob/master/src/log4net.ElasticSearch/ElasticSearchAppender.cs#L48) of the appender and the c'tor of every filter. 
+Almost all the parameters are optional, to see the default values check the [c'tor](https://github.com/urielha/log4stash/blob/master/src/log4net.ElasticSearch/ElasticSearchAppender.cs#L52) of the appender and the c'tor of every filter. 
 You can also set any public property in the appender/filter which didn't appear in the example.
 
 ##### Simple configuration:
