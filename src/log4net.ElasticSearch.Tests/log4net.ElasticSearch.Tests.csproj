@@ -67,6 +67,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CoreTests.cs" />
     <Compile Include="ElasticSearchAppenderTests.cs" />
     <Compile Include="ElasticsearchTests.cs" />
     <Compile Include="Program.cs" />
