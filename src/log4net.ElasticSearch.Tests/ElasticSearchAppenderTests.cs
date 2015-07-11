@@ -70,7 +70,7 @@ namespace log4net.ElasticSearch.Tests
 
             Client.Refresh();
 
-            var searchResults = Client.Search<JObject>(s => s.AllTypes().Take(1));
+            var searchResults = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
 
             Assert.AreEqual(1, searchResults.Total);
             var doc = searchResults.Documents.First();
@@ -107,7 +107,7 @@ namespace log4net.ElasticSearch.Tests
                 valueSplit[0].TrimStart('\\'), fieldSplit[0].TrimStart('\\'));
 
             Client.Refresh();
-            var searchResults = Client.Search<dynamic>(s => s.AllTypes().Take(1));
+            var searchResults = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent").Take(1));
 
             var entry = searchResults.Documents.First();
 
@@ -136,7 +136,7 @@ namespace log4net.ElasticSearch.Tests
             _log.Error("error! name is UnknownError and guid " + newGuid);
 
             Client.Refresh();
-            var res = Client.Search<dynamic>(s => s.AllTypes().Take((1)));
+            var res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent").Take((1)));
             var doc = res.Documents.First();
             Assert.AreEqual("UnknownError", doc.name.ToString());
             Assert.AreEqual(newGuid.ToString(), doc.the_guid.ToString());
@@ -150,7 +150,7 @@ namespace log4net.ElasticSearch.Tests
 
             Client.Refresh();
 
-            var res = Client.Search<JObject>(s => s.AllTypes().Take((1)));
+            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take((1)));
             var doc = res.Documents.First();
             Assert.AreEqual(true, doc["someIds"].HasValues);
             Assert.Contains("123", doc["someIds"].Values<string>().ToArray());
@@ -181,21 +181,21 @@ namespace log4net.ElasticSearch.Tests
 
             _log.Info("test");
             Client.Refresh();
-            var res = Client.Search<dynamic>(s => s.AllTypes().AllIndices());
+            var res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent"));
             Assert.AreEqual(1, res.Total);
 
             // Magic. The time of deletion isn't consistent :/
             int numOfTries = 20;
             while (--numOfTries > 0)
             {
-                Thread.Sleep(3000);
                 Client.Refresh();
                 Client.Optimize();
                 res = Client.Search<dynamic>(s => s.AllTypes().AllIndices());
                 numOfTries = res.Total == expectation ? 0 : numOfTries ;
+                Thread.Sleep(3000);
             }
 
-            res = Client.Search<dynamic>(s => s.AllTypes().AllIndices());
+            res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent"));
             Client.DeleteTemplate("ttltemplate");
             QueryConfiguration(appender => appender.ElasticFilters = oldFilters);
 
