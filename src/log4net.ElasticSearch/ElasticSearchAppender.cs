@@ -253,7 +253,8 @@ namespace log4net.ElasticSearch
                 var properties = loggingEvent.GetProperties();
                 foreach (var propertyKey in properties.GetKeys())
                 {
-                    logEvent[propertyKey] = properties[propertyKey].ToString();
+                    var value = properties[propertyKey];
+                    logEvent[propertyKey] = value != null ? value.ToString() : string.Empty;
                 }
             }
             return logEvent;

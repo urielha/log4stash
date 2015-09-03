@@ -79,6 +79,22 @@ namespace log4net.ElasticSearch.Tests
         }
 
         [Test]
+        public void Property_with_null_value()
+        {
+            log4net.LogicalThreadContext.Properties["NullProperty"] = null;
+            _log.Debug("debug kuku");
+
+            Client.Refresh();
+
+            var searchResults = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
+
+            Assert.AreEqual(1, searchResults.Total);
+            var doc = searchResults.Documents.First();
+
+            Assert.AreEqual(doc["NullProperty"].ToString(), string.Empty);
+        }
+
+        [Test]
         [TestCase(new[] { ",", " " }, new[] { ":", "=" }, "", TestName = "Can_read_KvFilter_properties: Regular1")]
         [TestCase(new[] { ";", " " }, new[] { "~" }, "", TestName = "Can_read_KvFilter_properties: Regular2")]
         [TestCase(new[] { ";" }, new[] { "~" }, "", TestName = "Can_read_KvFilter_properties: No whiteSpace on fieldSplit causes the 'another ' key and raise spaces issue", ExpectedException = typeof(Exception), ExpectedMessage = "spaces issue")]
@@ -157,7 +173,6 @@ namespace log4net.ElasticSearch.Tests
             Assert.AreEqual(true, doc["anotherIds"].HasValues);
             Assert.AreEqual("33", doc["anotherIds"].Values<string>().First());
         }
-
 
         [Test]
         [TestCase("1s", 0, TestName = "ttl elapsed")]
