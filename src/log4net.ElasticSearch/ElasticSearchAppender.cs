@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using log4net.ElasticSearch.LogEventFactory;
 using log4net.ElasticSearch.SmartFormatters;
-using log4net.ElasticSearch.Extensions;
 using log4net.Util;
 using log4net.Appender;
 using log4net.Core;
@@ -12,8 +12,6 @@ namespace log4net.ElasticSearch
 {
     public class ElasticSearchAppender : AppenderSkeleton
     {
-        private static readonly string MachineName = Environment.MachineName;
-
         private List<InnerBulkOperation> _bulk = new List<InnerBulkOperation>();
         private IElasticsearchClient _client;
         private LogEventSmartFormatter _indexName;
@@ -38,6 +36,7 @@ namespace log4net.ElasticSearch
         public int MaxAsyncConnections { get; set; }
         public TemplateInfo Template { get; set; }
         public ElasticAppenderFilters ElasticFilters { get; set; }
+        public ILogEventFactory LogEventFactory { get; set; }
 
         public string IndexName
         {
@@ -64,6 +63,7 @@ namespace log4net.ElasticSearch
             IndexAsync = true;
             MaxAsyncConnections = 10;
             Template = null;
+            LogEventFactory = new BasicLogEventFactory();
 
             _timer = new Timer(TimerElapsed, null, Timeout.Infinite, Timeout.Infinite);
             ElasticFilters = new ElasticAppenderFilters();
@@ -72,6 +72,8 @@ namespace log4net.ElasticSearch
         public override void ActivateOptions()
         {
             _client = new WebElasticClient(Server, Port, Ssl, AllowSelfSignedServerCert, BasicAuthUsername, BasicAuthPassword);
+
+            LogEventFactory.Configure(this);
 
             if (Template != null && Template.IsValid)
             {
@@ -114,7 +116,7 @@ namespace log4net.ElasticSearch
                 return;
             }
 
-            var logEvent = CreateLogEvent(loggingEvent);
+            var logEvent = LogEventFactory.CreateLogEvent(loggingEvent);
             PrepareAndAddToBulk(logEvent);
 
             if (_bulk.Count >= BulkSize && BulkSize > 0)
@@ -185,79 +187,6 @@ namespace log4net.ElasticSearch
             {
                 LogLog.Error(GetType(), "Invalid connection to ElasticSearch", ex);
             }
-        }
-
-        private Dictionary<string, object> CreateLogEvent(LoggingEvent loggingEvent)
-        {
-            if (loggingEvent == null)
-            {
-                throw new ArgumentNullException("loggingEvent");
-            }
-
-            var logEvent = new Dictionary<string, object>();
-
-            logEvent["@timestamp"] = loggingEvent.TimeStamp.ToUniversalTime().ToString("O");
-            logEvent["LoggerName"] = loggingEvent.LoggerName;
-            logEvent["HostName"] = MachineName;
-
-            if (FixedFields.ContainsFlag(FixFlags.ThreadName))
-            {
-                logEvent["ThreadName"] = loggingEvent.ThreadName;
-            }
-
-            if (FixedFields.ContainsFlag(FixFlags.Message) && loggingEvent.MessageObject != null)
-            {
-                logEvent["Message"] = loggingEvent.MessageObject.ToString();
-                //logEvent["Message"] = loggingEvent.RenderedMessage;
-            }
-
-            if (FixedFields.ContainsFlag(FixFlags.Exception) && loggingEvent.ExceptionObject != null)
-            {
-                logEvent["Exception"] = loggingEvent.ExceptionObject.ToString();
-            }
-
-            if (FixedFields.ContainsFlag(FixFlags.Domain))
-            {
-                logEvent["AppDomain"] = loggingEvent.Domain;
-            }
-
-            if (loggingEvent.Level != null)
-            {
-                logEvent["Level"] = loggingEvent.Level.DisplayName;
-            }
-
-            if (FixedFields.ContainsFlag(FixFlags.Identity))
-            {
-                logEvent["Identity"] = loggingEvent.Identity;
-            }
-
-            if (FixedFields.ContainsFlag(FixFlags.UserName))
-            {
-                logEvent["UserName"] = loggingEvent.UserName;
-            }
-
-            if (FixedFields.ContainsFlag(FixFlags.LocationInfo) && loggingEvent.LocationInformation != null)
-            {
-                var locationInfo = new Dictionary<string, object>();
-                logEvent["LocationInformation"] = locationInfo;
-
-                locationInfo["ClassName"] = loggingEvent.LocationInformation.ClassName;
-                locationInfo["FileName"] = loggingEvent.LocationInformation.FileName;
-                locationInfo["LineNumber"] = loggingEvent.LocationInformation.LineNumber;
-                locationInfo["FullInfo"] = loggingEvent.LocationInformation.FullInfo;
-                locationInfo["MethodName"] = loggingEvent.LocationInformation.MethodName;
-            }
-
-            if (FixedFields.ContainsFlag(FixFlags.Properties))
-            {
-                var properties = loggingEvent.GetProperties();
-                foreach (var propertyKey in properties.GetKeys())
-                {
-                    var value = properties[propertyKey];
-                    logEvent[propertyKey] = value != null ? value.ToString() : string.Empty;
-                }
-            }
-            return logEvent;
         }
     }
 }

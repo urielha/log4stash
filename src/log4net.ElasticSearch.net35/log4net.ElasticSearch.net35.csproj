@@ -93,6 +93,12 @@
     <Compile Include="..\log4net.ElasticSearch\InnerExceptions\InvalidFilterConfigurationException.cs">
       <Link>InnerExceptions\InvalidFilterConfigurationException.cs</Link>
     </Compile>
+    <Compile Include="..\log4net.ElasticSearch\LogEventFactory\BasicLogEventFactory.cs">
+      <Link>LogEventFactory\BasicLogEventFactory.cs</Link>
+    </Compile>
+    <Compile Include="..\log4net.ElasticSearch\LogEventFactory\ILogEventFactory.cs">
+      <Link>LogEventFactory\ILogEventFactory.cs</Link>
+    </Compile>
     <Compile Include="..\log4net.ElasticSearch\SmartFormatters\GrokSmartFormatter.cs">
       <Link>SmartFormatters\GrokSmartFormatter.cs</Link>
     </Compile>

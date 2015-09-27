@@ -49,6 +49,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LogEventFactory\BasicLogEventFactory.cs" />
     <Compile Include="ElasticClient.cs" />
     <Compile Include="Filters\AddValueFilter.cs" />
     <Compile Include="AssemblyVersionInfo.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="Filters\GrokFilter.cs" />
     <Compile Include="Filters\KvFilter.cs" />
     <Compile Include="IElasticAppenderFilter.cs" />
+    <Compile Include="LogEventFactory\ILogEventFactory.cs" />
     <Compile Include="InnerExceptions\InvalidFilterConfigurationException.cs" />
     <Compile Include="Extensions\FixFlagsExtensions.cs" />
     <Compile Include="SmartFormatters\GrokSmartFormatter.cs" />
