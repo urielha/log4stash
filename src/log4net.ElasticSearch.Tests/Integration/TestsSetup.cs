@@ -4,7 +4,7 @@ using log4net.Repository.Hierarchy;
 using Nest;
 using NUnit.Framework;
 
-namespace log4net.ElasticSearch.Tests
+namespace log4net.ElasticSearch.Tests.Integration
 {
     public class TestsSetup
     {

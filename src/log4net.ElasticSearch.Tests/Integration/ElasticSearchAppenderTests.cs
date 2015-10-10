@@ -4,11 +4,12 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using log4net.Core;
 using log4net.ElasticSearch.Filters;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
-namespace log4net.ElasticSearch.Tests
+namespace log4net.ElasticSearch.Tests.Integration
 {
     [TestFixture]
     public class ElasticsearchAppenderTests : TestsSetup
@@ -25,6 +26,32 @@ namespace log4net.ElasticSearch.Tests
             var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(q => q.Term("Message", "loggingtest")));
 
             Assert.AreEqual(1, searchResults.Total);
+        }
+
+        [Test]
+        public void Log_exception_string_without_object()
+        {
+            var exceptionString = "Exception string";
+            var eventData = new LoggingEventData
+            {
+                LoggerName = _log.Logger.Name,
+                ExceptionString = exceptionString,
+                Level = Level.Error,
+                Message = "loggingtest",
+                TimeStamp = DateTime.Now,
+                Domain = "Domain",
+            };
+            var loggingEvent = new LoggingEvent(eventData);
+
+            _log.Logger.Repository.Log(loggingEvent);
+
+            Client.Refresh();
+
+            var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(q => q.Term("Message", "loggingtest")));
+
+            Assert.AreEqual(1, searchResults.Total);
+            var doc = searchResults.Documents.First();
+            Assert.AreEqual(exceptionString, doc["Exception"].ToString());
         }
 
         [Test]

@@ -1,9 +1,9 @@
 using NUnit.Framework;
 
-namespace log4net.ElasticSearch.Tests
+namespace log4net.ElasticSearch.Tests.Unit
 {
     [TestFixture]
-    public class UnitTests
+    public class Ssl
     {
         [Test]
         public void Ssl_should_create_https()
