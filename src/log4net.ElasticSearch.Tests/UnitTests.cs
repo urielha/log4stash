@@ -3,7 +3,7 @@ using NUnit.Framework;
 namespace log4net.ElasticSearch.Tests
 {
     [TestFixture]
-    public class CoreTests
+    public class UnitTests
     {
         [Test]
         public void Ssl_should_create_https()

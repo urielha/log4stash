@@ -95,12 +95,12 @@ namespace log4net.ElasticSearch.Tests
         }
 
         [Test]
-        [TestCase(new[] { ",", " " }, new[] { ":", "=" }, "", TestName = "Can_read_KvFilter_properties: Regular1")]
-        [TestCase(new[] { ";", " " }, new[] { "~" }, "", TestName = "Can_read_KvFilter_properties: Regular2")]
-        [TestCase(new[] { ";" }, new[] { "~" }, "", TestName = "Can_read_KvFilter_properties: No whiteSpace on fieldSplit causes the 'another ' key and raise spaces issue", ExpectedException = typeof(Exception), ExpectedMessage = "spaces issue")]
-        [TestCase(new[] { ";" }, new[] { "~" }, " ", TestName = "Can_read_KvFilter_properties: No whiteSpace but with trimming, fix the 'another' key")]
-        [TestCase(new[] { "\\|", " " }, new[] { "\\>" }, "", TestName = "Can_read_KvFilter_properties: Regex chars need to be escaped with backslash")]
-        [TestCase(new[] { "\n" }, new[] { ":" }, " ", TestName = "Can_read_KvFilter_properties: NewLine")]
+        [TestCase(new[] { ",", " " },   new[] { ":", "=" }, "",     TestName = "Can_read_KvFilter_properties: Regular1")]
+        [TestCase(new[] { ";", " " },   new[] { "~" },      "",     TestName = "Can_read_KvFilter_properties: Regular2")]
+        [TestCase(new[] { ";" },        new[] { "=" },      "",     TestName = "Can_read_KvFilter_properties: No whiteSpace on fieldSplit causes the 'another ' key and raise spaces issue", ExpectedException = typeof(Exception), ExpectedMessage = "spaces issue")]
+        [TestCase(new[] { ";" },        new[] { "=" },      " ",    TestName = "Can_read_KvFilter_properties: No whiteSpace but with trimming, fix the 'another' key")]
+        [TestCase(new[] { "\\|", " " }, new[] { "\\>" },    "",     TestName = "Can_read_KvFilter_properties: Regex chars need to be escaped with backslash")]
+        [TestCase(new[] { "\n" },       new[] { ":" },      " ",    TestName = "Can_read_KvFilter_properties: NewLine")]
         public void Can_read_KvFilter_properties(string[] fieldSplit, string[] valueSplit, string trim)
         {
             ElasticAppenderFilters oldFilters = null;
@@ -134,15 +134,16 @@ namespace log4net.ElasticSearch.Tests
             });
 
             Assert.IsNotNull(entry.key);
+            Assert.AreEqual("value", entry.key.ToString());
+            
             Assert.IsNotNull(entry["object"]);
+            Assert.AreEqual("this is object :)", entry["object"].ToString());
+
             if (entry.another == null)
             {
                 throw new Exception("spaces issue");
             }
-
-            Assert.AreEqual("value", entry.key.ToString());
             Assert.AreEqual("another", entry.another.ToString());
-            Assert.AreEqual("this is object :)", entry["object"].ToString());
         }
 
         [Test]
