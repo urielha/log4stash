@@ -15,8 +15,8 @@
       You can configure few filters to analyze log events before they got sended to Elasticsearch similar to the filters on logstash.
     </description>
     <releaseNotes>
-      * Update Grok filters from logstash
-      * SSL support (thanks to @zhengziying)
+      * Supports properties with null value
+      * Supports custom render loggingEvent - issue #6
     </releaseNotes>
     <copyright>Copyright 2015</copyright>
     <tags>log logging exception elasticsearch log4net appender logstash filters</tags>
