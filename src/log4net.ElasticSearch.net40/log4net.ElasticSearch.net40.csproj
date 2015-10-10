@@ -94,6 +94,9 @@
     <Compile Include="..\log4net.ElasticSearch\LogEventFactory\ILogEventFactory.cs">
       <Link>LogEventFactory\ILogEventFactory.cs</Link>
     </Compile>
+    <Compile Include="..\log4net.ElasticSearch\LogEventFactory\JsonSerializableException.cs">
+      <Link>LogEventFactory\JsonSerializableException.cs</Link>
+    </Compile>
     <Compile Include="..\log4net.ElasticSearch\SmartFormatters\GrokSmartFormatter.cs">
       <Link>SmartFormatters\GrokSmartFormatter.cs</Link>
     </Compile>

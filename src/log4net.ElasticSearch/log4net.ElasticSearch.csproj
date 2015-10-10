@@ -20,7 +20,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\bin\lib\net45\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NET40</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;NET45</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -62,6 +62,7 @@
     <Compile Include="LogEventFactory\ILogEventFactory.cs" />
     <Compile Include="InnerExceptions\InvalidFilterConfigurationException.cs" />
     <Compile Include="Extensions\FixFlagsExtensions.cs" />
+    <Compile Include="LogEventFactory\JsonSerializableException.cs" />
     <Compile Include="SmartFormatters\GrokSmartFormatter.cs" />
     <Compile Include="SmartFormatters\LogEventSmartFormatter.cs" />
     <Compile Include="SmartFormatters\SmartFormatter.cs" />

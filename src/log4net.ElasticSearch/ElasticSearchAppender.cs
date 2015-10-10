@@ -20,6 +20,7 @@ namespace log4net.ElasticSearch
         private readonly Timer _timer;
 
         public FixFlags FixedFields { get; set; }
+        public bool SerializeObjects { get; set; }
 
         public int BulkSize { get; set; }
         public int BulkIdleTimeout { get; set; }
@@ -51,6 +52,7 @@ namespace log4net.ElasticSearch
         public ElasticSearchAppender()
         {
             FixedFields = FixFlags.Partial;
+            SerializeObjects = true;
 
             BulkSize = 2000;
             BulkIdleTimeout = 5000;

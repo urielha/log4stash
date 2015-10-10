@@ -9,10 +9,12 @@ namespace log4net.ElasticSearch.LogEventFactory
     {
         private static readonly string MachineName = Environment.MachineName;
         protected FixFlags FixedFields;
+        protected bool SerializeObjects;
 
         public virtual void Configure(ElasticSearchAppender appenderProperties)
         {
             FixedFields = appenderProperties.FixedFields;
+            SerializeObjects = appenderProperties.SerializeObjects;
         }
 
         public virtual Dictionary<string, object> CreateLogEvent(LoggingEvent sourceLoggingEvent)
@@ -30,40 +32,42 @@ namespace log4net.ElasticSearch.LogEventFactory
 
             ParseMessage(sourceLoggingEvent, resultDictionary);
 
+            ParseException(sourceLoggingEvent, resultDictionary);
+
             ParseProperties(sourceLoggingEvent, resultDictionary);
 
             return resultDictionary;
         }
 
-        protected void ParseBasicFields(LoggingEvent sourceLoggingEvent, Dictionary<string, object> logEvent)
+        protected void ParseBasicFields(LoggingEvent sourceLoggingEvent, Dictionary<string, object> resultDictionary)
         {
-            logEvent["@timestamp"] = sourceLoggingEvent.TimeStamp.ToUniversalTime().ToString("O");
-            logEvent["LoggerName"] = sourceLoggingEvent.LoggerName;
-            logEvent["HostName"] = MachineName;
+            resultDictionary["@timestamp"] = sourceLoggingEvent.TimeStamp.ToUniversalTime().ToString("O");
+            resultDictionary["LoggerName"] = sourceLoggingEvent.LoggerName;
+            resultDictionary["HostName"] = MachineName;
 
             if (FixedFields.ContainsFlag(FixFlags.ThreadName))
             {
-                logEvent["ThreadName"] = sourceLoggingEvent.ThreadName;
+                resultDictionary["ThreadName"] = sourceLoggingEvent.ThreadName;
             }
 
             if (FixedFields.ContainsFlag(FixFlags.Domain))
             {
-                logEvent["AppDomain"] = sourceLoggingEvent.Domain;
+                resultDictionary["AppDomain"] = sourceLoggingEvent.Domain;
             }
 
             if (sourceLoggingEvent.Level != null)
             {
-                logEvent["Level"] = sourceLoggingEvent.Level.DisplayName;
+                resultDictionary["Level"] = sourceLoggingEvent.Level.DisplayName;
             }
 
             if (FixedFields.ContainsFlag(FixFlags.Identity))
             {
-                logEvent["Identity"] = sourceLoggingEvent.Identity;
+                resultDictionary["Identity"] = sourceLoggingEvent.Identity;
             }
 
             if (FixedFields.ContainsFlag(FixFlags.UserName))
             {
-                logEvent["UserName"] = sourceLoggingEvent.UserName;
+                resultDictionary["UserName"] = sourceLoggingEvent.UserName;
             }
         }
 
@@ -82,17 +86,47 @@ namespace log4net.ElasticSearch.LogEventFactory
             }
         }
 
-        protected void ParseMessage(LoggingEvent loggingEvent, Dictionary<string, object> logEvent)
+        protected void ParseMessage(LoggingEvent sourceLoggingEvent, Dictionary<string, object> resultDictionary)
         {
-            if (FixedFields.ContainsFlag(FixFlags.Message) && loggingEvent.MessageObject != null)
+            if (FixedFields.ContainsFlag(FixFlags.Message))
             {
-                logEvent["Message"] = loggingEvent.MessageObject.ToString();
-                //logEvent["Message"] = sourceLoggingEvent.RenderedMessage;
-            }
+                resultDictionary["Message"] = sourceLoggingEvent.RenderedMessage;
 
-            if (FixedFields.ContainsFlag(FixFlags.Exception) && loggingEvent.ExceptionObject != null)
+                // Added special handling of the MessageObject since it may be an exception. 
+                // Exception Types require specialized serialization to prevent serialization exceptions.
+                if (SerializeObjects && sourceLoggingEvent.MessageObject != null && !(sourceLoggingEvent.MessageObject is string))
+                {
+                    var exceptionObject = sourceLoggingEvent.MessageObject as Exception;
+                    if (exceptionObject != null)
+                    {
+                        resultDictionary["MessageObject"] = JsonSerializableException.Create(exceptionObject);
+                    }
+                    else
+                    {
+                        resultDictionary["MessageObject"] = sourceLoggingEvent.MessageObject;
+                    }
+                }
+            }
+        }
+
+        protected void ParseException(LoggingEvent sourceLoggingEvent, Dictionary<string, object> resultDictionary)
+        {
+            if (FixedFields.ContainsFlag(FixFlags.Exception))
             {
-                logEvent["Exception"] = loggingEvent.ExceptionObject.ToString();
+                var exception = sourceLoggingEvent.ExceptionObject;
+                var exceptionString = sourceLoggingEvent.GetExceptionString();
+
+                // If exceptionString is empty - no exception exists at all.
+                // Because GetExceptionString() returns exceptionString if exists or exception.ToString().
+                if (!string.IsNullOrEmpty(exceptionString))
+                {
+                    resultDictionary["Exception"] = exceptionString;
+                    
+                    if (SerializeObjects && exception != null)
+                    {
+                        resultDictionary["ExceptionObject"] = JsonSerializableException.Create(exception);
+                    }
+                }
             }
         }
 
