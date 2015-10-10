@@ -15,6 +15,9 @@ The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.Elast
 ### Breaking Changes:
 * The definition of IElasticAppenderFilter has been changed, PrepareEvent has only one parameter and PrepareConfiguration's parameter type has changed to IElasticsearchClient.
 
+#### :green_book: Version 1.1.0 note:
+* log4stash 1.1.0 has new feature `SerializeObjects`, if true (the default) it serializes the exception object and message object into json object and add them to Elastic. You can see them under "MessageObject" and "ExceptionObject" keys.  - [Related commit](https://github.com/urielha/log4stash/commit/560676de9b074be70e00f93566c543a846ba5c8e)
+
 ### Filters:
 * **Add** - add new key and value to the event.
 * **Remove** - remove key from the event.
