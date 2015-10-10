@@ -11,7 +11,7 @@ namespace log4net.ElasticSearch.LogEventFactory
         protected FixFlags FixedFields;
         protected bool SerializeObjects;
 
-        public virtual void Configure(ElasticSearchAppender appenderProperties)
+        public virtual void Configure(ILogEventFactoryParams appenderProperties)
         {
             FixedFields = appenderProperties.FixedFields;
             SerializeObjects = appenderProperties.SerializeObjects;

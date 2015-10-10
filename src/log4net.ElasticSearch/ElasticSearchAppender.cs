@@ -10,7 +10,7 @@ using log4net.Core;
 
 namespace log4net.ElasticSearch
 {
-    public class ElasticSearchAppender : AppenderSkeleton
+    public class ElasticSearchAppender : AppenderSkeleton, ILogEventFactoryParams
     {
         private List<InnerBulkOperation> _bulk = new List<InnerBulkOperation>();
         private IElasticsearchClient _client;

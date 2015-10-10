@@ -3,6 +3,12 @@ using log4net.Core;
 
 namespace log4net.ElasticSearch.LogEventFactory
 {
+    public interface ILogEventFactoryParams
+    {
+        FixFlags FixedFields { get; set; }
+        bool SerializeObjects { get; set; }
+    }
+
     /// <summary>
     /// Represents class which can create LogEvent <see cref="Dictionary{TKey,TValue}"/>
     /// out of given <see cref="LoggingEvent"/>
@@ -12,8 +18,8 @@ namespace log4net.ElasticSearch.LogEventFactory
         /// <summary>
         /// Configure the Factory before use.
         /// </summary>
-        /// <param name="appenderProperties">ElasticSearchAppender</param>
-        void Configure(ElasticSearchAppender appenderProperties);
+        /// <param name="factoryParams">ILogEventFactoryParams</param>
+        void Configure(ILogEventFactoryParams factoryParams);
 
         /// <summary>
         /// Create the log event out of given <paramref name="sourceLoggingEvent"/>
