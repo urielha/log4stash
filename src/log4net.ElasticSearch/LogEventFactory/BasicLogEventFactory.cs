@@ -138,7 +138,7 @@ namespace log4net.ElasticSearch.LogEventFactory
                 foreach (var propertyKey in properties.GetKeys())
                 {
                     var value = properties[propertyKey];
-                    resultDictionary[propertyKey] = value != null ? value.ToString() : string.Empty;
+                    resultDictionary[propertyKey] = value ?? string.Empty;
                 }
             }
         }
