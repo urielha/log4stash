@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>log4stash</id>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <authors>urielha</authors>
     <owners>urielha</owners>
     <title>log4stash - Elasticsearch log4net appender</title>
