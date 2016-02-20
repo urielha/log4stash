@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Nest;
 using NUnit.Framework;
 
 namespace log4net.ElasticSearch.Tests.Integration
@@ -39,7 +40,7 @@ namespace log4net.ElasticSearch.Tests.Integration
             };
 
             Client.Index(logEvent, descriptor => descriptor.Type("anonymous"));
-            Client.Refresh();
+            Client.Refresh(Indices.AllIndices);
 
             var searchResults = Client.Search<dynamic>(s => s.AllTypes().MatchAll());
             Assert.AreEqual(1, searchResults.Total);

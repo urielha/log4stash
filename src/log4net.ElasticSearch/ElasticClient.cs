@@ -5,7 +5,7 @@ using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using System.Web.Script.Serialization;
+using Newtonsoft.Json;
 
 namespace log4net.ElasticSearch
 {
@@ -129,14 +129,14 @@ namespace log4net.ElasticSearch
         private static string PrepareBulk(IEnumerable<InnerBulkOperation> bulk)
         {
             var sb = new StringBuilder();
-            foreach (var operation in bulk)
+            foreach (InnerBulkOperation operation in bulk)
             {
                 sb.AppendFormat(
                     @"{{ ""index"" : {{ ""_index"" : ""{0}"", ""_type"" : ""{1}""}} }}",
                     operation.IndexName, operation.IndexType);
                 sb.Append("\n");
-
-                string json = new JavaScriptSerializer().Serialize(operation.Document);
+                
+                string json = JsonConvert.SerializeObject(operation.Document);
                 sb.Append(json);
 
                 sb.Append("\n");

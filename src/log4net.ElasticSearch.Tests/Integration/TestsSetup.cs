@@ -26,7 +26,7 @@ namespace log4net.ElasticSearch.Tests.Integration
 
             ConnectionSettings elasticSettings =
                 new ConnectionSettings(new Uri(string.Format("http://{0}:{1}", host, port)))
-                    .SetDefaultIndex(TestIndex);
+                    .DefaultIndex(TestIndex);
 
             Client = new ElasticClient(elasticSettings);
         }
@@ -34,10 +34,10 @@ namespace log4net.ElasticSearch.Tests.Integration
         [TestFixtureTearDown]
         public void FixtureTearDown()
         {
-            var response = Client.IndexExists(descriptor => descriptor.Index(TestIndex));
+            var response = Client.IndexExists(new IndexExistsRequest(TestIndex));
             if (response.Exists)
             {
-                Client.DeleteIndex(descriptor => descriptor.Index(TestIndex));
+                Client.DeleteIndex(new DeleteIndexRequest(TestIndex));
             }
         }
 

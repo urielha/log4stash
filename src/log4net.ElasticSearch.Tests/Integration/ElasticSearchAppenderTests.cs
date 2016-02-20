@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using log4net.Core;
 using log4net.ElasticSearch.Filters;
+using Nest;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
@@ -21,7 +22,7 @@ namespace log4net.ElasticSearch.Tests.Integration
         {
             _log.Info("loggingtest");
 
-            Client.Refresh();
+            Client.Refresh(TestIndex);
 
             var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(q => q.Term("Message", "loggingtest")));
 
@@ -45,7 +46,7 @@ namespace log4net.ElasticSearch.Tests.Integration
 
             _log.Logger.Repository.Log(loggingEvent);
 
-            Client.Refresh();
+            Client.Refresh(TestIndex);
 
             var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(q => q.Term("Message", "loggingtest")));
 
@@ -59,7 +60,7 @@ namespace log4net.ElasticSearch.Tests.Integration
         {
             _log.Info("loggingtest");
 
-            Client.Refresh();
+            Client.Refresh(TestIndex);
 
             var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(q => q.Term("Message", "loggingtest")));
 
@@ -78,7 +79,7 @@ namespace log4net.ElasticSearch.Tests.Integration
             LogicalThreadContext.Properties["logicalThreadDynamicProperty"] = "local thread";
             _log.Info("loggingtest");
 
-            Client.Refresh();
+            Client.Refresh(TestIndex);
             var searchResults = Client.Search<dynamic>(s => s.AllTypes().Query(q => q.Term("Message", "loggingtest")));
 
             Assert.AreEqual(1, searchResults.Total);
@@ -95,7 +96,7 @@ namespace log4net.ElasticSearch.Tests.Integration
             log4net.LogicalThreadContext.Properties["Level"] = value;
             _log.Debug("debug kuku");
 
-            Client.Refresh();
+            Client.Refresh(TestIndex);
 
             var searchResults = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
 
@@ -111,7 +112,7 @@ namespace log4net.ElasticSearch.Tests.Integration
             log4net.LogicalThreadContext.Properties["NullProperty"] = null;
             _log.Debug("debug kuku");
 
-            Client.Refresh();
+            Client.Refresh(TestIndex);
 
             var searchResults = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
 
@@ -149,7 +150,7 @@ namespace log4net.ElasticSearch.Tests.Integration
                 "this is message{1}key{0}value{1}another {0} 'another'{1}object{0}[this is object :)]",
                 valueSplit[0].TrimStart('\\'), fieldSplit[0].TrimStart('\\'));
 
-            Client.Refresh();
+            Client.Refresh(TestIndex);
             var searchResults = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent").Take(1));
 
             var entry = searchResults.Documents.First();
@@ -179,7 +180,7 @@ namespace log4net.ElasticSearch.Tests.Integration
             var newGuid = Guid.NewGuid();
             _log.Error("error! name is UnknownError and guid " + newGuid);
 
-            Client.Refresh();
+            Client.Refresh(TestIndex);
             var res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent").Take((1)));
             var doc = res.Documents.First();
             Assert.AreEqual("UnknownError", doc.name.ToString());
@@ -192,7 +193,7 @@ namespace log4net.ElasticSearch.Tests.Integration
         {
             _log.Info("someIds=[123, 124 ,125 , 007] anotherIds=[33]");
 
-            Client.Refresh();
+            Client.Refresh(TestIndex);
 
             var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take((1)));
             var doc = res.Documents.First();
@@ -207,11 +208,14 @@ namespace log4net.ElasticSearch.Tests.Integration
         [TestCase("20m", 1, TestName = "ttl didn't elapsed")]
         public void test_ttl(string ttlValue, int expectation)
         {
-            Client.PutTemplate("ttltemplate",
+            const string ttlTemplateName = "ttltemplate";
+            const int toWaitMillisec = 3000;
+
+            Client.PutIndexTemplate(ttlTemplateName,
                 descriptor =>
                     descriptor.Template("*")
-                        .Settings(settings => settings.Add("indices.ttl.interval", "1s").Add("index.ttl.interval", "1s"))
-                        .AddMapping<dynamic>(mapping => mapping.Type("_default_").TtlField(ttlField => ttlField.Enable().Default("1d"))));
+                        .Settings(settings => settings.Setting("indices.ttl.interval", "1s").Setting("index.ttl.interval", "1s"))
+                        .Mappings(mapping => mapping.Map("_default_", desc => desc.TtlField(ttlField => ttlField.Enable().Default("1d")))));
 
             ElasticAppenderFilters oldFilters = null;
             QueryConfiguration(
@@ -223,7 +227,7 @@ namespace log4net.ElasticSearch.Tests.Integration
                 });
 
             _log.Info("test");
-            Client.Refresh();
+            Client.Refresh(TestIndex);
             var res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent"));
             Assert.AreEqual(1, res.Total);
 
@@ -231,15 +235,15 @@ namespace log4net.ElasticSearch.Tests.Integration
             int numOfTries = 20;
             while (--numOfTries > 0)
             {
-                Client.Refresh();
-                Client.Optimize();
+                Client.Refresh(TestIndex);
+                Client.Optimize(TestIndex);
                 res = Client.Search<dynamic>(s => s.AllTypes().AllIndices());
                 numOfTries = res.Total == expectation ? 0 : numOfTries ;
-                Thread.Sleep(3000);
+                Thread.Sleep(toWaitMillisec);
             }
 
             res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent"));
-            Client.DeleteTemplate("ttltemplate");
+            Client.DeleteIndexTemplate(ttlTemplateName);
             QueryConfiguration(appender => appender.ElasticFilters = oldFilters);
 
             Assert.AreEqual(expectation, res.Total);
