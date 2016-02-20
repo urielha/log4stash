@@ -55,70 +55,8 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
+  <Import Project="..\log4net.ElasticSearch\log4net.ElasticSearch.props"/>
   <ItemGroup>
-    <Compile Include="..\log4net.ElasticSearch\AssemblyVersionInfo.cs">
-      <Link>AssemblyVersionInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\ElasticAppenderFilters.cs">
-      <Link>ElasticAppenderFilters.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\ElasticClient.cs">
-      <Link>ElasticClient.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\ElasticSearchAppender.cs">
-      <Link>ElasticSearchAppender.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\Extensions\FixFlagsExtensions.cs">
-      <Link>Extensions\FixFlagsExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\Extensions\LoggingEventExtensions.cs">
-      <Link>Extensions\LoggingEventExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\Filters\AddValueFilter.cs">
-      <Link>Filters\AddValueFilter.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\Filters\ConvertToArrayFilter.cs">
-      <Link>Filters\ConvertToArrayFilter.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\Filters\GrokFilter.cs">
-      <Link>Filters\GrokFilter.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\Filters\KvFilter.cs">
-      <Link>Filters\KvFilter.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\Filters\RemoveKeyFilter.cs">
-      <Link>Filters\RemoveKeyFilter.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\Filters\RenameKeyFilter.cs">
-      <Link>Filters\RenameKeyFilter.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\IElasticAppenderFilter.cs">
-      <Link>IElasticAppenderFilter.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\InnerExceptions\InvalidFilterConfigurationException.cs">
-      <Link>InnerExceptions\InvalidFilterConfigurationException.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\LogEventFactory\BasicLogEventFactory.cs">
-      <Link>LogEventFactory\BasicLogEventFactory.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\LogEventFactory\ILogEventFactory.cs">
-      <Link>LogEventFactory\ILogEventFactory.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\LogEventFactory\JsonSerializableException.cs">
-      <Link>LogEventFactory\JsonSerializableException.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\SmartFormatters\GrokSmartFormatter.cs">
-      <Link>SmartFormatters\GrokSmartFormatter.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\SmartFormatters\LogEventSmartFormatter.cs">
-      <Link>SmartFormatters\LogEventSmartFormatter.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\SmartFormatters\SmartFormatter.cs">
-      <Link>SmartFormatters\SmartFormatter.cs</Link>
-    </Compile>
-    <Compile Include="..\log4net.ElasticSearch\TemplateInfo.cs">
-      <Link>TemplateInfo.cs</Link>
-    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

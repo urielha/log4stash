@@ -53,8 +53,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ElasticClient\IElasticsearchClient.cs" />
+    <Compile Include="ElasticClient\InnerBulkOperation.cs" />
     <Compile Include="LogEventFactory\BasicLogEventFactory.cs" />
-    <Compile Include="ElasticClient.cs" />
+    <Compile Include="ElasticClient\ElasticClient.cs" />
     <Compile Include="Filters\AddValueFilter.cs" />
     <Compile Include="AssemblyVersionInfo.cs" />
     <Compile Include="ElasticSearchAppender.cs" />
@@ -77,6 +79,7 @@
     <Compile Include="TemplateInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="log4net.ElasticSearch.props" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

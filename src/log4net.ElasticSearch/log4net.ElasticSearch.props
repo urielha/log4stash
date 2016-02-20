@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Compile Include="..\log4net.ElasticSearch\*.cs" />
+    <Compile Include="..\log4net.ElasticSearch\Extensions\*.cs">
+      <Link>Extensions\{filename}</Link>
+    </Compile>
+    <Compile Include="..\log4net.ElasticSearch\Filters\*.cs">
+      <Link>Filters\{filename}</Link>
+    </Compile>
+    <Compile Include="..\log4net.ElasticSearch\InnerExceptions\*.cs">
+      <Link>InnerExceptions\{filename}</Link>
+    </Compile>
+    <Compile Include="..\log4net.ElasticSearch\LogEventFactory\*.cs">
+      <Link>LogEventFactory\{filename}</Link>
+    </Compile>
+    <Compile Include="..\log4net.ElasticSearch\SmartFormatters\*.cs">
+      <Link>SmartFormatters\{filename}</Link>
+    </Compile>
+    <Compile Include="..\log4net.ElasticSearch\ElasticClient\*.cs">
+      <Link>ElasticClient\{filename}</Link>
+    </Compile>
+  </ItemGroup>
+</Project>

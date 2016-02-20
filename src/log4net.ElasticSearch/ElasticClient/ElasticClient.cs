@@ -9,27 +9,7 @@ using Newtonsoft.Json;
 
 namespace log4net.ElasticSearch
 {
-    public interface IElasticsearchClient : IDisposable
-    {
-        string Server { get; }
-        int Port { get; }
-        bool Ssl { get; }
-        bool AllowSelfSignedServerCert { get; }
-        string BasicAuthUsername { get; }
-        string BasicAuthPassword { get; }
-        void PutTemplateRaw(string templateName, string rawBody);
-        void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
-        IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
-    }
-    
-    public class InnerBulkOperation 
-    {
-        public string IndexName { get; set; }
-        public string IndexType { get; set; }
-        public object Document { get; set; }
-    }
-
-    public class WebElasticClient : IElasticsearchClient
+    public abstract class AbstractWebElasticClient : IElasticsearchClient
     {
         public string Server { get; private set; }
         public int Port { get; private set; }
@@ -39,15 +19,10 @@ namespace log4net.ElasticSearch
         public string BasicAuthPassword { get; private set; }
         public string Url { get { return _url; } }
 
-        private readonly string _url;
-        private readonly string _credentials;
+        protected readonly string _url;
+        protected readonly string _encodedAuthInfo;
 
-        public WebElasticClient(string server, int port)
-            : this(server, port, false, false, string.Empty, string.Empty)
-        {
-        }
-
-        public WebElasticClient(string server, int port,
+        protected AbstractWebElasticClient(string server, int port,
                                 bool ssl, bool allowSelfSignedServerCert, 
                                 string basicAuthUsername, string basicAuthPassword)
         {
@@ -61,22 +36,48 @@ namespace log4net.ElasticSearch
             BasicAuthPassword = basicAuthPassword;
             BasicAuthUsername = basicAuthUsername;
 
-            if (Ssl && AllowSelfSignedServerCert)
-            {
-                ServicePointManager.ServerCertificateValidationCallback += AcceptSelfSignedServerCertCallback;
-            }
-
             if(BasicAuthUsername != null && !string.IsNullOrEmpty(BasicAuthUsername.Trim()))
             {
                 string authInfo = string.Format("{0}:{1}", BasicAuthUsername, BasicAuthPassword);
-                string encodedAuthInfo = Convert.ToBase64String(Encoding.ASCII.GetBytes(authInfo));
-                _credentials = string.Format("{0} {1}", "Basic", encodedAuthInfo);
+                _encodedAuthInfo = Convert.ToBase64String(Encoding.ASCII.GetBytes(authInfo));
             }
 
             _url = string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", Server, Port);
         }
 
-        public void PutTemplateRaw(string templateName, string rawBody)
+        public abstract void PutTemplateRaw(string templateName, string rawBody);
+        public abstract void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
+        public abstract IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
+        
+        public abstract void Dispose();
+    }
+
+    public class WebElasticClient : AbstractWebElasticClient
+    {
+        private readonly string _credentials;
+
+        public WebElasticClient(string server, int port)
+            : this(server, port, false, false, string.Empty, string.Empty)
+        {
+        }
+
+        public WebElasticClient(string server, int port,
+                                bool ssl, bool allowSelfSignedServerCert, 
+                                string basicAuthUsername, string basicAuthPassword)
+            : base(server, port, ssl, allowSelfSignedServerCert, basicAuthUsername, basicAuthPassword)
+        {
+            if (Ssl && AllowSelfSignedServerCert)
+            {
+                ServicePointManager.ServerCertificateValidationCallback += AcceptSelfSignedServerCertCallback;
+            }
+
+            if (!string.IsNullOrEmpty(_encodedAuthInfo))
+            {
+                _credentials = string.Format("{0} {1}", "Basic", _encodedAuthInfo);
+            }
+        }
+
+        public override void PutTemplateRaw(string templateName, string rawBody)
         {
             var webRequest = WebRequest.Create(string.Concat(_url, "_template/", templateName));
             webRequest.ContentType = "text/json";
@@ -89,7 +90,7 @@ namespace log4net.ElasticSearch
             }
         }
 
-        public void IndexBulk(IEnumerable<InnerBulkOperation> bulk)
+        public override void IndexBulk(IEnumerable<InnerBulkOperation> bulk)
         {
             var webRequest = PrepareBulkAndSend(bulk);
             using (var httpResponse = (HttpWebResponse) webRequest.GetResponse())
@@ -97,8 +98,8 @@ namespace log4net.ElasticSearch
                 CheckResponse(httpResponse);
             }
         }
-        
-        public IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
+
+        public override IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
         {
             var webRequest = PrepareBulkAndSend(bulk);
             return webRequest.BeginGetResponse(FinishGetResponse, webRequest);
@@ -198,7 +199,7 @@ namespace log4net.ElasticSearch
             }
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
             ServicePointManager.ServerCertificateValidationCallback -= AcceptSelfSignedServerCertCallback;
         }
