@@ -204,6 +204,20 @@ namespace log4net.ElasticSearch.Tests.Integration
         }
 
         [Test]
+        public void check_issue()
+        {
+            LogicalThreadContext.Stacks["UserName"].Push("name1");
+            LogicalThreadContext.Stacks["UserName"].Push("name2");
+            _log.Info("hi");
+
+            Client.Refresh(TestIndex);
+
+            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
+            var doc = res.Documents.First();
+            var x = doc["UserName"];
+        }
+
+        [Test]
         [TestCase("1s", 0, TestName = "ttl elapsed")]
         [TestCase("20m", 1, TestName = "ttl didn't elapsed")]
         public void test_ttl(string ttlValue, int expectation)

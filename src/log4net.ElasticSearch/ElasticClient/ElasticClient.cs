@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using log4net.ElasticSearch.JsonConverters;
 using Newtonsoft.Json;
 
 namespace log4net.ElasticSearch
@@ -137,7 +138,7 @@ namespace log4net.ElasticSearch
                     operation.IndexName, operation.IndexType);
                 sb.Append("\n");
                 
-                string json = JsonConvert.SerializeObject(operation.Document);
+                string json = JsonConvert.SerializeObject(operation.Document, JsonConvertersFactory.GetCustomConverters());
                 sb.Append(json);
 
                 sb.Append("\n");
