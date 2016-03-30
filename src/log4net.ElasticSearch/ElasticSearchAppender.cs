@@ -161,20 +161,11 @@ namespace log4net.ElasticSearch
         /// </summary>
         private void DoIndexNow()
         {
-            // avoid blocking further inserts by creating new bulk before the lock
-            var bulkToSend = _bulk;
-            _bulk = new List<InnerBulkOperation>();
-
-            try
+            var bulkToSend = Interlocked.Exchange(ref _bulk, new List<InnerBulkOperation>());
+            if (bulkToSend.Count > 0)
             {
-                lock (bulkToSend)
+                try
                 {
-                    // I didnt use double-check in purpose.
-                    if (bulkToSend.Count == 0)
-                    {
-                        return;
-                    }
-
                     if (IndexAsync)
                     {
                         _client.IndexBulkAsync(bulkToSend);
@@ -184,10 +175,10 @@ namespace log4net.ElasticSearch
                         _client.IndexBulk(bulkToSend);
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                LogLog.Error(GetType(), "Invalid connection to ElasticSearch", ex);
+                catch (Exception ex)
+                {
+                    LogLog.Error(GetType(), "Invalid connection to ElasticSearch", ex);
+                }
             }
         }
     }
