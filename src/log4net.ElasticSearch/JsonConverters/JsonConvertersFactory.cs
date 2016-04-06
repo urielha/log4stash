@@ -15,8 +15,9 @@ namespace log4net.ElasticSearch.JsonConverters
         public static JsonConverter[] GetCustomConverters()
         {
             var converters = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(t => t.Namespace != null
-                            && typeof(ICustomJsonConverter).IsAssignableFrom(t))
+                .Where(t => t.Namespace != null && t.IsClass
+                            && typeof(ICustomJsonConverter).IsAssignableFrom(t)
+                            && t.GetConstructor(Type.EmptyTypes) != null)
                 .Select(Activator.CreateInstance).OfType<JsonConverter>();
             return converters.ToArray();
         }
