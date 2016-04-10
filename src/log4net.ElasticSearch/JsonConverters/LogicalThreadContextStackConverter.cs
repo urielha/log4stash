@@ -16,12 +16,20 @@ namespace log4net.ElasticSearch.JsonConverters
 
         private void Process(LogicalThreadContextStack stack, JsonWriter writer, JsonSerializer serializer)
         {
-            int count = stack.Count;
-            for (int i = 0; i < count; i++)
+            var objects = stack.ToString().Split(' ');
+            foreach (var obj in objects)
             {
-                string item = stack.Pop();
-                writer.WriteValue(item);
+                writer.WriteValue(obj);
             }
+
+            // there is an issue with LogicalThreadContextStack.Pop() 
+            // it returns the top object everytime.
+            //int count = stack.Count;
+            //for (int i = 0; i < count; i++)
+            //{
+            //    string item = stack.Pop();
+            //    writer.WriteValue(item);
+            //}
         }
 
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)

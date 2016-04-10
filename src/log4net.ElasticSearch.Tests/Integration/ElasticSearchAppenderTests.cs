@@ -204,7 +204,7 @@ namespace log4net.ElasticSearch.Tests.Integration
         }
 
         [Test]
-        public void check_issue()
+        public void can_parse_log4net_context_stacks()
         {
             LogicalThreadContext.Stacks["UserName"].Push("name1");
             LogicalThreadContext.Stacks["UserName"].Push("name2");
@@ -214,7 +214,10 @@ namespace log4net.ElasticSearch.Tests.Integration
 
             var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
             var doc = res.Documents.First();
-            var x = doc["UserName"];
+            var usrName = doc["UserName"];
+            Assert.NotNull(usrName);
+            Assert.AreEqual("name1", usrName[0].Value<string>());
+            Assert.AreEqual("name2", usrName[1].Value<string>());
         }
 
         [Test]
