@@ -127,8 +127,8 @@ The inspiration to the filters and style had taken from [elasticsearch/logstash]
 | [![Build status][TravisImg]][TravisLink] | Mono CI provided by [travis-ci][] |
 | [![Build Status][AppVeyorImg]][AppVeyorLink] | Windows CI provided by [AppVeyor][] (without tests for now) |
 
-[TravisImg]:https://travis-ci.org/urielha/log4stash-new.svg?branch=master
-[TravisLink]:https://travis-ci.org/urielha/log4stash-new
+[TravisImg]:https://travis-ci.org/urielha/log4stash.svg?branch=master
+[TravisLink]:https://travis-ci.org/urielha/log4stash
 [AppVeyorImg]:https://ci.appveyor.com/api/projects/status/byp4s7vl8cuhyae0
 [AppVeyorLink]:https://ci.appveyor.com/project/urielha/log4stash
 
