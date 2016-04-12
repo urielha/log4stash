@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <PropertyGroup>
+    <PackedAssemblyName>$(AssemblyName).packed.dll</PackedAssemblyName>
+  </PropertyGroup>
+  
+  <Target Name="ilRepack" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+  
+    <ItemGroup>
+      <InputAssemblies Include="$(OutputPath)\log4stash.dll" />
+      <InputAssemblies Include="$(OutputPath)\Newtonsoft.Json.dll" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <DoNotInternalizeAssemblies Include="log4stash" />
+    </ItemGroup>
+
+    <ILRepack
+     Parallel="true"
+     Internalize="true"
+     InternalizeExclude="@(DoNotInternalizeAssemblies)"
+     InputAssemblies="@(InputAssemblies)"
+     TargetKind="Dll"
+     OutputFile="$(OutputPath)\$(PackedAssemblyName)"
+   />
+
+  </Target>
+
+  <Target Name="CleanIlRepack" BeforeTargets="Clean" Condition="'$(Configuration)' == 'Release'">
+    <Delete Files="$(OutputPath)\$(PackedAssemblyName)" />
+  </Target>
+</Project>
