@@ -42,6 +42,10 @@
     <Reference Include="log4net">
       <HintPath>..\packages\log4net.2.0.3\lib\net35-full\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net35\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web.Extensions" />
@@ -77,6 +81,9 @@
     </Compile>
     <Compile Include="..\log4net.ElasticSearch\Filters\GrokFilter.cs">
       <Link>Filters\GrokFilter.cs</Link>
+    </Compile>
+    <Compile Include="..\log4net.ElasticSearch\Filters\JsonFilter.cs">
+      <Link>Filters\JsonFilter.cs</Link>
     </Compile>
     <Compile Include="..\log4net.ElasticSearch\Filters\KvFilter.cs">
       <Link>Filters\KvFilter.cs</Link>
