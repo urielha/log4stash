@@ -16,9 +16,12 @@ namespace log4net.ElasticSearch.Filters
             set { _sourceKey = value; }
         }
 
+        public bool FlattenJson { get; set; }
+
         public JsonFilter()
         {
             SourceKey = "JsonRaw";
+            FlattenJson = false;
         }
 
         public void PrepareConfiguration(IElasticsearchClient client)
@@ -33,7 +36,47 @@ namespace log4net.ElasticSearch.Filters
                 return;
 
             var token = JToken.Parse(input);
-            logEvent[key] = token;
+            if (FlattenJson)
+            {
+                ScanToken(logEvent, token, "");
+            }
+            else
+            {
+                logEvent[key] = token;
+            }
+        }
+
+        private static void ScanToken(IDictionary<string, object> logEvent, JToken token, string prefix)
+        {
+            switch (token.Type)
+            {
+                case JTokenType.Object:
+                    foreach (var prop in token.Children<JProperty>())
+                    {
+                        ScanToken(logEvent, prop.Value, Join(prefix, prop.Name));
+                    }
+                    break;
+
+                case JTokenType.Array:
+                    var index = 0;
+                    foreach (var child in token.Children())
+                    {
+                        ScanToken(logEvent, child, Join(prefix, index.ToString()));
+                        index++;
+                    }
+                    break;
+
+                default:
+                    var value = ((JValue)token).Value;
+                    if (value != null)
+                        logEvent.Add(prefix, ((JValue)token).Value);
+                    break;
+            }
+        }
+
+        private static string Join(string prefix, string name)
+        {
+            return (string.IsNullOrEmpty(prefix) ? name : prefix + "." + name);
         }
     }
 }

@@ -255,14 +255,16 @@ namespace log4net.ElasticSearch.Tests.Integration
         }
 
         [Test]
-        public void parse_json_string_as_object2()
+        [TestCase(false, TestName = "parse_json_string_as_object2: Should preserve json structure")]
+        [TestCase(true, TestName = "parse_json_string_as_object2: Should flatten the json")]
+        public void parse_json_string_as_object2(bool flatten)
         {
             ElasticAppenderFilters oldFilters = null;
             QueryConfiguration(appender =>
             {
                 oldFilters = appender.ElasticFilters;
                 appender.ElasticFilters = new ElasticAppenderFilters();
-                appender.ElasticFilters.AddFilter(new JsonFilter());
+                appender.ElasticFilters.AddFilter(new JsonFilter() {FlattenJson = flatten});
                 appender.ActivateOptions();
             });
             string json =
@@ -271,7 +273,7 @@ namespace log4net.ElasticSearch.Tests.Integration
             _log.Info("Info");
 
             Client.Refresh(TestIndex);
-            var res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent").Take(1));
+            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
             var doc = res.Documents.First();
 
             QueryConfiguration(appender =>
@@ -279,12 +281,33 @@ namespace log4net.ElasticSearch.Tests.Integration
                 appender.ElasticFilters = oldFilters;
                 appender.ActivateOptions();
             });
-            var jsonObj = doc["JsonRaw"];
-            Assert.IsNotNull(jsonObj);
-            Assert.AreEqual("Starting.", jsonObj["InnerMessage"].ToString());
-            Assert.AreEqual("Server", jsonObj["Data"]["Type"].ToString());
-            Assert.AreEqual("localhost", jsonObj["Data"]["Host"].ToString());
-            Assert.AreEqual("One", jsonObj["Data"]["Array"][0].ToString());
+
+            JToken actualObj;
+            string innerMessage;
+            string dataType;
+            string dataHost;
+            string dataArrayFirst;
+            if (flatten)
+            {
+                actualObj = doc;
+                innerMessage = actualObj["InnerMessage"].ToString();
+                dataType = actualObj["Data.Type"].ToString();
+                dataHost = actualObj["Data.Host"].ToString();
+                dataArrayFirst = actualObj["Data.Array.0"].ToString();
+            }
+            else
+            {
+                actualObj = doc["JsonRaw"];
+                innerMessage = actualObj["InnerMessage"].ToString();
+                dataType = actualObj["Data"]["Type"].ToString();
+                dataHost = actualObj["Data"]["Host"].ToString();
+                dataArrayFirst = actualObj["Data"]["Array"][0].ToString();
+            }
+            Assert.IsNotNull(actualObj);
+            Assert.AreEqual("Starting.", innerMessage);
+            Assert.AreEqual("Server", dataType);
+            Assert.AreEqual("localhost", dataHost);
+            Assert.AreEqual("One", dataArrayFirst);
         }
 
         [Test]
