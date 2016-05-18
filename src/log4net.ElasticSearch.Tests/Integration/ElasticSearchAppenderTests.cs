@@ -220,19 +220,19 @@ namespace log4net.ElasticSearch.Tests.Integration
         }
 
         [Test]
-        public void preserve_json_string()
+        public void parse_json_string_as_object()
         {
-            const string sourceKey = "jsonObject"; 
+            const string sourceKey = "jsonObject";
             ElasticAppenderFilters oldFilters = null;
 
             QueryConfiguration(appender =>
             {
                 oldFilters = appender.ElasticFilters;
                 appender.ElasticFilters = new ElasticAppenderFilters();
-                appender.ElasticFilters.AddFilter(new JsonStringFilter() { SourceKey = sourceKey});
+                appender.ElasticFilters.AddFilter(new JsonFilter() { SourceKey = sourceKey });
             });
 
-            var jObject = new JObject {{"key", "value\r\nnewline"}, {"arr", new JArray(Enumerable.Range(0, 5))}};
+            var jObject = new JObject { { "key", "value\r\nnewline" }, { "arr", new JArray(Enumerable.Range(0, 5)) } };
             LogicalThreadContext.Properties[sourceKey] = jObject.ToString();
             _log.Info("logging jsonObject");
 
@@ -251,11 +251,11 @@ namespace log4net.ElasticSearch.Tests.Integration
             {
                 Assert.AreEqual(arr[i].Value<int>(), i);
             }
-            
+
         }
 
-                [Test]
-        public void Can_read_json_properties()
+        [Test]
+        public void parse_json_string_as_object2()
         {
             ElasticAppenderFilters oldFilters = null;
             QueryConfiguration(appender =>
@@ -265,10 +265,12 @@ namespace log4net.ElasticSearch.Tests.Integration
                 appender.ElasticFilters.AddFilter(new JsonFilter());
                 appender.ActivateOptions();
             });
+            string json =
+                "{\"InnerMessage\":\"Starting.\", \"Data\":{\"Type\":\"Server\", \"Host\":\"localhost\", \"Array\":[\"One\", \"Two\"]}}";
+            log4net.LogicalThreadContext.Properties["JsonRaw"] = json;
+            _log.Info("Info");
 
-            _log.Info("{\"InnerMessage\":\"Starting.\", \"Data\":{\"Type\":\"Server\", \"Host\":\"localhost\", \"Array\":[\"One\", \"Two\"]}}");
-            
-            Client.Refresh();
+            Client.Refresh(TestIndex);
             var res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent").Take(1));
             var doc = res.Documents.First();
 
@@ -277,15 +279,14 @@ namespace log4net.ElasticSearch.Tests.Integration
                 appender.ElasticFilters = oldFilters;
                 appender.ActivateOptions();
             });
-
-            Assert.AreEqual("Starting.", doc["InnerMessage"].ToString());
-            Assert.AreEqual("Server", doc["Data.Type"].ToString());
-            Assert.AreEqual("localhost", doc["Data.Host"].ToString());
-            Assert.AreEqual("One", doc["Data.Array.0"].ToString());
+            var jsonObj = doc["JsonRaw"];
+            Assert.IsNotNull(jsonObj);
+            Assert.AreEqual("Starting.", jsonObj["InnerMessage"].ToString());
+            Assert.AreEqual("Server", jsonObj["Data"]["Type"].ToString());
+            Assert.AreEqual("localhost", jsonObj["Data"]["Host"].ToString());
+            Assert.AreEqual("One", jsonObj["Data"]["Array"][0].ToString());
         }
 
-
-       
         [Test]
         [TestCase("1s", 0, TestName = "ttl elapsed")]
         [TestCase("20m", 1, TestName = "ttl didn't elapsed")]
@@ -321,7 +322,7 @@ namespace log4net.ElasticSearch.Tests.Integration
                 Client.Refresh(TestIndex);
                 Client.Optimize(TestIndex);
                 res = Client.Search<dynamic>(s => s.AllTypes().AllIndices());
-                numOfTries = res.Total == expectation ? 0 : numOfTries ;
+                numOfTries = res.Total == expectation ? 0 : numOfTries;
                 Thread.Sleep(toWaitMillisec);
             }
 
