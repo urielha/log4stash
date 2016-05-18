@@ -93,6 +93,11 @@ namespace log4net.ElasticSearch
             AddFilter(filter);
         }
 
+        private void AddJson(JsonFilter filter)
+        {
+            AddFilter(filter);
+        }
+
         #endregion
     }
 

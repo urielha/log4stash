@@ -64,6 +64,7 @@
     <Compile Include="LogEventFactory\BasicLogEventFactory.cs" />
     <Compile Include="ElasticClient\ElasticClient.cs" />
     <Compile Include="Filters\AddValueFilter.cs" />
+    <Compile Include="Filters\JsonFilter.cs" />
     <Compile Include="AssemblyVersionInfo.cs" />
     <Compile Include="ElasticSearchAppender.cs" />
     <Compile Include="ElasticAppenderFilters.cs" />

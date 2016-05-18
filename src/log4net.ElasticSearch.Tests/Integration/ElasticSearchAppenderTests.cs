@@ -254,6 +254,38 @@ namespace log4net.ElasticSearch.Tests.Integration
             
         }
 
+                [Test]
+        public void Can_read_json_properties()
+        {
+            ElasticAppenderFilters oldFilters = null;
+            QueryConfiguration(appender =>
+            {
+                oldFilters = appender.ElasticFilters;
+                appender.ElasticFilters = new ElasticAppenderFilters();
+                appender.ElasticFilters.AddFilter(new JsonFilter());
+                appender.ActivateOptions();
+            });
+
+            _log.Info("{\"InnerMessage\":\"Starting.\", \"Data\":{\"Type\":\"Server\", \"Host\":\"localhost\", \"Array\":[\"One\", \"Two\"]}}");
+            
+            Client.Refresh();
+            var res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent").Take(1));
+            var doc = res.Documents.First();
+
+            QueryConfiguration(appender =>
+            {
+                appender.ElasticFilters = oldFilters;
+                appender.ActivateOptions();
+            });
+
+            Assert.AreEqual("Starting.", doc["InnerMessage"].ToString());
+            Assert.AreEqual("Server", doc["Data.Type"].ToString());
+            Assert.AreEqual("localhost", doc["Data.Host"].ToString());
+            Assert.AreEqual("One", doc["Data.Array.0"].ToString());
+        }
+
+
+       
         [Test]
         [TestCase("1s", 0, TestName = "ttl elapsed")]
         [TestCase("20m", 1, TestName = "ttl didn't elapsed")]
