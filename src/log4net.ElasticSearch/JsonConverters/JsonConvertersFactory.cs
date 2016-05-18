@@ -5,9 +5,14 @@ using Newtonsoft.Json;
 
 namespace log4net.ElasticSearch.JsonConverters
 {
+    /// <summary>
+    /// This interface is just a place holder.
+    /// All log4stash' custom json converters should implement this interface
+    /// in order to be find throught the <see cref="JsonConvertersFactory"/>.
+    /// </summary>
     interface ICustomJsonConverter
     {
-         // todo: add description
+     
     }
 
     class JsonConvertersFactory

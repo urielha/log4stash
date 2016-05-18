@@ -8,7 +8,7 @@ namespace log4net.ElasticSearch.JsonConverters
     {
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var stack = value as LogicalThreadContextStack;
+            var stack = (LogicalThreadContextStack)value;
             writer.WriteStartArray();
             this.Process(stack, writer, serializer);
             writer.WriteEndArray();

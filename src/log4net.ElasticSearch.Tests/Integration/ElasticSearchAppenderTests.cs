@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using log4net.Core;
 using log4net.ElasticSearch.Filters;
-using Nest;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
@@ -221,6 +220,41 @@ namespace log4net.ElasticSearch.Tests.Integration
         }
 
         [Test]
+        public void preserve_json_string()
+        {
+            const string sourceKey = "jsonObject"; 
+            ElasticAppenderFilters oldFilters = null;
+
+            QueryConfiguration(appender =>
+            {
+                oldFilters = appender.ElasticFilters;
+                appender.ElasticFilters = new ElasticAppenderFilters();
+                appender.ElasticFilters.AddFilter(new JsonStringFilter() { SourceKey = sourceKey});
+            });
+
+            var jObject = new JObject {{"key", "value\r\nnewline"}, {"arr", new JArray(Enumerable.Range(0, 5))}};
+            LogicalThreadContext.Properties[sourceKey] = jObject.ToString();
+            _log.Info("logging jsonObject");
+
+            Client.Refresh(TestIndex);
+
+            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
+            var doc = res.Documents.First();
+
+            var jsonObject = doc[sourceKey];
+            QueryConfiguration(appender => appender.ElasticFilters = oldFilters);
+
+            Assert.NotNull(jsonObject);
+            Assert.AreEqual(jsonObject["key"].Value<string>(), "value\r\nnewline");
+            var arr = jsonObject["arr"].ToArray();
+            foreach (var i in Enumerable.Range(0, 5))
+            {
+                Assert.AreEqual(arr[i].Value<int>(), i);
+            }
+            
+        }
+
+        [Test]
         [TestCase("1s", 0, TestName = "ttl elapsed")]
         [TestCase("20m", 1, TestName = "ttl didn't elapsed")]
         public void test_ttl(string ttlValue, int expectation)
@@ -248,7 +282,7 @@ namespace log4net.ElasticSearch.Tests.Integration
             var res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent"));
             Assert.AreEqual(1, res.Total);
 
-            // Magic. The time of deletion isn't consistent :/
+            // "Magic". The time of deletion isn't consistent :/
             int numOfTries = 20;
             while (--numOfTries > 0)
             {

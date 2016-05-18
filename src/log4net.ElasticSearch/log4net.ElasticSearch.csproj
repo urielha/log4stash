@@ -57,8 +57,10 @@
     <Compile Include="ElasticClient\CompositeElasticClient.cs" />
     <Compile Include="ElasticClient\IElasticsearchClient.cs" />
     <Compile Include="ElasticClient\InnerBulkOperation.cs" />
+    <Compile Include="Filters\JsonStringFilter.cs" />
     <Compile Include="JsonConverters\JsonConvertersFactory.cs" />
     <Compile Include="JsonConverters\LogicalThreadContextStackConverter.cs" />
+    <Compile Include="JsonConverters\StringJsonConverter.cs" />
     <Compile Include="LogEventFactory\BasicLogEventFactory.cs" />
     <Compile Include="ElasticClient\ElasticClient.cs" />
     <Compile Include="Filters\AddValueFilter.cs" />
