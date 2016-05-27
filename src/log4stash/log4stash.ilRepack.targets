@@ -2,7 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   
   <PropertyGroup>
-    <PackedAssemblyName>$(AssemblyName).packed.dll</PackedAssemblyName>
+    <PackedAssemblyName>$(AssemblyName).dll</PackedAssemblyName>
   </PropertyGroup>
   
   <Target Name="ilRepack" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
