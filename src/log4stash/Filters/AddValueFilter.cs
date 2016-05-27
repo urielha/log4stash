@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using log4net.ElasticSearch.Extensions;
-using log4net.ElasticSearch.SmartFormatters;
+using log4stash.Extensions;
+using log4stash.SmartFormatters;
 
-namespace log4net.ElasticSearch.Filters
+namespace log4stash.Filters
 {
     public class AddValueFilter : IElasticAppenderFilter
     {

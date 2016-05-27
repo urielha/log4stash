@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Compile Include="..\log4net.ElasticSearch\*.cs" />
-    <Compile Include="..\log4net.ElasticSearch\Extensions\*.cs" />
-    <Compile Include="..\log4net.ElasticSearch\Filters\*.cs" />
-    <Compile Include="..\log4net.ElasticSearch\InnerExceptions\*.cs" />
-    <Compile Include="..\log4net.ElasticSearch\LogEventFactory\*.cs" />
-    <Compile Include="..\log4net.ElasticSearch\SmartFormatters\*.cs" />
-    <Compile Include="..\log4net.ElasticSearch\ElasticClient\*.cs" />
-    <Compile Include="..\log4net.ElasticSearch\JsonConverters\*.cs" />
+    <Compile Include="..\log4stash\*.cs" />
+    <Compile Include="..\log4stash\Extensions\*.cs" />
+    <Compile Include="..\log4stash\Filters\*.cs" />
+    <Compile Include="..\log4stash\InnerExceptions\*.cs" />
+    <Compile Include="..\log4stash\LogEventFactory\*.cs" />
+    <Compile Include="..\log4stash\SmartFormatters\*.cs" />
+    <Compile Include="..\log4stash\ElasticClient\*.cs" />
+    <Compile Include="..\log4stash\JsonConverters\*.cs" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-# Travis-CI Build for log4net.ElasticSearch (copied from WampSharp)
+# Travis-CI Build for log4stash (copied from WampSharp)
 # Copied from keyczar-dotnet
 # The Elasticsearch install copied from elasticsearch-dsl-py
 # see travis-ci.org for details

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using log4net.ElasticSearch.Extensions;
+using log4stash.Extensions;
 
-namespace log4net.ElasticSearch.Filters
+namespace log4stash.Filters
 {
     public class KvFilter : IElasticAppenderFilter
     {

@@ -1,10 +1,11 @@
 using System;
+using log4net;
 using log4net.Appender;
 using log4net.Repository.Hierarchy;
 using Nest;
 using NUnit.Framework;
 
-namespace log4net.ElasticSearch.Tests.Integration
+namespace log4stash.Tests.Integration
 {
     public class TestsSetup
     {

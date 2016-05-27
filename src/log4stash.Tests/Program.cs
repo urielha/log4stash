@@ -1,7 +1,7 @@
 ﻿using System;
-using log4net.ElasticSearch.Tests.Integration;
+using log4stash.Tests.Integration;
 
-namespace log4net.ElasticSearch.Tests
+namespace log4stash.Tests
 {
     public static class Program
     {

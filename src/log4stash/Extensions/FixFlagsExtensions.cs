@@ -1,6 +1,6 @@
 using log4net.Core;
 
-namespace log4net.ElasticSearch.Extensions
+namespace log4stash.Extensions
 {
     public static class FixFlagsExtensions
     {

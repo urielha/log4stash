@@ -1,4 +1,4 @@
-namespace log4net.ElasticSearch
+namespace log4stash
 {
     public class InnerBulkOperation 
     {

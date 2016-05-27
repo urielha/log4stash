@@ -1,6 +1,6 @@
 using NUnit.Framework;
 
-namespace log4net.ElasticSearch.Tests.Unit
+namespace log4stash.Tests.Unit
 {
     [TestFixture]
     public class Ssl

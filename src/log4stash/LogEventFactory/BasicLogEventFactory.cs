@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using log4net.Core;
-using log4net.ElasticSearch.Extensions;
+using log4stash.Extensions;
 
-namespace log4net.ElasticSearch.LogEventFactory
+namespace log4stash.LogEventFactory
 {
     public class BasicLogEventFactory : ILogEventFactory
     {

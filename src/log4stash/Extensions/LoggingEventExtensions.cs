@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace log4net.ElasticSearch.Extensions
+namespace log4stash.Extensions
 {
     public static class LoggingEventExtensions
     {

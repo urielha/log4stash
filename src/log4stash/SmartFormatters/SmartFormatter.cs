@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace log4net.ElasticSearch.SmartFormatters
+namespace log4stash.SmartFormatters
 {
     public abstract class SmartFormatter
     {

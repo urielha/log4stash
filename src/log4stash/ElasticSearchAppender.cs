@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using log4net.ElasticSearch.LogEventFactory;
-using log4net.ElasticSearch.SmartFormatters;
+using log4stash.LogEventFactory;
+using log4stash.SmartFormatters;
 using log4net.Util;
 using log4net.Appender;
 using log4net.Core;
 
-namespace log4net.ElasticSearch
+namespace log4stash
 {
     public class ElasticSearchAppender : AppenderSkeleton, ILogEventFactoryParams
     {

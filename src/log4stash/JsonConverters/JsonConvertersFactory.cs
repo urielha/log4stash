@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
 
-namespace log4net.ElasticSearch.JsonConverters
+namespace log4stash.JsonConverters
 {
     /// <summary>
     /// This interface is just a place holder.

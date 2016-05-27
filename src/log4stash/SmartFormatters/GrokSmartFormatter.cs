@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-namespace log4net.ElasticSearch.SmartFormatters
+namespace log4stash.SmartFormatters
 {
     /// <summary>
     /// A SmartFormatter that generate regex patterns by thier names.

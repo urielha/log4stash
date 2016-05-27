@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace log4net.ElasticSearch
+namespace log4stash
 {
     public interface IElasticsearchClient : IDisposable
     {

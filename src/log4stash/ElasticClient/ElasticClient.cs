@@ -5,10 +5,10 @@ using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using log4net.ElasticSearch.JsonConverters;
+using log4stash.JsonConverters;
 using Newtonsoft.Json;
 
-namespace log4net.ElasticSearch
+namespace log4stash
 {
     public abstract class AbstractWebElasticClient : IElasticsearchClient
     {

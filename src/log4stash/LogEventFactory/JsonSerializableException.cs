@@ -1,10 +1,10 @@
 using System;
 
-namespace log4net.ElasticSearch.LogEventFactory
+namespace log4stash.LogEventFactory
 {
     /// <summary>
     /// JsonSerializableException.
-    /// Ported from jptoto's log4net.ElasticSearch
+    /// Ported from jptoto's log4stash
     /// </summary>
     public class JsonSerializableException
     {

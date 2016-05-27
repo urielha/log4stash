@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using log4net.ElasticSearch.Filters;
-using log4net.ElasticSearch.InnerExceptions;
+using log4stash.Filters;
+using log4stash.InnerExceptions;
 
-namespace log4net.ElasticSearch
+namespace log4stash
 {
     public class ElasticAppenderFilters : IElasticAppenderFilter
     {

@@ -7,7 +7,7 @@
     <ProjectGuid>{DD7A63E6-7F28-41BA-827B-C992208CCD9F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>log4net.ElasticSearch.net35</RootNamespace>
+    <RootNamespace>log4stash.net35</RootNamespace>
     <AssemblyName>log4stash</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -56,7 +56,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
-  <Import Project="..\log4net.ElasticSearch\log4stash.props" />
+  <Import Project="..\log4stash\log4stash.props" />
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -72,7 +72,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\ILRepack.MSBuild.Task.1.0.9\build\ILRepack.MSBuild.Task.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.MSBuild.Task.1.0.9\build\ILRepack.MSBuild.Task.targets'))" />
   </Target>
-  <Import Project="..\log4net.ElasticSearch\log4stash.ilRepack.targets" />
+  <Import Project="..\log4stash\log4stash.ilRepack.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace log4net.ElasticSearch
+namespace log4stash
 {
     // TODO: need more work here
     public class CompositeElasticClient : IElasticsearchClient

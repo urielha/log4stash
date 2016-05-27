@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using log4net.Core;
 
-namespace log4net.ElasticSearch.LogEventFactory
+namespace log4stash.LogEventFactory
 {
     public interface ILogEventFactoryParams
     {

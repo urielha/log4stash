@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace log4net.ElasticSearch.InnerExceptions
+namespace log4stash.InnerExceptions
 {
     public class InvalidFilterConfigurationException : Exception
     {

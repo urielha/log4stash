@@ -7,7 +7,7 @@
     <ProjectGuid>{2F7D7AD4-2DA0-430A-9E90-9D0E398D590C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>log4net.ElasticSearch.Tests</RootNamespace>
+    <RootNamespace>log4stash.Tests</RootNamespace>
     <AssemblyName>log4stash.Tests</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -95,9 +95,9 @@
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\log4net.ElasticSearch\log4net.ElasticSearch.csproj">
+    <ProjectReference Include="..\log4stash\log4stash.csproj">
       <Project>{22964cb0-8a39-41ea-807d-b5216d27df70}</Project>
-      <Name>log4net.ElasticSearch</Name>
+      <Name>log4stash</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

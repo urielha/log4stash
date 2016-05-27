@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using log4net.Core;
-using log4net.ElasticSearch.LogEventFactory;
+using log4stash.LogEventFactory;
 using log4net.Repository.Hierarchy;
 using NUnit.Framework;
 
-namespace log4net.ElasticSearch.Tests.Unit
+namespace log4stash.Tests.Unit
 {
     [TestFixture]
     class LogEventFactory

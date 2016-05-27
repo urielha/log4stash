@@ -2,7 +2,7 @@
 using log4net.Util;
 using Newtonsoft.Json;
 
-namespace log4net.ElasticSearch.JsonConverters
+namespace log4stash.JsonConverters
 {
     class LogicalThreadContextStackConverter : JsonConverter, ICustomJsonConverter
     {
