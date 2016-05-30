@@ -6,30 +6,16 @@
   </PropertyGroup>
   
   <Target Name="ilRepack" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
-  
+    <PropertyGroup>
+      <RepackCmd>&quot;$(SolutionDir)\packages\ILRepack.2.0.10\tools\ILRepack.exe&quot;</RepackCmd>
+    </PropertyGroup>
+    
     <ItemGroup>
       <InputAssemblies Include="$(OutputPath)\log4stash.dll" />
       <InputAssemblies Include="$(OutputPath)\Newtonsoft.Json.dll" />
     </ItemGroup>
 
-    <ItemGroup>
-      <DoNotInternalizeAssemblies Include="log4stash" />
-    </ItemGroup>
-    <ILRepack
-     Parallel="true"
-     Internalize="true"
-     InternalizeExclude="@(DoNotInternalizeAssemblies)"
-     InputAssemblies="@(InputAssemblies)"
-     TargetKind="Dll"
-     OutputFile="$(OutputPath)\$(PackedAssemblyName).tmp"
-    />
-   <Move 
-      SourceFiles="$(OutputPath)\$(PackedAssemblyName).tmp" 
-      DestinationFiles="$(OutputPath)\$(PackedAssemblyName)" 
-    />
-  </Target>
-
-  <Target Name="CleanIlRepack" BeforeTargets="Clean" Condition="'$(Configuration)' == 'Release'">
-    <Delete Files="$(OutputPath)\$(PackedAssemblyName)" />
+    <Exec Command="$(RepackCmd) -internalize -out:&quot;$(OutputPath)\$(PackedAssemblyName)&quot; @(InputAssemblies-&gt;'&quot;%(FullPath)&quot;', ' ')" />
+    
   </Target>
 </Project>
