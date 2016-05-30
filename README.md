@@ -116,6 +116,13 @@ You can also set any public property in the appender/filter which didn't appear 
 
 Note that the filters got called by the order they appeared in the config (as shown in the example).
 
+### Templates:
+To get to know the [ElasticSearch templates](https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-templates.html) follow the link.
+
+Sample template could be found in: [log-index-spec.json](https://github.com/urielha/log4stash/blob/master/scripts/log-index-spec.json). And more complex template with dynamic mappings can be found in the tests template: [template.json](https://github.com/urielha/log4stash/blob/master/src/log4stash.Tests/template.json)
+
+You can follow the link to read more about [dynamic mappings](https://www.elastic.co/guide/en/elasticsearch/reference/current/default-mapping.html).
+
 ### License:
 [MIT License](https://github.com/urielha/log4stash/blob/master/LICENSE)
 
