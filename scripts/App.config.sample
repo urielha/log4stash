@@ -8,7 +8,6 @@
     </startup>
     <log4net>
         <appender name="ElasticSearchAppender" type="log4stash.ElasticSearchAppender, log4stash">
-            <!-- for .NET 40 <appender name="ElasticSearchAppender" type="log4stash.ElasticSearchAppender, log4stash.Net40">-->
             <Server>localhost</Server>
             <Port>9200</Port>
             <IndexName>log_index_%{+yyyy.MM.dd}</IndexName>
