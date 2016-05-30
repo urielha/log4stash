@@ -15,16 +15,18 @@
     <ItemGroup>
       <DoNotInternalizeAssemblies Include="log4stash" />
     </ItemGroup>
-
     <ILRepack
      Parallel="true"
      Internalize="true"
      InternalizeExclude="@(DoNotInternalizeAssemblies)"
      InputAssemblies="@(InputAssemblies)"
      TargetKind="Dll"
-     OutputFile="$(OutputPath)\$(PackedAssemblyName)"
-   />
-
+     OutputFile="$(OutputPath)\$(PackedAssemblyName).tmp"
+    />
+   <Move 
+      SourceFiles="$(OutputPath)\$(PackedAssemblyName).tmp" 
+      DestinationFiles="$(OutputPath)\$(PackedAssemblyName)" 
+    />
   </Target>
 
   <Target Name="CleanIlRepack" BeforeTargets="Clean" Condition="'$(Configuration)' == 'Release'">

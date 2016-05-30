@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>log4stash</id>
-    <version>2.0.0</version>
+    <version>2.0.0.1</version>
     <authors>urielha</authors>
     <owners>urielha</owners>
     <title>log4stash - Elasticsearch log4net appender</title>
@@ -15,7 +15,7 @@
       You can configure few filters to analyze log events before they got sended to Elasticsearch similar to the filters on logstash.
     </description>
     <releaseNotes>
-      * Namespace renamed to log4stash - Breaking Change.
+      * Breaking: Namespace has been renamed from "log4net.ElasticSearch" to "log4stash".
       * Use Newtonsoft.Json (internally) instead of JavaScriptSerializer.
       * Add jsonFilter - to parse json strings as objects into ES.
       * Fixed issues.
@@ -31,5 +31,6 @@
   <files>
     <file src="lib\**\log4stash*.dll" target="lib"/>
     <file src="lib\**\log4stash*.pdb" target="lib"/>
+    <file src="readme.txt" target="" />
   </files>
 </package>

@@ -1,22 +1,22 @@
 <?xml version="1.0"?>
 <configuration>
     <configSections>
-        <section name="log4net" type="log4net.Config.Log4NetConfigurationSectionHandler, log4net" />
+        <section name="log4net" type="log4net.Config.Log4NetConfigurationSectionHandler, log4net"/>
     </configSections>
     <startup>
-        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.0"/>
+        <supportedRuntime sku=".NETFramework,Version=v4.0" version="v4.0"/>
     </startup>
     <log4net>
         <appender name="ElasticSearchAppender" type="log4stash.ElasticSearchAppender, log4stash">
-        <!-- for .NET 40 <appender name="ElasticSearchAppender" type="log4stash.ElasticSearchAppender, log4stash.Net40">-->
-            <layout type="log4net.Layout.PatternLayout,log4net">
-                <param name="ConversionPattern" value="%d{ABSOLUTE} %-5p %c{1}:%L - %m%n" />
-            </layout>
-            <connectionString value="Server=localhost;Index=log;Port=9200;rolling=true"/>
+            <!-- for .NET 40 <appender name="ElasticSearchAppender" type="log4stash.ElasticSearchAppender, log4stash.Net40">-->
+            <Server>localhost</Server>
+            <Port>9200</Port>
+            <IndexName>log_index_%{+yyyy.MM.dd}</IndexName>
+            <IndexType>LogEvent</IndexType>
         </appender>
         <root>
             <level value="ALL"/>
-            <appender-ref ref="ElasticSearchAppender" />
+            <appender-ref ref="ElasticSearchAppender"/>
         </root>
     </log4net>
 </configuration>

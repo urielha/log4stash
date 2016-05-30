@@ -1,4 +1,5 @@
 {
+    "template" : "log_index_*",
     "settings": {
         "index": {
             "number_of_shards": 1,
@@ -7,60 +8,61 @@
     },
     "mappings": {
         "LogEvent": {
+            "_timestamp" : {
+                "enabled" : true,
+                "path" : "@timestamp"
+            },
             "properties": {
-                "timeStamp": {
-                    "type": "date",
-                    "format": "dateOptionalTime"
+               "Message" : {
+                    "type":"string",
+                    "index": "analyzed"
                 },
-                "message": {
+                "@timestamp" : {
+                    "type":"date"
+                },
+                "MessageObject": {
+                    "type": "object"
+                },
+                "Exception": {
                     "type": "string"
                 },
-                "messageObject": {
+                "ExceptionString": {
+                    "type": "object"
+                },
+                "LoggerName": {
                     "type": "string"
                 },
-                "exception": {
+                "AppDomain": {
                     "type": "string"
                 },
-                "loggerName": {
+                "Identity": {
                     "type": "string"
                 },
-                "domain": {
+                "Level": {
                     "type": "string"
                 },
-                "identity": {
+                "ClassName": {
                     "type": "string"
                 },
-                "level": {
+                "FileName": {
                     "type": "string"
                 },
-                "className": {
+                "FullInfo": {
                     "type": "string"
                 },
-                "fileName": {
+                "MethodName": {
                     "type": "string"
                 },
-                "name": {
+                "LineNumber": {
                     "type": "string"
                 },
-                "fullInfo": {
+                "UserName": {
                     "type": "string"
                 },
-                "methodName": {
+                "ThreadName": {
                     "type": "string"
                 },
-                "fix": {
-                    "type": "string"
-                },
-                "properties": {
-                    "type": "string"
-                },
-                "userName": {
-                    "type": "string"
-                },
-                "threadName": {
-                    "type": "string"
-                },
-                "hostName": {
+                "HostName": {
                     "type": "string"
                 }
             }

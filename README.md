@@ -13,10 +13,13 @@ The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.Elast
 * Ability to analyze the log event before sending it to elasticsearch using built-in filters and custom filters similar to [logstash](http://logstash.net/docs/1.4.2/).
 
 ### Breaking Changes:
-* The definition of IElasticAppenderFilter has been changed, PrepareEvent has only one parameter and PrepareConfiguration's parameter type has changed to IElasticsearchClient.
+* __From 2.0.0__: The namespace has been changed from _log4net.ElasticSearch_ to _log4stash_ 
+* __From 1.0.0__: The definition of IElasticAppenderFilter has been changed, PrepareEvent has only one parameter and PrepareConfiguration's parameter type has changed to IElasticsearchClient.
 
-#### :green_book: Version 1.1.0 note:
-* log4stash 1.1.0 has new feature `SerializeObjects`, if true (the default) it serializes the exception object and message object into json object and add them to Elastic. You can see them under "MessageObject" and "ExceptionObject" keys.  - [Related commit](https://github.com/urielha/log4stash/commit/560676de9b074be70e00f93566c543a846ba5c8e)
+#### Versions notes:
+* :green_book: log4stash 1.1.0 has new feature `SerializeObjects`, if true (the default) it serializes the exception object and message object into json object and add them to Elastic. You can see them under "MessageObject" and "ExceptionObject" keys.  - [Related commit](https://github.com/urielha/log4stash/commit/560676de9b074be70e00f93566c543a846ba5c8e)
+
+* :green_book: log4stash 2.0.0 has new filter `Json`, you can add it if you have json string in you log event and you want it to be converted to an object and not be passed as string to the elastic. Thanks to [@ignasv](https://github.com/ignasv) for this filter.
 
 ### Filters:
 * **Add** - add new key and value to the event.
@@ -25,6 +28,7 @@ The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.Elast
 * **Kv** - analyze value (default is to analyze the 'Message' value) and export key-value pairs using regex (similar to logstash's kv filter).
 * **Grok** - analyze value (default is 'Message') using custom regex and saved patterns (similar to logstash's grok filter).
 * **ConvertToArray** - split raw string to an array by given seperators. 
+* :new: **Json** - convert json string to an object (so it will be parsed as object in elasticsearch).
 
 #### Custom filter:
 To add your own filters you just need to implement the interface IElasticAppenderFilter on your assembly and configure it on the log4net configuration file.
