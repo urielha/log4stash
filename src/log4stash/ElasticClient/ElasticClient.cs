@@ -96,10 +96,7 @@ namespace log4stash
         public override void IndexBulk(IEnumerable<InnerBulkOperation> bulk)
         {
             var webRequest = PrepareBulkAndSend(bulk);
-            using (var httpResponse = (HttpWebResponse) webRequest.GetResponse())
-            {
-                CheckResponse(httpResponse);
-            }
+            SafeGetAndCheckResponse(webRequest.GetResponse);
         }
 
         public override IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
@@ -110,18 +107,8 @@ namespace log4stash
 
         private void FinishGetResponse(IAsyncResult result)
         {
-            try
-            {
-                var webRequest = (WebRequest)result.AsyncState;
-                using (var httpResponse = (HttpWebResponse)webRequest.EndGetResponse(result))
-                {
-                    CheckResponse(httpResponse);
-                }
-            }
-            catch (Exception ex)
-            {
-                LogLog.Error(GetType(), "Invalid request to ElasticSearch", ex);
-            }
+            var webRequest = (WebRequest)result.AsyncState;
+            SafeGetAndCheckResponse(() => webRequest.EndGetResponse(result));
         }
 
         private WebRequest PrepareBulkAndSend(IEnumerable<InnerBulkOperation> bulk)
@@ -160,6 +147,21 @@ namespace log4stash
             using (var stream = new StreamWriter(webRequest.GetRequestStream()))
             {
                 stream.Write(requestString);
+            }
+        }
+
+        private void SafeGetAndCheckResponse(Func<WebResponse> getResponse)
+        {
+            try
+            {
+                using (var httpResponse = (HttpWebResponse)getResponse())
+                {
+                    CheckResponse(httpResponse);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogLog.Error(GetType(), "Invalid request to ElasticSearch", ex);
             }
         }
 
