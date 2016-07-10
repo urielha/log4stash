@@ -177,6 +177,7 @@ namespace log4stash
                 }
                 catch (Exception ex)
                 {
+                    //async exceptions will never get here
                     LogLog.Error(GetType(), "Invalid connection to ElasticSearch", ex);
                 }
             }

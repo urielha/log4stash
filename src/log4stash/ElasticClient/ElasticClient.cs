@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using log4net.Util;
 using log4stash.JsonConverters;
 using Newtonsoft.Json;
 
@@ -109,10 +110,17 @@ namespace log4stash
 
         private void FinishGetResponse(IAsyncResult result)
         {
-            var webRequest = (WebRequest)result.AsyncState;
-            using (var httpResponse = (HttpWebResponse)webRequest.EndGetResponse(result))
+            try
             {
-                CheckResponse(httpResponse);
+                var webRequest = (WebRequest)result.AsyncState;
+                using (var httpResponse = (HttpWebResponse)webRequest.EndGetResponse(result))
+                {
+                    CheckResponse(httpResponse);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogLog.Error(GetType(), "Invalid request to ElasticSearch", ex);
             }
         }
 
