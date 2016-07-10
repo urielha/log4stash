@@ -59,6 +59,18 @@ namespace log4stash
     {
         private readonly string _credentials;
 
+        class RequestDetails
+        {
+            public RequestDetails(WebRequest webRequest, string content)
+            {
+                WebRequest = webRequest;
+                Content = content;
+            }
+
+            public WebRequest WebRequest { get; private set; }
+            public string Content { get; private set;  }
+        }
+
         public WebElasticClient(string server, int port)
             : this(server, port, false, false, string.Empty, string.Empty)
         {
@@ -86,23 +98,34 @@ namespace log4stash
             webRequest.ContentType = "text/json";
             webRequest.Method = "PUT";
             SetBasicAuthHeader(webRequest);
-            SendRequest(webRequest, rawBody);
-            using (var httpResponse = (HttpWebResponse)webRequest.GetResponse())
+            if (SafeSendRequest(new RequestDetails(webRequest, rawBody), webRequest.GetRequestStream))
             {
-                CheckResponse(httpResponse);
+                SafeGetAndCheckResponse(webRequest.GetResponse);
             }
         }
 
         public override void IndexBulk(IEnumerable<InnerBulkOperation> bulk)
         {
-            var webRequest = PrepareBulkAndSend(bulk);
-            SafeGetAndCheckResponse(webRequest.GetResponse);
+            var request = PrepareRequest(bulk);
+            if (SafeSendRequest(request, request.WebRequest.GetRequestStream))
+            {
+                SafeGetAndCheckResponse(request.WebRequest.GetResponse);
+            }
         }
 
         public override IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
         {
-            var webRequest = PrepareBulkAndSend(bulk);
-            return webRequest.BeginGetResponse(FinishGetResponse, webRequest);
+            var request = PrepareRequest(bulk);
+            return request.WebRequest.BeginGetRequestStream(FinishGetRequest, request);
+        }
+
+        private void FinishGetRequest(IAsyncResult result)
+        {
+            var request = (RequestDetails)result.AsyncState;
+            if (SafeSendRequest(request, () => request.WebRequest.EndGetRequestStream(result)))
+            {
+                request.WebRequest.BeginGetResponse(FinishGetResponse, request.WebRequest);
+            }
         }
 
         private void FinishGetResponse(IAsyncResult result)
@@ -111,7 +134,7 @@ namespace log4stash
             SafeGetAndCheckResponse(() => webRequest.EndGetResponse(result));
         }
 
-        private WebRequest PrepareBulkAndSend(IEnumerable<InnerBulkOperation> bulk)
+        private RequestDetails PrepareRequest(IEnumerable<InnerBulkOperation> bulk)
         {
             var requestString = PrepareBulk(bulk);
 
@@ -120,8 +143,7 @@ namespace log4stash
             webRequest.Method = "POST";
             webRequest.Timeout = 10000;
             SetBasicAuthHeader(webRequest);
-            SendRequest(webRequest, requestString);
-            return webRequest;
+            return new RequestDetails(webRequest, requestString);
         }
 
         private static string PrepareBulk(IEnumerable<InnerBulkOperation> bulk)
@@ -142,12 +164,21 @@ namespace log4stash
             return sb.ToString();
         }
 
-        private static void SendRequest(WebRequest webRequest, string requestString)
+        private bool SafeSendRequest(RequestDetails request, Func<Stream> getRequestStream)
         {
-            using (var stream = new StreamWriter(webRequest.GetRequestStream()))
+            try
             {
-                stream.Write(requestString);
+                using (var stream = new StreamWriter(getRequestStream()))
+                {
+                    stream.Write(request.Content);
+                }
+                return true;
             }
+            catch (Exception ex)
+            {
+                LogLog.Error(GetType(), "Invalid request to ElasticSearch", ex);
+            }
+            return false;
         }
 
         private void SafeGetAndCheckResponse(Func<WebResponse> getResponse)
@@ -161,7 +192,7 @@ namespace log4stash
             }
             catch (Exception ex)
             {
-                LogLog.Error(GetType(), "Invalid request to ElasticSearch", ex);
+                LogLog.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
             }
         }
 

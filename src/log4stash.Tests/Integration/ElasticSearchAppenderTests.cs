@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using log4net;
 using log4net.Core;
 using log4stash.Filters;
+using Nest;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
@@ -27,6 +28,41 @@ namespace log4stash.Tests.Integration
             var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(q => q.Term("Message", "loggingtest")));
 
             Assert.AreEqual(1, searchResults.Total);
+        }
+
+        [Test]
+        public void log_async_message()
+        {
+            bool originIndexAsync = false;
+            QueryConfiguration(appender =>
+            {
+                originIndexAsync = appender.IndexAsync;
+                appender.IndexAsync = true;
+            });
+
+            _log.Info("dummy async");
+
+            int tries = 5;
+            ISearchResponse<JObject> searchResults = null;
+            while (--tries >= 0)
+            {
+                Client.Refresh(TestIndex);
+
+                searchResults = Client.Search<JObject>(s => s.AllTypes().AllIndices());
+
+                if (searchResults.Total > 0)
+                {
+                    break;
+                }
+                Thread.Sleep(100);
+            }
+            Assert.AreEqual(1, searchResults.Total);
+
+            QueryConfiguration(appender =>
+            {
+                appender.IndexAsync = originIndexAsync;
+            });
+
         }
 
         [Test]
