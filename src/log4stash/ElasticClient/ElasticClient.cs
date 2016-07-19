@@ -23,7 +23,7 @@ namespace log4stash
 
         protected readonly string _url;
         protected readonly string _encodedAuthInfo;
-        protected static readonly JsonConverter[] _jsonConverters = JsonConvertersFactory.GetCustomConverters();
+        //protected static readonly JsonConverter[] _jsonConverters = JsonConvertersFactory.GetCustomConverters();
 
         protected AbstractWebElasticClient(string server, int port,
                                 bool ssl, bool allowSelfSignedServerCert, 
@@ -156,7 +156,7 @@ namespace log4stash
                     operation.IndexName, operation.IndexType);
                 sb.Append("\n");
                 
-                string json = JsonConvert.SerializeObject(operation.Document, _jsonConverters);
+                string json = JsonConvert.SerializeObject(operation.Document/*, _jsonConverters*/);
                 sb.Append(json);
 
                 sb.Append("\n");

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using log4net.Core;
+using log4net.Util;
 using log4stash.Extensions;
 
 namespace log4stash.LogEventFactory
@@ -17,57 +19,57 @@ namespace log4stash.LogEventFactory
             SerializeObjects = appenderProperties.SerializeObjects;
         }
 
-        public virtual Dictionary<string, object> CreateLogEvent(LoggingEvent sourceLoggingEvent)
+        public virtual Dictionary<string, object> CreateLogEvent(LoggingEvent loggingEvent)
         {
-            if (sourceLoggingEvent == null)
+            if (loggingEvent == null)
             {
-                throw new ArgumentNullException("sourceLoggingEvent");
+                throw new ArgumentNullException("loggingEvent");
             }
 
             var resultDictionary = new Dictionary<string, object>();
 
-            ParseBasicFields(sourceLoggingEvent, resultDictionary);
+            ParseBasicFields(loggingEvent, resultDictionary);
 
-            ParseLocationInfo(sourceLoggingEvent.LocationInformation, resultDictionary);
+            ParseLocationInfo(loggingEvent.LocationInformation, resultDictionary);
 
-            ParseMessage(sourceLoggingEvent, resultDictionary);
+            ParseMessage(loggingEvent, resultDictionary);
 
-            ParseException(sourceLoggingEvent, resultDictionary);
+            ParseException(loggingEvent, resultDictionary);
 
-            ParseProperties(sourceLoggingEvent, resultDictionary);
+            ParseProperties(loggingEvent, resultDictionary);
 
             return resultDictionary;
         }
 
-        protected void ParseBasicFields(LoggingEvent sourceLoggingEvent, Dictionary<string, object> resultDictionary)
+        protected void ParseBasicFields(LoggingEvent loggingEvent, Dictionary<string, object> resultDictionary)
         {
-            resultDictionary["@timestamp"] = sourceLoggingEvent.TimeStamp.ToUniversalTime().ToString("O");
-            resultDictionary["LoggerName"] = sourceLoggingEvent.LoggerName;
+            resultDictionary["@timestamp"] = loggingEvent.TimeStamp.ToUniversalTime().ToString("O");
+            resultDictionary["LoggerName"] = loggingEvent.LoggerName;
             resultDictionary["HostName"] = MachineName;
 
             if (FixedFields.ContainsFlag(FixFlags.ThreadName))
             {
-                resultDictionary["ThreadName"] = sourceLoggingEvent.ThreadName;
+                resultDictionary["ThreadName"] = loggingEvent.ThreadName;
             }
 
             if (FixedFields.ContainsFlag(FixFlags.Domain))
             {
-                resultDictionary["AppDomain"] = sourceLoggingEvent.Domain;
+                resultDictionary["AppDomain"] = loggingEvent.Domain;
             }
 
-            if (sourceLoggingEvent.Level != null)
+            if (loggingEvent.Level != null)
             {
-                resultDictionary["Level"] = sourceLoggingEvent.Level.DisplayName;
+                resultDictionary["Level"] = loggingEvent.Level.DisplayName;
             }
 
             if (FixedFields.ContainsFlag(FixFlags.Identity))
             {
-                resultDictionary["Identity"] = sourceLoggingEvent.Identity;
+                resultDictionary["Identity"] = loggingEvent.Identity;
             }
 
             if (FixedFields.ContainsFlag(FixFlags.UserName))
             {
-                resultDictionary["UserName"] = sourceLoggingEvent.UserName;
+                resultDictionary["UserName"] = loggingEvent.UserName;
             }
         }
 
@@ -86,35 +88,35 @@ namespace log4stash.LogEventFactory
             }
         }
 
-        protected void ParseMessage(LoggingEvent sourceLoggingEvent, Dictionary<string, object> resultDictionary)
+        protected void ParseMessage(LoggingEvent loggingEvent, Dictionary<string, object> resultDictionary)
         {
             if (FixedFields.ContainsFlag(FixFlags.Message))
             {
-                resultDictionary["Message"] = sourceLoggingEvent.RenderedMessage;
+                resultDictionary["Message"] = loggingEvent.RenderedMessage;
 
                 // Added special handling of the MessageObject since it may be an exception. 
                 // Exception Types require specialized serialization to prevent serialization exceptions.
-                if (SerializeObjects && sourceLoggingEvent.MessageObject != null && !(sourceLoggingEvent.MessageObject is string))
+                if (SerializeObjects && loggingEvent.MessageObject != null && !(loggingEvent.MessageObject is string))
                 {
-                    var exceptionObject = sourceLoggingEvent.MessageObject as Exception;
+                    var exceptionObject = loggingEvent.MessageObject as Exception;
                     if (exceptionObject != null)
                     {
                         resultDictionary["MessageObject"] = JsonSerializableException.Create(exceptionObject);
                     }
                     else
                     {
-                        resultDictionary["MessageObject"] = sourceLoggingEvent.MessageObject;
+                        resultDictionary["MessageObject"] = loggingEvent.MessageObject;
                     }
                 }
             }
         }
 
-        protected void ParseException(LoggingEvent sourceLoggingEvent, Dictionary<string, object> resultDictionary)
+        protected void ParseException(LoggingEvent loggingEvent, Dictionary<string, object> resultDictionary)
         {
             if (FixedFields.ContainsFlag(FixFlags.Exception))
             {
-                var exception = sourceLoggingEvent.ExceptionObject;
-                var exceptionString = sourceLoggingEvent.GetExceptionString();
+                var exception = loggingEvent.ExceptionObject;
+                var exceptionString = loggingEvent.GetExceptionString();
 
                 // If exceptionString is empty - no exception exists at all.
                 // Because GetExceptionString() returns exceptionString if exists or exception.ToString().
@@ -130,17 +132,27 @@ namespace log4stash.LogEventFactory
             }
         }
 
-        protected void ParseProperties(LoggingEvent sourceLoggingEvent, Dictionary<string, object> resultDictionary)
+        protected void ParseProperties(LoggingEvent loggingEvent, Dictionary<string, object> resultDictionary)
         {
             if (FixedFields.ContainsFlag(FixFlags.Properties))
             {
-                var properties = sourceLoggingEvent.GetProperties();
+                var properties = loggingEvent.GetProperties();
                 foreach (var propertyKey in properties.GetKeys())
                 {
-                    var value = properties[propertyKey];
-                    resultDictionary[propertyKey] = value ?? string.Empty;
+                    resultDictionary[propertyKey] = GetPropertyValue(properties[propertyKey]);
                 }
             }
+        }
+
+        private static object GetPropertyValue(object value)
+        {
+            var stack = value as LogicalThreadContextStack;
+            if (stack != null)
+            {
+                var objects = stack.ToString().Split(' ');
+                return objects.ToList();
+            }
+            return value ?? string.Empty;
         }
     }
 }

@@ -22,10 +22,10 @@ namespace log4stash.LogEventFactory
         void Configure(ILogEventFactoryParams factoryParams);
 
         /// <summary>
-        /// Create the log event out of given <paramref name="sourceLoggingEvent"/>
+        /// Create the log event out of given <paramref name="loggingEvent"/>
         /// </summary>
-        /// <param name="sourceLoggingEvent">log4net <see cref="LoggingEvent"/> input</param>
+        /// <param name="loggingEvent">log4net <see cref="LoggingEvent"/> input</param>
         /// <returns>LogEvent Dictionary</returns>
-        Dictionary<string, object> CreateLogEvent(LoggingEvent sourceLoggingEvent);
+        Dictionary<string, object> CreateLogEvent(LoggingEvent loggingEvent);
     }
 }
