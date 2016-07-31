@@ -6,7 +6,6 @@ using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using log4net.Util;
-using log4stash.JsonConverters;
 using Newtonsoft.Json;
 
 namespace log4stash
@@ -23,7 +22,6 @@ namespace log4stash
 
         protected readonly string _url;
         protected readonly string _encodedAuthInfo;
-        //protected static readonly JsonConverter[] _jsonConverters = JsonConvertersFactory.GetCustomConverters();
 
         protected AbstractWebElasticClient(string server, int port,
                                 bool ssl, bool allowSelfSignedServerCert, 
@@ -156,7 +154,7 @@ namespace log4stash
                     operation.IndexName, operation.IndexType);
                 sb.Append("\n");
                 
-                string json = JsonConvert.SerializeObject(operation.Document/*, _jsonConverters*/);
+                string json = JsonConvert.SerializeObject(operation.Document);
                 sb.Append(json);
 
                 sb.Append("\n");
