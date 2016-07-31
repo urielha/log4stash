@@ -61,39 +61,42 @@ namespace log4stash
 
         #region Helpers for common filters
 
-        // note: the functions are private but the log4net XmlConfigurator can find them
-
-        private void AddAdd(AddValueFilter filter)
+        public void AddAdd(AddValueFilter filter)
         {
             AddFilter(filter);
         }
 
-        private void AddRemove(RemoveKeyFilter filter)
+        public void AddRemove(RemoveKeyFilter filter)
         {
             AddFilter(filter);
         }
 
-        private void AddRename(RenameKeyFilter filter)
+        public void AddRename(RenameKeyFilter filter)
         {
             AddFilter(filter);
         }
 
-        private void AddKv(KvFilter filter)
+        public void AddKv(KvFilter filter)
         {
             AddFilter(filter);
         }
 
-        private void AddGrok(GrokFilter filter)
+        public void AddGrok(GrokFilter filter)
         {
             AddFilter(filter);
         }
 
-        private void AddConvertToArray(ConvertToArrayFilter filter)
+        public void AddConvertToArray(ConvertToArrayFilter filter)
         {
             AddFilter(filter);
         }
 
-        private void AddJson(JsonFilter filter)
+        public void AddJson(JsonFilter filter)
+        {
+            AddFilter(filter);
+        }
+
+        public void AddConvert(ConvertFilter filter)
         {
             AddFilter(filter);
         }

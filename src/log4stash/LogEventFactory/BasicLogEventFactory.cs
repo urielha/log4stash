@@ -139,20 +139,10 @@ namespace log4stash.LogEventFactory
                 var properties = loggingEvent.GetProperties();
                 foreach (var propertyKey in properties.GetKeys())
                 {
-                    resultDictionary[propertyKey] = GetPropertyValue(properties[propertyKey]);
+                    object value = properties[propertyKey];
+                    resultDictionary[propertyKey] = value ?? string.Empty;
                 }
             }
-        }
-
-        private static object GetPropertyValue(object value)
-        {
-            var stack = value as LogicalThreadContextStack;
-            if (stack != null)
-            {
-                var objects = stack.ToString().Split(' ');
-                return objects.ToList();
-            }
-            return value ?? string.Empty;
         }
     }
 }

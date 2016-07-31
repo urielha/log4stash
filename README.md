@@ -29,6 +29,7 @@ The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.Elast
 * **Grok** - analyze value (default is 'Message') using custom regex and saved patterns (similar to logstash's grok filter).
 * **ConvertToArray** - split raw string to an array by given seperators. 
 * :new: **Json** - convert json string to an object (so it will be parsed as object in elasticsearch).
+* :new: `(beta)` **Convert** - Available convertors: `ToString`, `ToLower`, `ToUpper` and `ToArray`. See [config example](https://github.com/urielha/log4stash#almost-full-configuration) for more information. 
 
 #### Custom filter:
 To add your own filters you just need to implement the interface IElasticAppenderFilter on your assembly and configure it on the log4net configuration file.
@@ -110,6 +111,23 @@ You can also set any public property in the appender/filter which didn't appear 
         <Pattern>the message is %{WORD:Message} and guid %{UUID:the_guid}</Pattern>
         <Overwrite>true</Overwrite>
       </Grok>
+
+      <!-- Convert string like: "1,2, 45 9" into array of numbers [1,2,45,9] -->
+      <ConvertToArray>
+        <SourceKey>someIds</SourceKey>
+        <!-- The separators (space and comma) -->
+        <Seperators>, </Seperators> 
+      </ConvertToArray>
+
+      <Convert>
+        <!-- convert given key to string -->
+        <ToString>shouldBeString</ToString>
+
+        <!-- same as ConvertToArray. Just for convenience -->
+        <ToArray>
+           <SourceKey>anotherIds</SourceKey>
+        </ToArray>
+      </Convert>
     </ElasticFilters>
 </appender>
 ```

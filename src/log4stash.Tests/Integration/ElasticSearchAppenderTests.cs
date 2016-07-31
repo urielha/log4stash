@@ -231,7 +231,7 @@ namespace log4stash.Tests.Integration
 
             Client.Refresh(TestIndex);
 
-            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take((1)));
+            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
             var doc = res.Documents.First();
             Assert.AreEqual(true, doc["someIds"].HasValues);
             Assert.Contains("123", doc["someIds"].Values<string>().ToArray());
@@ -240,20 +240,56 @@ namespace log4stash.Tests.Integration
         }
 
         [Test]
+        public void convert_filter_to_string()
+        {
+            var sp = new StringProducer();
+            log4net.GlobalContext.Properties["shouldBeString"] = sp;
+            _log.Debug("dummy");
+
+            Client.Refresh(TestIndex);
+            
+            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
+            var doc = res.Documents.First();
+
+            Assert.AreEqual(doc["shouldBeString"].Value<string>(), sp.GetInnerGuid());
+        }
+
+        [Test]
         public void can_parse_log4net_context_stacks()
         {
-            LogicalThreadContext.Stacks["UserName"].Push("name1");
-            LogicalThreadContext.Stacks["UserName"].Push("name2");
+            const string sourceKey = "UserName";
+
+            ElasticAppenderFilters oldFilters = null;
+            QueryConfiguration(appender =>
+            {
+                oldFilters = appender.ElasticFilters;
+                appender.ElasticFilters = new ElasticAppenderFilters();
+                var convert = new ConvertFilter();
+                convert.AddToString(sourceKey);
+
+                var toArray = new ConvertToArrayFilter {SourceKey = sourceKey};
+                convert.AddToArray(toArray);
+
+                appender.ElasticFilters.AddConvert(convert);
+            });
+
+            LogicalThreadContext.Stacks[sourceKey].Push("name1");
+            LogicalThreadContext.Stacks[sourceKey].Push("name2");
             _log.Info("hi");
 
             Client.Refresh(TestIndex);
 
             var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
             var doc = res.Documents.First();
-            var usrName = doc["UserName"];
+            var usrName = doc[sourceKey];
             Assert.NotNull(usrName);
             Assert.AreEqual("name1", usrName[0].Value<string>());
             Assert.AreEqual("name2", usrName[1].Value<string>());
+
+            QueryConfiguration(appender =>
+            {
+                appender.ElasticFilters = oldFilters;
+            });
         }
 
         [Test]
@@ -440,6 +476,26 @@ namespace log4stash.Tests.Integration
 
             Console.WriteLine("Ellapsed: {0}, numPerSec: {1}",
                 sw.ElapsedMilliseconds, numberOfCycles / (sw.ElapsedMilliseconds / (double)1000));
+        }
+    }
+
+    public class StringProducer
+    {
+        private readonly string _guid;
+
+        public string GetInnerGuid()
+        {
+            return _guid;
+        }
+
+        public StringProducer()
+        {
+            _guid = Guid.NewGuid().ToString();
+        }
+
+        public override string ToString()
+        {
+            return _guid;
         }
     }
 }

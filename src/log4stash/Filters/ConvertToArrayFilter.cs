@@ -44,7 +44,17 @@ namespace log4stash.Filters
                 return;
             }
 
-            logEvent[formattedKey] = _seperateRegex.Split(value).Where(s => !string.IsNullOrEmpty(s)).ToList();
+            logEvent[formattedKey] = ValueToArray(value);
+        }
+
+        private List<string> ValueToArray(string value)
+        {
+            return _seperateRegex.Split(value).Where(s => !string.IsNullOrEmpty(s)).ToList();
+        }
+
+        public object ValueToArrayObject(object value)
+        {
+            return ValueToArray((string)value);
         }
     }
 }

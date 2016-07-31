@@ -54,9 +54,13 @@
         <ConvertToArray>
           <SourceKey>someIds</SourceKey>
         </ConvertToArray>
-        <ConvertToArray>
-          <SourceKey>anotherIds</SourceKey>
-        </ConvertToArray>
+        
+        <Convert>
+          <ToString>shouldBeString</ToString>
+          <ToArray>
+             <SourceKey>anotherIds</SourceKey>
+          </ToArray>
+        </Convert>
         
       </ElasticFilters>
     </appender>
