@@ -20,7 +20,7 @@
       * Add jsonFilter - to parse json strings as objects into ES.
       * Fixed issues.
       * (2.0.1) - merged pull request #11 (fix application crash on async index)
-      * (2.0.2-b) - add Convert Filter. Used for converting values to: [lower/upper] string or array
+      * (2.0.2-b) - add Convert Filter. Used for converting values to: [lower/upper] string, int or array
     </releaseNotes>
     <copyright>Copyright 2016</copyright>
     <tags>log logging exception elasticsearch log4net appender logstash filters</tags>
