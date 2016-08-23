@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using log4net.Util;
 using log4stash.SmartFormatters;
-using converterKeyValuePair = System.Collections.Generic.KeyValuePair
-                                <log4stash.SmartFormatters.LogEventSmartFormatter,
-                                 System.Func<object, object>>;
 
 namespace log4stash.Filters
 {
@@ -18,31 +16,36 @@ namespace log4stash.Filters
     public class ConvertFilter : IElasticAppenderFilter
     {
 
-        private readonly List<converterKeyValuePair> _converters;
+        private readonly List<ConverterDetails> _converters;
 
         public ConvertFilter()
         {
-            _converters = new List<converterKeyValuePair>();
+            _converters = new List<ConverterDetails>();
         }
 
         public void AddToString(string sourceKey)
         {
-            _converters.Add(new converterKeyValuePair(sourceKey, Convert.ToString));
+            _converters.Add(new ConverterDetails(sourceKey, Convert.ToString));
         }
 
         public void AddToLower(string sourceKey)
         {
-            _converters.Add(new converterKeyValuePair(sourceKey, ConvertToLower));
+            _converters.Add(new ConverterDetails(sourceKey, ConvertToLower));
         }
 
         public void AddToUpper(string sourceKey)
         {
-             _converters.Add(new converterKeyValuePair(sourceKey, ConvertToUpper));
+            _converters.Add(new ConverterDetails(sourceKey, ConvertToUpper));
+        }
+
+        public void AddToInt(string sourceKey)
+        {
+            _converters.Add(new ConverterDetails(sourceKey, ConvertToInt));
         }
 
         public void AddToArray(ConvertToArrayFilter toArrayFilter)
         {
-             _converters.Add(new converterKeyValuePair(toArrayFilter.SourceKey, toArrayFilter.ValueToArrayObject));
+            _converters.Add(new ConverterDetails(toArrayFilter.SourceKey, toArrayFilter.ValueToArrayObject));
         }
 
         public void PrepareConfiguration(IElasticsearchClient client)
@@ -58,7 +61,7 @@ namespace log4stash.Filters
 
                 if (logEvent.TryGetValue(key, out value))
                 {
-                    logEvent[key] = converterPair.Value(value);
+                    logEvent[key] = converterPair.ConvertFunc(value);
                 }
             }
         }
@@ -71,6 +74,36 @@ namespace log4stash.Filters
         private object ConvertToUpper(object arg)
         {
             return Convert.ToString(arg).ToUpper();
+        }
+
+        private object ConvertToInt(object arg)
+        {
+            if (arg is int)
+            {
+                return arg;
+            }
+
+            int num;
+            if (int.TryParse(arg.ToString(), out num))
+            {
+                return num;
+            }
+
+            LogLog.Warn(GetType(), 
+                string.Format("Could not convert {0} of type: {1} to int", arg, arg.GetType()));
+            return 0;
+        }
+    }
+
+    class ConverterDetails
+    {
+        public LogEventSmartFormatter Key { get; private set; }
+        public Func<object, object> ConvertFunc { get; private set; }
+
+        public ConverterDetails(LogEventSmartFormatter key, Func<object, object> convertFunc)
+        {
+            Key = key;
+            ConvertFunc = convertFunc;
         }
     }
 }
