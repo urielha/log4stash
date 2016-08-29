@@ -238,10 +238,9 @@ namespace log4stash
                 foreach (var header in headers.Keys)
                 {
                     if (header.Equals("host", StringComparison.OrdinalIgnoreCase))
-                    {
-                        //webRequest.Host = headers[header];
-                    }
-                    else if (header.Equals("content-length", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (header.Equals("content-length", StringComparison.OrdinalIgnoreCase))
                         webRequest.ContentLength = long.Parse(headers[header]);
                     else if (header.Equals("content-type", StringComparison.OrdinalIgnoreCase))
                         webRequest.ContentType = headers[header];
