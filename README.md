@@ -98,7 +98,13 @@ You can also set any public property in the appender/filter which didn't appear 
         <Key>SmartValue</Key>
         <RenameTo>SmartValue2</RenameTo>
       </Filter>
-
+	
+	  <!-- converts a json object to fields in the document -->
+	  <Json>
+		<SourceKey>JsonRaw</SourceKey>
+		<FlattenJson>false</FlattenJson>
+	  </Json>
+	  
       <!-- kv and grok filters similar to logstash's filters -->
       <Kv>
       	<SourceKey>Message</SourceKey>
