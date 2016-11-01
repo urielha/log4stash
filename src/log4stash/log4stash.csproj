@@ -54,8 +54,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AWS4SignerForAuthorizationHeader.cs" />
-    <Compile Include="AWS4SignerBase.cs" />
+    <Compile Include="Authentication\AuthenticationMethodChooser.cs" />
+    <Compile Include="Authentication\AwsAuthenticationMethod.cs" />
+    <Compile Include="Authentication\BasicAuthenticationMethod.cs" />
+    <Compile Include="Authentication\IAuthenticationMethod.cs" />
+    <Compile Include="Authentication\RequestData.cs" />
+    <Compile Include="Authentication\Aws\AWS4SignerForAuthorizationHeader.cs" />
+    <Compile Include="Authentication\Aws\AWS4SignerBase.cs" />
     <Compile Include="ElasticClient\CompositeElasticClient.cs" />
     <Compile Include="ElasticClient\IElasticsearchClient.cs" />
     <Compile Include="ElasticClient\InnerBulkOperation.cs" />

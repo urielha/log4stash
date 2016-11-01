@@ -4,13 +4,13 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace log4stash.AWS4Signer
+namespace log4stash.Authentication.Aws
 {
     /// <summary>
     /// Common methods and properties for all AWS4 signer variants
     /// Original code from: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
     /// </summary>
-    public abstract class AWS4SignerBase
+    public abstract class Aws4SignerBase
     {
         // SHA256 hash of an empty request body
         public const string EmptyBodySha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
