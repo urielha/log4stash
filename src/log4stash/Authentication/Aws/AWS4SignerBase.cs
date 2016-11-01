@@ -4,13 +4,13 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace log4stash.AWS4Signer
+namespace log4stash.Authentication.Aws
 {
     /// <summary>
     /// Common methods and properties for all AWS4 signer variants
     /// Original code from: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
     /// </summary>
-    public abstract class AWS4SignerBase
+    public abstract class Aws4SignerBase
     {
         public const string Scheme = "AWS4";
         public const string Algorithm = "HMAC-SHA256";

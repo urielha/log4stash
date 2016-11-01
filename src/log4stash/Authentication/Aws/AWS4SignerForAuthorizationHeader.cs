@@ -5,14 +5,14 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace log4stash.AWS4Signer
+namespace log4stash.Authentication.Aws
 {
     /// <summary>
     /// Sample AWS4 signer demonstrating how to sign requests to Amazon S3
     /// using an 'Authorization' header.
     /// Original code from: http://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
     /// </summary>
-    public class AWS4SignerForAuthorizationHeader : AWS4SignerBase
+    public class Aws4SignerForAuthorizationHeader : Aws4SignerBase
     {
         /// <summary>
         /// Computes an AWS4 signature for a request, ready for inclusion as an 
@@ -115,11 +115,11 @@ namespace log4stash.AWS4Signer
             Console.WriteLine("\nStringToSign:\n{0}", stringToSign);
 
             // compute the signing key
-            var kha = KeyedHashAlgorithm.Create(HMACSHA256);
-            kha.Key = DeriveSigningKey(HMACSHA256, awsSecretKey, Region, dateStamp, Service);
+            var hashAlgorithm = KeyedHashAlgorithm.Create(HMACSHA256);
+            hashAlgorithm.Key = DeriveSigningKey(HMACSHA256, awsSecretKey, Region, dateStamp, Service);
 
             // compute the AWS4 signature and return it
-            var signature = kha.ComputeHash(Encoding.UTF8.GetBytes(stringToSign.ToString()));
+            var signature = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(stringToSign.ToString()));
             var signatureString = ToHexString(signature, true);
             Console.WriteLine("\nSignature:\n{0}", signatureString);
 

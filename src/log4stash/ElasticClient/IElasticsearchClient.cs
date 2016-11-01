@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using log4stash.Authentication;
 
 namespace log4stash
 {
@@ -9,8 +10,7 @@ namespace log4stash
         int Port { get; }
         bool Ssl { get; }
         bool AllowSelfSignedServerCert { get; }
-        string BasicAuthUsername { get; }
-        string BasicAuthPassword { get; }
+        AuthenticationMethodChooser AuthenticationMethod { get; set; }
         void PutTemplateRaw(string templateName, string rawBody);
         void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
         IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
