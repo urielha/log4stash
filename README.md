@@ -135,6 +135,22 @@ You can also set any public property in the appender/filter which didn't appear 
         </ToArray>
       </Convert>
     </ElasticFilters>
+
+	<!--Only one credential type can used at once-->
+	<!--Here we list all possible types-->
+	<AuthenticationCredentials>
+        <!--For basic authentication purposes-->
+        <Basic>
+			<Username>Username</Username>
+			<Password>Password</Password>
+        </Basic>
+        <!--For AWS ElasticSearch service-->
+        <Aws>
+			<Aws4SignerSecretKey>Secret</Aws4SignerSecretKey>
+			<Aws4SignerAccessKey>AccessKey</Aws4SignerAccessKey>
+			<Aws4SignerRegion>Region</Aws4SignerRegion>
+        </Aws>
+	</AuthenticationCredentials>
 </appender>
 ```
 
