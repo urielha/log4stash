@@ -19,7 +19,7 @@ namespace log4stash
         public bool Ssl { get; private set; }
         public bool AllowSelfSignedServerCert { get; private set; }
         public AuthenticationMethodChooser AuthenticationMethod { get; set; }
-        public string Url { get; private set; }
+        public string Url { get { return GetServerUrl(); } }
 
         protected AbstractWebElasticClient(string server, 
                                            int port,
@@ -37,14 +37,18 @@ namespace log4stash
             Ssl = ssl;
             AllowSelfSignedServerCert = allowSelfSignedServerCert;
             AuthenticationMethod = authenticationMethod;
-
-            Url = string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", Server, Port);
         }
 
         public abstract void PutTemplateRaw(string templateName, string rawBody);
         public abstract void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
         public abstract IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
         public abstract void Dispose();
+
+        protected string GetServerUrl()
+        {
+            var url = string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", Server, Port);
+            return url;
+        }
     }
 
     public class WebElasticClient : AbstractWebElasticClient
@@ -82,8 +86,8 @@ namespace log4stash
 
         public override void PutTemplateRaw(string templateName, string rawBody)
         {
-            var url = string.Concat(Url, "_template/", templateName);
-            var webRequest = WebRequest.Create(url);
+            var serverUrl = GetServerUrl();
+            var webRequest = WebRequest.Create(string.Concat(serverUrl, "_template/", templateName));
             webRequest.ContentType = "text/json";
             webRequest.Method = "PUT";
             SetHeaders((HttpWebRequest)webRequest, url, rawBody);
@@ -125,10 +129,9 @@ namespace log4stash
 
         private RequestDetails PrepareRequest(IEnumerable<InnerBulkOperation> bulk)
         {
-            var url = string.Concat(Url, "_bulk");
             var requestString = PrepareBulk(bulk);
-
-            var webRequest = WebRequest.Create(url);
+            var serverUrl = GetServerUrl();
+            var webRequest = WebRequest.Create(string.Concat(serverUrl, "_bulk"));
             webRequest.ContentType = "text/plain";
             webRequest.Method = "POST";
             webRequest.Timeout = 10000;
