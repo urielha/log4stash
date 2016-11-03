@@ -1,35 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using log4net.Util;
 using log4stash.Authentication;
+using log4stash.Configuration;
 using Newtonsoft.Json;
 
 namespace log4stash
 {
     public abstract class AbstractWebElasticClient : IElasticsearchClient
     {
-        public string Server { get; private set; }
-        public int Port { get; private set; }
+        public ServerDataCollection Servers { get; private set; }
         public int Timeout { get; private set; }
         public bool Ssl { get; private set; }
         public bool AllowSelfSignedServerCert { get; private set; }
         public AuthenticationMethodChooser AuthenticationMethod { get; set; }
         public string Url { get { return GetServerUrl(); } }
 
-        protected AbstractWebElasticClient(string server, 
-                                           int port,
+        protected AbstractWebElasticClient(ServerDataCollection servers,
                                            int timeout,
                                            bool ssl, 
                                            bool allowSelfSignedServerCert,
                                            AuthenticationMethodChooser authenticationMethod)
         {
-            Server = server;
-            Port = port;
+            Servers = servers;
             Timeout = timeout;
             ServicePointManager.Expect100Continue = false;
 
@@ -46,9 +45,11 @@ namespace log4stash
 
         protected string GetServerUrl()
         {
-            var url = string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", Server, Port);
+            var serverData = Servers.GetRandomServerData();
+            var url = string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", serverData.Address, serverData.Port);
             return url;
         }
+
     }
 
     public class WebElasticClient : AbstractWebElasticClient
@@ -65,13 +66,12 @@ namespace log4stash
             public string Content { get; private set;  }
         }
 
-        public WebElasticClient(string server, int port, int timeout)
+        public WebElasticClient(ServerDataCollection servers, int timeout)
             : this(server, port, timeout, false, false, new AuthenticationMethodChooser())
         {
         }
 
-        public WebElasticClient(string server, 
-                                int port,
+        public WebElasticClient(ServerDataCollection servers,
                                 int timeout,
                                 bool ssl,
                                 bool allowSelfSignedServerCert,
@@ -209,8 +209,9 @@ namespace log4stash
 
             string subjectCn = certificate2.GetNameInfo(X509NameType.DnsName, false);
             string issuerCn = certificate2.GetNameInfo(X509NameType.DnsName, true);
+            var serverAddresses = Servers.Select(s => s.Address);
             if (sslPolicyErrors == SslPolicyErrors.None
-                || (Server.Equals(subjectCn) && subjectCn.Equals(issuerCn)))
+                || (serverAddresses.Contains(subjectCn) && subjectCn.Equals(issuerCn)))
             {
                 return true;
             }

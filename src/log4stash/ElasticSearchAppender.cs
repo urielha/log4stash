@@ -8,6 +8,7 @@ using log4net.Util;
 using log4net.Appender;
 using log4net.Core;
 using log4stash.Authentication;
+using log4stash.Configuration;
 
 namespace log4stash
 {
@@ -28,8 +29,7 @@ namespace log4stash
         public int TimeoutToWaitForTimer { get; set; }
 
         // elastic configuration
-        public string Server { get; set; }
-        public int Port { get; set; }
+        public ServerDataCollection Servers { get; set; }
         public int ElasticSearchTimeout { get; set; }
         public bool Ssl { get; set; }
         public bool AllowSelfSignedServerCert { get; set; }
@@ -58,8 +58,7 @@ namespace log4stash
             BulkIdleTimeout = 5000;
             TimeoutToWaitForTimer = 5000;
 
-            Server = "localhost";
-            Port = 9200;
+            Servers = new ServerDataCollection();
             ElasticSearchTimeout = 10000;
             IndexName = "LogEvent-%{+yyyy.MM.dd}";
             IndexType = "LogEvent";
@@ -77,7 +76,7 @@ namespace log4stash
 
         public override void ActivateOptions()
         {
-            _client = new WebElasticClient(Server, Port, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
+            _client = new WebElasticClient(Servers, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
 
             LogEventFactory.Configure(this);
 

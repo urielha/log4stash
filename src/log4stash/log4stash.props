@@ -2,6 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Compile Include="..\log4stash\*.cs" />
+    <Compile Include="..\log4stash\Configuration\*.cs" />
     <Compile Include="..\log4stash\Extensions\*.cs" />
     <Compile Include="..\log4stash\Filters\*.cs" />
     <Compile Include="..\log4stash\InnerExceptions\*.cs" />
