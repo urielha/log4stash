@@ -39,6 +39,7 @@ namespace log4stash
         public string AWS4SignerRegion { get; set; }
         public string AWS4SignerAccessKey { get; set; }
         public string AWS4SignerSecretKey { get; set; }
+        public int ElasticSearchTimeout { get; set; }
         public TemplateInfo Template { get; set; }
         public ElasticAppenderFilters ElasticFilters { get; set; }
         public ILogEventFactory LogEventFactory { get; set; }
@@ -78,7 +79,7 @@ namespace log4stash
         public override void ActivateOptions()
         {
             _client = new WebElasticClient(Server, Port, Ssl, AllowSelfSignedServerCert, BasicAuthUsername, BasicAuthPassword, UseAWS4Signer,
-                AWS4SignerRegion, AWS4SignerAccessKey, AWS4SignerSecretKey);
+                AWS4SignerRegion, AWS4SignerAccessKey, AWS4SignerSecretKey, ElasticSearchTimeout);
 
             LogEventFactory.Configure(this);
 

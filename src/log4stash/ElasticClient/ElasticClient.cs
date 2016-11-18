@@ -15,6 +15,7 @@ namespace log4stash
         public string Server { get; private set; }
         public int Port { get; private set; }
         public bool Ssl { get; private set; }
+        public int Timeout { get; private set; }
         public bool AllowSelfSignedServerCert { get; private set; }
         public string BasicAuthUsername { get; private set; }
         public string BasicAuthPassword { get; private set; }
@@ -27,7 +28,7 @@ namespace log4stash
         protected AbstractWebElasticClient(string server, int port,
                                 bool ssl, bool allowSelfSignedServerCert,
                                 string basicAuthUsername, string basicAuthPassword, bool useAWS4Signer,
-                string aws4SignerRegion, string aws4SignerAccessKey, string aws4SignerSecretKey)
+                string aws4SignerRegion, string aws4SignerAccessKey, string aws4SignerSecretKey, int timeout)
         {
             Server = server;
             Port = port;
@@ -42,6 +43,7 @@ namespace log4stash
             Aws4SignerAccessKey = aws4SignerAccessKey;
             Aws4SignerSecretKey = aws4SignerSecretKey;
             BasicAuthUsername = basicAuthUsername;
+            Timeout = timeout;
             Url = string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", Server, Port);
         }
 
@@ -66,22 +68,22 @@ namespace log4stash
         }
 
         public WebElasticClient(string server, int port, bool ssl, bool allowSelfSignedServerCert,
-                                string basicAuthUsername, string basicAuthPassword)
-            : this(server, port, ssl, allowSelfSignedServerCert, basicAuthUsername, basicAuthPassword, false, string.Empty, string.Empty, string.Empty)
+                                string basicAuthUsername, string basicAuthPassword, int timeout)
+            : this(server, port, ssl, allowSelfSignedServerCert, basicAuthUsername, basicAuthPassword, false, string.Empty, string.Empty, string.Empty, timeout)
         {
         }
 
-        public WebElasticClient(string server, int port)
-            : this(server, port, false, false, string.Empty, string.Empty, false, string.Empty, string.Empty, string.Empty)
+        public WebElasticClient(string server, int port, int timeout)
+            : this(server, port, false, false, string.Empty, string.Empty, false, string.Empty, string.Empty, string.Empty, timeout)
         {
         }
 
         public WebElasticClient(string server, int port,
                                 bool ssl, bool allowSelfSignedServerCert,
                                 string basicAuthUsername, string basicAuthPassword, bool useAWS4Signer, 
-                                string aws4SignerRegion, string aws4SignerAccessKey, string aws4SignerSecretKey)
+                                string aws4SignerRegion, string aws4SignerAccessKey, string aws4SignerSecretKey, int timeout)
             : base(server, port, ssl, allowSelfSignedServerCert, basicAuthUsername, basicAuthPassword, useAWS4Signer,
-                aws4SignerRegion, aws4SignerAccessKey, aws4SignerSecretKey)
+                aws4SignerRegion, aws4SignerAccessKey, aws4SignerSecretKey, timeout)
         {
             if (Ssl && AllowSelfSignedServerCert)
             {
@@ -140,7 +142,7 @@ namespace log4stash
             var webRequest = WebRequest.Create(url);
             webRequest.ContentType = "text/plain";
             webRequest.Method = "POST";
-            webRequest.Timeout = 10000;
+            webRequest.Timeout = Timeout;
             SetHeaders((HttpWebRequest)webRequest, url, requestString);
             return new RequestDetails(webRequest, requestString);
         }
