@@ -66,6 +66,7 @@ You can also set any public property in the appender/filter which didn't appear 
     <Bulksize>2000</Bulksize>
     <BulkIdleTimeout>10000</BulkIdleTimeout>
     <IndexAsync>False</IndexAsync>
+	<DocumentIdSource>IdSource</DocumentIdSource>
 
     <!-- for more information read about log4net.Core.FixFlags -->
     <FixedFields>Partial</FixedFields>
