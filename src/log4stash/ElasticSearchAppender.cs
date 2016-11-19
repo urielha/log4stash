@@ -21,6 +21,7 @@ namespace log4stash
 
         public FixFlags FixedFields { get; set; }
         public bool SerializeObjects { get; set; }
+        public string DocumentIdSource { get; set; }
 
         public int BulkSize { get; set; }
         public int BulkIdleTimeout { get; set; }
@@ -53,6 +54,7 @@ namespace log4stash
         {
             FixedFields = FixFlags.Partial;
             SerializeObjects = true;
+            DocumentIdSource = null;
 
             BulkSize = 2000;
             BulkIdleTimeout = 5000;
@@ -134,7 +136,7 @@ namespace log4stash
         private void PrepareAndAddToBulk(Dictionary<string, object> logEvent)
         {
             ElasticFilters.PrepareEvent(logEvent);
-
+            var documentId = DocumentIdSource == null ? null : logEvent[DocumentIdSource];
             var indexName = _indexName.Format(logEvent).ToLower();
             var indexType = _indexType.Format(logEvent);
 
@@ -142,7 +144,8 @@ namespace log4stash
             {
                 Document = logEvent,
                 IndexName = indexName,
-                IndexType = indexType
+                IndexType = indexType,
+                DocumentId = documentId
             };
 
             lock (_bulk)

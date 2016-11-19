@@ -134,17 +134,35 @@ namespace log4stash
             var sb = new StringBuilder();
             foreach (InnerBulkOperation operation in bulk)
             {
-                sb.AppendFormat(
-                    @"{{ ""index"" : {{ ""_index"" : ""{0}"", ""_type"" : ""{1}""}} }}",
-                    operation.IndexName, operation.IndexType);
+                AddOperationMetadata(operation, sb);
                 sb.Append("\n");
-                
-                string json = JsonConvert.SerializeObject(operation.Document, _jsonConverters);
-                sb.Append(json);
 
+                AddOperationSource(operation, sb);
                 sb.Append("\n");
             }
             return sb.ToString();
+        }
+
+        private static void AddOperationMetadata(InnerBulkOperation operation, StringBuilder sb)
+        {
+            if (operation.DocumentId != null)
+            {
+                sb.AppendFormat(
+                    @"{{ ""index"" : {{ ""_index"" : ""{0}"", ""_type"" : ""{1}"", ""_id"" : ""{2}""}} }}",
+                    operation.IndexName, operation.IndexType, operation.DocumentId);
+            }
+            else
+            {
+                sb.AppendFormat(
+                    @"{{ ""index"" : {{ ""_index"" : ""{0}"", ""_type"" : ""{1}""}} }}",
+                    operation.IndexName, operation.IndexType);
+            }
+        }
+
+        private static void AddOperationSource(InnerBulkOperation operation, StringBuilder sb)
+        {
+            string json = JsonConvert.SerializeObject(operation.Document, _jsonConverters);
+            sb.Append(json);
         }
 
         private static void SendRequest(WebRequest webRequest, string requestString)
