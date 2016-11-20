@@ -30,6 +30,19 @@ namespace log4stash.Tests.Integration
         }
 
         [Test]
+        public void Log_Exception_With_Custom_Id()
+        {
+            ThreadContext.Properties["IdSource"] = "TEST_ID";
+            _log.Info("loggingtest");
+
+            Client.Refresh(TestIndex);
+
+            var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(q => q.Ids(descriptor => descriptor.Values("TEST_ID"))));
+
+            Assert.AreEqual(1, searchResults.Total);
+        }
+
+        [Test]
         public void Log_exception_string_without_object()
         {
             var exceptionString = "Exception string";
