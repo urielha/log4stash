@@ -136,7 +136,11 @@ namespace log4stash
         private void PrepareAndAddToBulk(Dictionary<string, object> logEvent)
         {
             ElasticFilters.PrepareEvent(logEvent);
-            var documentId = DocumentIdSource == null ? null : logEvent[DocumentIdSource];
+            object documentId = null;
+            if (DocumentIdSource != null)
+            {
+                logEvent.TryGetValue(DocumentIdSource, out documentId);
+            }
             var indexName = _indexName.Format(logEvent).ToLower();
             var indexType = _indexType.Format(logEvent);
 
