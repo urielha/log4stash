@@ -25,8 +25,8 @@ namespace log4stash.Configuration
 
         public IServerData GetRandomServerData()
         {
-            var random = new Random();
-            var index = random.Next(_serverDatas.Count);
+            var now = DateTime.Now.Ticks;
+            var index = (int) (now %_serverDatas.Count);
             return _serverDatas[index];
         }
 
