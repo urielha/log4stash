@@ -76,7 +76,7 @@ namespace log4stash.Filters
 
         private static string Join(string prefix, string name)
         {
-            return (string.IsNullOrEmpty(prefix) ? name : prefix + "." + name);
+            return (string.IsNullOrEmpty(prefix) ? name : prefix + "_" + name);
         }
     }
 }

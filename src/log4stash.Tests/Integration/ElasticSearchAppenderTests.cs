@@ -364,9 +364,9 @@ namespace log4stash.Tests.Integration
             {
                 actualObj = doc;
                 innerMessage = actualObj["InnerMessage"].ToString();
-                dataType = actualObj["Data.Type"].ToString();
-                dataHost = actualObj["Data.Host"].ToString();
-                dataArrayFirst = actualObj["Data.Array.0"].ToString();
+                dataType = actualObj["Data_Type"].ToString();
+                dataHost = actualObj["Data_Host"].ToString();
+                dataArrayFirst = actualObj["Data_Array_0"].ToString();
             }
             else
             {
