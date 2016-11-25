@@ -384,52 +384,6 @@ namespace log4stash.Tests.Integration
         }
 
         [Test]
-        [TestCase("1s", 0, TestName = "ttl elapsed")]
-        [TestCase("20m", 1, TestName = "ttl didn't elapsed")]
-        public void test_ttl(string ttlValue, int expectation)
-        {
-            const string ttlTemplateName = "ttltemplate";
-            const int toWaitMillisec = 3000;
-
-            Client.PutIndexTemplate(ttlTemplateName,
-                descriptor =>
-                    descriptor.Template("*")
-                        .Settings(settings => settings.Setting("indices.ttl.interval", "1s").Setting("index.ttl.interval", "1s"))
-                        .Mappings(mapping => mapping.Map("_default_", desc => desc.TtlField(ttlField => ttlField.Enable().Default("1d")))));
-
-            ElasticAppenderFilters oldFilters = null;
-            QueryConfiguration(
-                appender =>
-                {
-                    oldFilters = appender.ElasticFilters;
-                    appender.ElasticFilters = new ElasticAppenderFilters();
-                    appender.ElasticFilters.AddFilter(new AddValueFilter() { Key = "_ttl", Value = ttlValue });
-                });
-
-            _log.Info("test");
-            Client.Refresh(TestIndex);
-            var res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent"));
-            Assert.AreEqual(1, res.Total);
-
-            // "Magic". The time of deletion isn't consistent :/
-            int numOfTries = 20;
-            while (--numOfTries > 0)
-            {
-                Client.Refresh(TestIndex);
-                Client.Optimize(TestIndex);
-                res = Client.Search<dynamic>(s => s.AllTypes().AllIndices());
-                numOfTries = res.Total == expectation ? 0 : numOfTries;
-                Thread.Sleep(toWaitMillisec);
-            }
-
-            res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent"));
-            Client.DeleteIndexTemplate(ttlTemplateName);
-            QueryConfiguration(appender => appender.ElasticFilters = oldFilters);
-
-            Assert.AreEqual(expectation, res.Total);
-        }
-
-        [Test]
         [Ignore("the build agent have problems on running performance")]
         public static void Performance()
         {
