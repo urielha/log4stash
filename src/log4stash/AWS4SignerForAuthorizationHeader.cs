@@ -40,10 +40,10 @@ namespace log4stash.AWS4Signer
         /// header 'Authorization' on the subsequent HTTP request.
         /// </returns>
         public string ComputeSignature(IDictionary<string, string> headers,
-            string queryParameters,
-            string bodyHash,
-            string awsAccessKey,
-            string awsSecretKey)
+                      string queryParameters,
+                      string bodyHash,
+                      string awsAccessKey,
+                      string awsSecretKey)
         {
             // first get the date and time for the subsequent request, and convert to ISO 8601 format
             // for use in signature generation

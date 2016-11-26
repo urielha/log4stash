@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
   <metadata>
-    <id>log4stashaws4Signer</id>
-    <version>2.0.4</version>
+    <id>log4stash</id>
+    <version>2.0.2-c</version>
     <authors>urielha</authors>
     <owners>urielha</owners>
     <title>log4stash - Elasticsearch log4net appender</title>

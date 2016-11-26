@@ -12,9 +12,6 @@ namespace log4stash.AWS4Signer
     /// </summary>
     public abstract class AWS4SignerBase
     {
-        // SHA256 hash of an empty request body
-        public const string EmptyBodySha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
-
         public const string Scheme = "AWS4";
         public const string Algorithm = "HMAC-SHA256";
         public const string Terminator = "aws4_request";

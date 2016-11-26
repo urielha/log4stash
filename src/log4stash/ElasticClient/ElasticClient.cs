@@ -25,10 +25,17 @@ namespace log4stash
         public string Aws4SignerSecretKey { get; private set; }
         public string Url { get; private set; }
 
-        protected AbstractWebElasticClient(string server, int port,
-                                bool ssl, bool allowSelfSignedServerCert,
-                                string basicAuthUsername, string basicAuthPassword, bool useAWS4Signer,
-                string aws4SignerRegion, string aws4SignerAccessKey, string aws4SignerSecretKey, int timeout)
+        protected AbstractWebElasticClient(string server,
+                                           int port,
+                                           bool ssl,
+                                           bool allowSelfSignedServerCert,
+                                           string basicAuthUsername,
+                                           string basicAuthPassword,
+                                           bool useAWS4Signer,
+                                           string aws4SignerRegion,
+                                           string aws4SignerAccessKey,
+                                           string aws4SignerSecretKey,
+                                           int timeout)
         {
             Server = server;
             Port = port;
@@ -67,23 +74,35 @@ namespace log4stash
             public string Content { get; private set;  }
         }
 
-        public WebElasticClient(string server, int port, bool ssl, bool allowSelfSignedServerCert,
-                                string basicAuthUsername, string basicAuthPassword, int timeout)
+        public WebElasticClient(string server, int port, int timeout)
+            : this(server, port, false, false, string.Empty, string.Empty, timeout)
+        {
+        }
+
+        public WebElasticClient(string server, 
+                                int port, 
+                                bool ssl, 
+                                bool allowSelfSignedServerCert,
+                                string basicAuthUsername, 
+                                string basicAuthPassword, 
+                                int timeout)
             : this(server, port, ssl, allowSelfSignedServerCert, basicAuthUsername, basicAuthPassword, false, string.Empty, string.Empty, string.Empty, timeout)
         {
         }
 
-        public WebElasticClient(string server, int port, int timeout)
-            : this(server, port, false, false, string.Empty, string.Empty, false, string.Empty, string.Empty, string.Empty, timeout)
-        {
-        }
-
-        public WebElasticClient(string server, int port,
-                                bool ssl, bool allowSelfSignedServerCert,
-                                string basicAuthUsername, string basicAuthPassword, bool useAWS4Signer, 
-                                string aws4SignerRegion, string aws4SignerAccessKey, string aws4SignerSecretKey, int timeout)
+        public WebElasticClient(string server,
+                                int port,
+                                bool ssl,
+                                bool allowSelfSignedServerCert,
+                                string basicAuthUsername,
+                                string basicAuthPassword,
+                                bool useAWS4Signer,
+                                string aws4SignerRegion,
+                                string aws4SignerAccessKey,
+                                string aws4SignerSecretKey,
+                                int timeout)
             : base(server, port, ssl, allowSelfSignedServerCert, basicAuthUsername, basicAuthPassword, useAWS4Signer,
-                aws4SignerRegion, aws4SignerAccessKey, aws4SignerSecretKey, timeout)
+                   aws4SignerRegion, aws4SignerAccessKey, aws4SignerSecretKey, timeout)
         {
             if (Ssl && AllowSelfSignedServerCert)
             {
@@ -201,7 +220,7 @@ namespace log4stash
         {
             var authorizationHeaderValue = string.Empty;
             var authIsBasicAuth = !string.IsNullOrEmpty(BasicAuthUsername) && !string.IsNullOrEmpty(BasicAuthPassword);
-            var authIsAws4Signer = UseAws4Signer &&
+            var authIsAws4Signer = !authIsBasicAuth && UseAws4Signer &&
                 !string.IsNullOrEmpty(Aws4SignerRegion) &&
                 !string.IsNullOrEmpty(Aws4SignerAccessKey) &&
                 !string.IsNullOrEmpty(Aws4SignerSecretKey);
