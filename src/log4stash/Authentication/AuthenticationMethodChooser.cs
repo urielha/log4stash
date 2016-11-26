@@ -2,7 +2,7 @@
 {
     public class AuthenticationMethodChooser : IAuthenticationMethod
     {
-        private IAuthenticationMethod _innerMethod = null;
+        private IAuthenticationMethod _innerMethod;
 
         public string CreateAuthenticationHeader(RequestData requestData)
         {

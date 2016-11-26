@@ -15,17 +15,22 @@ namespace log4stash
     {
         public string Server { get; private set; }
         public int Port { get; private set; }
+        public int Timeout { get; private set; }
         public bool Ssl { get; private set; }
         public bool AllowSelfSignedServerCert { get; private set; }
         public AuthenticationMethodChooser AuthenticationMethod { get; set; }
         public string Url { get; private set; }
 
-        protected AbstractWebElasticClient(string server, int port,
-                                bool ssl, bool allowSelfSignedServerCert,
-                                AuthenticationMethodChooser authenticationMethod)
+        protected AbstractWebElasticClient(string server, 
+                                           int port,
+                                           int timeout,
+                                           bool ssl, 
+                                           bool allowSelfSignedServerCert,
+                                           AuthenticationMethodChooser authenticationMethod)
         {
             Server = server;
             Port = port;
+            Timeout = timeout;
             ServicePointManager.Expect100Continue = false;
 
             // SSL related properties
@@ -56,15 +61,18 @@ namespace log4stash
             public string Content { get; private set;  }
         }
 
-        public WebElasticClient(string server, int port)
-            : this(server, port, false, false, new AuthenticationMethodChooser())
+        public WebElasticClient(string server, int port, int timeout)
+            : this(server, port, timeout, false, false, new AuthenticationMethodChooser())
         {
         }
 
-        public WebElasticClient(string server, int port,
-                                bool ssl, bool allowSelfSignedServerCert,
+        public WebElasticClient(string server, 
+                                int port,
+                                int timeout,
+                                bool ssl,
+                                bool allowSelfSignedServerCert,
                                 AuthenticationMethodChooser authenticationMethod)
-            : base(server, port, ssl, allowSelfSignedServerCert, authenticationMethod)
+            : base(server, port, timeout, ssl, allowSelfSignedServerCert, authenticationMethod)
         {
             if (Ssl && AllowSelfSignedServerCert)
             {

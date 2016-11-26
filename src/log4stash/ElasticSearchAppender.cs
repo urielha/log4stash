@@ -30,11 +30,11 @@ namespace log4stash
         // elastic configuration
         public string Server { get; set; }
         public int Port { get; set; }
+        public int ElasticSearchTimeout { get; set; }
         public bool Ssl { get; set; }
         public bool AllowSelfSignedServerCert { get; set; }
         public AuthenticationMethodChooser AuthenticationMethod { get; set; }
         public bool IndexAsync { get; set; }
-        public int MaxAsyncConnections { get; set; }
         public TemplateInfo Template { get; set; }
         public ElasticAppenderFilters ElasticFilters { get; set; }
         public ILogEventFactory LogEventFactory { get; set; }
@@ -60,21 +60,24 @@ namespace log4stash
 
             Server = "localhost";
             Port = 9200;
+            ElasticSearchTimeout = 10000;
             IndexName = "LogEvent-%{+yyyy.MM.dd}";
             IndexType = "LogEvent";
             IndexAsync = true;
-            MaxAsyncConnections = 10;
             Template = null;
             LogEventFactory = new BasicLogEventFactory();
 
             _timer = new Timer(TimerElapsed, null, Timeout.Infinite, Timeout.Infinite);
             ElasticFilters = new ElasticAppenderFilters();
+
+            AllowSelfSignedServerCert = false;
+            Ssl = false;
             AuthenticationMethod = new AuthenticationMethodChooser();
         }
 
         public override void ActivateOptions()
         {
-            _client = new WebElasticClient(Server, Port, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
+            _client = new WebElasticClient(Server, Port, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
 
             LogEventFactory.Configure(this);
 

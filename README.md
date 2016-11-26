@@ -13,8 +13,9 @@ The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.Elast
 * Ability to analyze the log event before sending it to elasticsearch using built-in filters and custom filters similar to [logstash](http://logstash.net/docs/1.4.2/).
 
 ### Breaking Changes:
-* __From 2.0.0__: The namespace has been changed from _log4net.ElasticSearch_ to _log4stash_ 
-* __From 1.0.0__: The definition of IElasticAppenderFilter has been changed, PrepareEvent has only one parameter and PrepareConfiguration's parameter type has changed to IElasticsearchClient.
+* __Upgrading to 2.0.4__: BasicAuthUsername and BasicAuthPassword moved under AuthenticationMethod, see [config example][config-example] for more information.
+* __Upgrading to 2.0.0__: The namespace has been changed from _log4net.ElasticSearch_ to _log4stash_ 
+* __Upgrading to 1.0.0__: The definition of IElasticAppenderFilter has been changed, PrepareEvent has only one parameter and PrepareConfiguration's parameter type has changed to IElasticsearchClient.
 
 #### Versions notes:
 * :green_book: log4stash 1.1.0 has new feature `SerializeObjects`, if true (the default) it serializes the exception object and message object into json object and add them to Elastic. You can see them under "MessageObject" and "ExceptionObject" keys.  - [Related commit](https://github.com/urielha/log4stash/commit/560676de9b074be70e00f93566c543a846ba5c8e)
@@ -29,7 +30,7 @@ The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.Elast
 * **Grok** - analyze value (default is 'Message') using custom regex and saved patterns (similar to logstash's grok filter).
 * **ConvertToArray** - split raw string to an array by given seperators. 
 * :new: **Json** - convert json string to an object (so it will be parsed as object in elasticsearch).
-* :new: `(beta)` **Convert** - Available convertors: `ToString`, `ToLower`, `ToUpper`, `ToInt` and `ToArray`. See [config example](https://github.com/urielha/log4stash#almost-full-configuration) for more information. 
+* :new: `(beta)` **Convert** - Available convertors: `ToString`, `ToLower`, `ToUpper`, `ToInt` and `ToArray`. See [config example][config-example] for more information. 
 
 #### Custom filter:
 To add your own filters you just need to implement the interface IElasticAppenderFilter on your assembly and configure it on the log4net configuration file.
@@ -68,6 +69,9 @@ You can also set any public property in the appender/filter which didn't appear 
     <BulkIdleTimeout>10000</BulkIdleTimeout>
     <IndexAsync>False</IndexAsync>
 
+    <!-- optional: elasticsearch timeout for the request, default = 10000 -->
+    <ElasticSearchTimeout>10000</ElasticSearchTimeout>
+
     <!-- for more information read about log4net.Core.FixFlags -->
     <FixedFields>Partial</FixedFields>
     
@@ -76,6 +80,22 @@ You can also set any public property in the appender/filter which didn't appear 
       <FileName>path2template.json</FileName>
     </Template>
 
+    <!--Only one credential type can used at once-->
+    <!--Here we list all possible types-->
+    <AuthenticationMethod>
+        <!--For basic authentication purposes-->
+        <Basic>
+            <Username>Username</Username>
+            <Password>Password</Password>
+        </Basic>
+        <!--For AWS ElasticSearch service-->
+        <Aws>
+            <Aws4SignerSecretKey>Secret</Aws4SignerSecretKey>
+            <Aws4SignerAccessKey>AccessKey</Aws4SignerAccessKey>
+            <Aws4SignerRegion>Region</Aws4SignerRegion>
+        </Aws>
+    </AuthenticationMethod>
+    
     <!-- all filters goes in ElasticFilters tag -->
     <ElasticFilters>
       <Add>
@@ -98,18 +118,18 @@ You can also set any public property in the appender/filter which didn't appear 
         <Key>SmartValue</Key>
         <RenameTo>SmartValue2</RenameTo>
       </Filter>
-	
-	  <!-- converts a json object to fields in the document -->
-	  <Json>
-		<SourceKey>JsonRaw</SourceKey>
-		<FlattenJson>false</FlattenJson>
-	  </Json>
-	  
+    
+      <!-- converts a json object to fields in the document -->
+      <Json>
+        <SourceKey>JsonRaw</SourceKey>
+        <FlattenJson>false</FlattenJson>
+      </Json>
+      
       <!-- kv and grok filters similar to logstash's filters -->
       <Kv>
-      	<SourceKey>Message</SourceKey>
-      	<ValueSplit>:=</ValueSplit>
-      	<FieldSplit> ,</FieldSplit>
+        <SourceKey>Message</SourceKey>
+        <ValueSplit>:=</ValueSplit>
+        <FieldSplit> ,</FieldSplit>
       </kv>
 
       <Grok>
@@ -135,22 +155,6 @@ You can also set any public property in the appender/filter which didn't appear 
         </ToArray>
       </Convert>
     </ElasticFilters>
-
-	<!--Only one credential type can used at once-->
-	<!--Here we list all possible types-->
-	<AuthenticationCredentials>
-        <!--For basic authentication purposes-->
-        <Basic>
-			<Username>Username</Username>
-			<Password>Password</Password>
-        </Basic>
-        <!--For AWS ElasticSearch service-->
-        <Aws>
-			<Aws4SignerSecretKey>Secret</Aws4SignerSecretKey>
-			<Aws4SignerAccessKey>AccessKey</Aws4SignerAccessKey>
-			<Aws4SignerRegion>Region</Aws4SignerRegion>
-        </Aws>
-	</AuthenticationCredentials>
 </appender>
 ```
 
@@ -185,3 +189,5 @@ The inspiration to the filters and style had taken from [elasticsearch/logstash]
 
 [travis-ci]:https://travis-ci.org/
 [AppVeyor]:http://www.appveyor.com/
+
+[config-example]:https://github.com/urielha/log4stash#almost-full-configuration
