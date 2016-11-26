@@ -7,6 +7,7 @@ using log4stash.SmartFormatters;
 using log4net.Util;
 using log4net.Appender;
 using log4net.Core;
+using log4stash.Authentication;
 
 namespace log4stash
 {
@@ -31,8 +32,7 @@ namespace log4stash
         public int Port { get; set; }
         public bool Ssl { get; set; }
         public bool AllowSelfSignedServerCert { get; set; }
-        public string BasicAuthUsername { get; set; }
-        public string BasicAuthPassword { get; set; }
+        public AuthenticationMethodChooser AuthenticationMethod { get; set; }
         public bool IndexAsync { get; set; }
         public int MaxAsyncConnections { get; set; }
         public TemplateInfo Template { get; set; }
@@ -69,11 +69,12 @@ namespace log4stash
 
             _timer = new Timer(TimerElapsed, null, Timeout.Infinite, Timeout.Infinite);
             ElasticFilters = new ElasticAppenderFilters();
+            AuthenticationMethod = new AuthenticationMethodChooser();
         }
 
         public override void ActivateOptions()
         {
-            _client = new WebElasticClient(Server, Port, Ssl, AllowSelfSignedServerCert, BasicAuthUsername, BasicAuthPassword);
+            _client = new WebElasticClient(Server, Port, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
 
             LogEventFactory.Configure(this);
 

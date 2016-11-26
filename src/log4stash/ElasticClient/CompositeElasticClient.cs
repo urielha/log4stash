@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using log4stash.Authentication;
 
 namespace log4stash
 {
@@ -14,8 +15,7 @@ namespace log4stash
         public int Port { get; private set; }
         public bool Ssl { get; private set; }
         public bool AllowSelfSignedServerCert { get; private set; }
-        public string BasicAuthUsername { get; private set; }
-        public string BasicAuthPassword { get; private set; }
+        public AuthenticationMethodChooser AuthenticationMethod { get; set; }
 
         public CompositeElasticClient(int clients, Func<IElasticsearchClient> factory)
         {

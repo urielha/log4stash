@@ -7,6 +7,8 @@
     <Compile Include="..\log4stash\InnerExceptions\*.cs" />
     <Compile Include="..\log4stash\LogEventFactory\*.cs" />
     <Compile Include="..\log4stash\SmartFormatters\*.cs" />
+    <Compile Include="..\log4stash\Authentication\*.cs" />
+    <Compile Include="..\log4stash\Authentication\Aws\*.cs" />
     <Compile Include="..\log4stash\ElasticClient\*.cs" />
     <Compile Include="..\log4stash\JsonConverters\*.cs" />
   </ItemGroup>
