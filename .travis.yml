@@ -20,9 +20,8 @@ before_install:
 #- /tmp/elasticsearch/bin/elasticsearch --daemonize --path.data /tmp 
 
 script:
- - cd src
  - xbuild /p:Configuration=Release src/log4stash.sln	
- - sh .ci/RunTests.sh
+ - sh src/.ci/RunTests.sh
 
 branches:
  only:
