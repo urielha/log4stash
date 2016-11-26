@@ -15,17 +15,20 @@ namespace log4stash
         public string Server { get; private set; }
         public int Port { get; private set; }
         public bool Ssl { get; private set; }
+        public int Timeout { get; private set; }
         public bool AllowSelfSignedServerCert { get; private set; }
         public string BasicAuthUsername { get; private set; }
         public string BasicAuthPassword { get; private set; }
-        public string Url { get { return _url; } }
-
-        protected readonly string _url;
-        protected readonly string _encodedAuthInfo;
+        public bool UseAws4Signer { get; private set; }
+        public string Aws4SignerRegion { get; private set; }
+        public string Aws4SignerAccessKey { get; private set; }
+        public string Aws4SignerSecretKey { get; private set; }
+        public string Url { get; private set; }
 
         protected AbstractWebElasticClient(string server, int port,
-                                bool ssl, bool allowSelfSignedServerCert, 
-                                string basicAuthUsername, string basicAuthPassword)
+                                bool ssl, bool allowSelfSignedServerCert,
+                                string basicAuthUsername, string basicAuthPassword, bool useAWS4Signer,
+                string aws4SignerRegion, string aws4SignerAccessKey, string aws4SignerSecretKey, int timeout)
         {
             Server = server;
             Port = port;
@@ -35,29 +38,24 @@ namespace log4stash
             Ssl = ssl;
             AllowSelfSignedServerCert = allowSelfSignedServerCert;
             BasicAuthPassword = basicAuthPassword;
+            UseAws4Signer = useAWS4Signer;
+            Aws4SignerRegion = aws4SignerRegion;
+            Aws4SignerAccessKey = aws4SignerAccessKey;
+            Aws4SignerSecretKey = aws4SignerSecretKey;
             BasicAuthUsername = basicAuthUsername;
-
-            if(BasicAuthUsername != null && !string.IsNullOrEmpty(BasicAuthUsername.Trim()))
-            {
-                string authInfo = string.Format("{0}:{1}", BasicAuthUsername, BasicAuthPassword);
-                _encodedAuthInfo = Convert.ToBase64String(Encoding.ASCII.GetBytes(authInfo));
-            }
-
-            _url = string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", Server, Port);
+            Timeout = timeout;
+            Url = string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", Server, Port);
         }
 
         public abstract void PutTemplateRaw(string templateName, string rawBody);
         public abstract void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
         public abstract IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
-        
         public abstract void Dispose();
     }
 
     public class WebElasticClient : AbstractWebElasticClient
     {
-        private readonly string _credentials;
-
-        class RequestDetails
+        private class RequestDetails
         {
             public RequestDetails(WebRequest webRequest, string content)
             {
@@ -69,33 +67,37 @@ namespace log4stash
             public string Content { get; private set;  }
         }
 
-        public WebElasticClient(string server, int port)
-            : this(server, port, false, false, string.Empty, string.Empty)
+        public WebElasticClient(string server, int port, bool ssl, bool allowSelfSignedServerCert,
+                                string basicAuthUsername, string basicAuthPassword, int timeout)
+            : this(server, port, ssl, allowSelfSignedServerCert, basicAuthUsername, basicAuthPassword, false, string.Empty, string.Empty, string.Empty, timeout)
+        {
+        }
+
+        public WebElasticClient(string server, int port, int timeout)
+            : this(server, port, false, false, string.Empty, string.Empty, false, string.Empty, string.Empty, string.Empty, timeout)
         {
         }
 
         public WebElasticClient(string server, int port,
-                                bool ssl, bool allowSelfSignedServerCert, 
-                                string basicAuthUsername, string basicAuthPassword)
-            : base(server, port, ssl, allowSelfSignedServerCert, basicAuthUsername, basicAuthPassword)
+                                bool ssl, bool allowSelfSignedServerCert,
+                                string basicAuthUsername, string basicAuthPassword, bool useAWS4Signer, 
+                                string aws4SignerRegion, string aws4SignerAccessKey, string aws4SignerSecretKey, int timeout)
+            : base(server, port, ssl, allowSelfSignedServerCert, basicAuthUsername, basicAuthPassword, useAWS4Signer,
+                aws4SignerRegion, aws4SignerAccessKey, aws4SignerSecretKey, timeout)
         {
             if (Ssl && AllowSelfSignedServerCert)
             {
                 ServicePointManager.ServerCertificateValidationCallback += AcceptSelfSignedServerCertCallback;
             }
-
-            if (!string.IsNullOrEmpty(_encodedAuthInfo))
-            {
-                _credentials = string.Format("{0} {1}", "Basic", _encodedAuthInfo);
-            }
         }
 
         public override void PutTemplateRaw(string templateName, string rawBody)
         {
-            var webRequest = WebRequest.Create(string.Concat(_url, "_template/", templateName));
+            var url = string.Concat(Url, "_template/", templateName);
+            var webRequest = WebRequest.Create(url);
             webRequest.ContentType = "text/json";
             webRequest.Method = "PUT";
-            SetBasicAuthHeader(webRequest);
+            SetHeaders((HttpWebRequest)webRequest, url, rawBody);
             if (SafeSendRequest(new RequestDetails(webRequest, rawBody), webRequest.GetRequestStream))
             {
                 SafeGetAndCheckResponse(webRequest.GetResponse);
@@ -134,13 +136,14 @@ namespace log4stash
 
         private RequestDetails PrepareRequest(IEnumerable<InnerBulkOperation> bulk)
         {
+            var url = string.Concat(Url, "_bulk");
             var requestString = PrepareBulk(bulk);
 
-            var webRequest = WebRequest.Create(string.Concat(_url, "_bulk"));
+            var webRequest = WebRequest.Create(url);
             webRequest.ContentType = "text/plain";
             webRequest.Method = "POST";
-            webRequest.Timeout = 10000;
-            SetBasicAuthHeader(webRequest);
+            webRequest.Timeout = Timeout;
+            SetHeaders((HttpWebRequest)webRequest, url, requestString);
             return new RequestDetails(webRequest, requestString);
         }
 
@@ -194,12 +197,62 @@ namespace log4stash
             }
         }
 
-        private void SetBasicAuthHeader(WebRequest request)
+        private void SetHeaders(HttpWebRequest webRequest, string url, string requestString)
         {
-            if (!string.IsNullOrEmpty(_credentials)) 
+            var authorizationHeaderValue = string.Empty;
+            var authIsBasicAuth = !string.IsNullOrEmpty(BasicAuthUsername) && !string.IsNullOrEmpty(BasicAuthPassword);
+            var authIsAws4Signer = UseAws4Signer &&
+                !string.IsNullOrEmpty(Aws4SignerRegion) &&
+                !string.IsNullOrEmpty(Aws4SignerAccessKey) &&
+                !string.IsNullOrEmpty(Aws4SignerSecretKey);
+
+            if (authIsBasicAuth)
             {
-                request.Headers[HttpRequestHeader.Authorization] = _credentials;
+                var authInfo = string.Format("{0}:{1}", BasicAuthUsername, BasicAuthPassword);
+                var encodedAuthInfo = Convert.ToBase64String(Encoding.ASCII.GetBytes(authInfo));
+                authorizationHeaderValue = string.Format("{0} {1}", "Basic", encodedAuthInfo);
             }
+            else if (authIsAws4Signer)
+            {
+                var contentHash = AWS4Signer.AWS4SignerBase.CanonicalRequestHashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(requestString));
+                var contentHashString = AWS4Signer.AWS4SignerBase.ToHexString(contentHash, true);
+
+                var headers = new Dictionary<string, string>
+                    {
+                        {AWS4Signer.AWS4SignerBase.X_Amz_Content_SHA256, contentHashString},
+                        {"content-type", "text/plain"}
+                    };
+
+                var signer = new AWS4Signer.AWS4SignerForAuthorizationHeader
+                {
+                    EndpointUri = new Uri(url),
+                    HttpMethod = webRequest.Method,
+                    Service = "es",
+                    Region = Aws4SignerRegion
+                };
+
+                authorizationHeaderValue = signer.ComputeSignature(headers, 
+                    "",  // no query parameters
+                    contentHashString,
+                    Aws4SignerAccessKey,
+                    Aws4SignerSecretKey);
+
+                foreach (var header in headers.Keys)
+                {
+                    if (header.Equals("host", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (header.Equals("content-length", StringComparison.OrdinalIgnoreCase))
+                        webRequest.ContentLength = long.Parse(headers[header]);
+                    else if (header.Equals("content-type", StringComparison.OrdinalIgnoreCase))
+                        webRequest.ContentType = headers[header];
+                    else
+                        webRequest.Headers.Add(header, headers[header]);
+                }
+            }
+
+            if (!string.IsNullOrEmpty(authorizationHeaderValue)) 
+                webRequest.Headers[HttpRequestHeader.Authorization] = authorizationHeaderValue;
         }
 
         private bool AcceptSelfSignedServerCertCallback(
