@@ -5,7 +5,7 @@
     <PackedAssemblyName>$(AssemblyName).dll</PackedAssemblyName>
   </PropertyGroup>
   
-  <Target Name="ilRepack" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+  <Target Name="ilRepack" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' And '$(Travis)' == ''">
     <PropertyGroup>
       <RepackCmd>&quot;$(SolutionDir)packages\ILRepack.2.0.10\tools\ILRepack.exe&quot;</RepackCmd>
     </PropertyGroup>

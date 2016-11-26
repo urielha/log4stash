@@ -10,6 +10,6 @@ runTest(){
    fi
 }
 
-runTest src/log4stash.Tests/bin/Debug/log4stash.Tests.dll -exclude=Performance
+runTest src/log4stash.Tests/bin/Release/log4stash.Tests.dll -exclude=Performance
 
 exit $?
