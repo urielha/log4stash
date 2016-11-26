@@ -8,8 +8,12 @@
   </startup>
   <log4net>
     <appender name="ElasticSearchAppender" type="log4stash.ElasticSearchAppender, log4stash">
-      <Server>localhost</Server>
-      <Port>9200</Port>
+      <Servers>
+        <Server>
+          <Address>localhost</Address>
+          <Port>9200</Port>
+        </Server>
+      </Servers>
       <IndexName>log_test_%{+yyyy.MM.dd}</IndexName>
       <IndexType>LogEvent</IndexType>
       <Bulksize>1</Bulksize>

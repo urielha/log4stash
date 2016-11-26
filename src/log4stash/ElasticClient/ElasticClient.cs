@@ -1,34 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using log4net.Util;
+using log4stash.Configuration;
 using Newtonsoft.Json;
 
 namespace log4stash
 {
     public abstract class AbstractWebElasticClient : IElasticsearchClient
     {
-        public string Server { get; private set; }
-        public int Port { get; private set; }
+        public ServerDataCollection Servers { get; private set; }
         public bool Ssl { get; private set; }
         public bool AllowSelfSignedServerCert { get; private set; }
         public string BasicAuthUsername { get; private set; }
         public string BasicAuthPassword { get; private set; }
-        public string Url { get { return _url; } }
+        public string Url { get { return GetServerUrl(); } }
 
-        protected readonly string _url;
         protected readonly string _encodedAuthInfo;
 
-        protected AbstractWebElasticClient(string server, int port,
-                                bool ssl, bool allowSelfSignedServerCert, 
+        protected AbstractWebElasticClient(ServerDataCollection servers, bool ssl, bool allowSelfSignedServerCert, 
                                 string basicAuthUsername, string basicAuthPassword)
         {
-            Server = server;
-            Port = port;
+            Servers = servers;
             ServicePointManager.Expect100Continue = false;
 
             // SSL related properties
@@ -42,8 +40,6 @@ namespace log4stash
                 string authInfo = string.Format("{0}:{1}", BasicAuthUsername, BasicAuthPassword);
                 _encodedAuthInfo = Convert.ToBase64String(Encoding.ASCII.GetBytes(authInfo));
             }
-
-            _url = string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", Server, Port);
         }
 
         public abstract void PutTemplateRaw(string templateName, string rawBody);
@@ -51,6 +47,14 @@ namespace log4stash
         public abstract IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
         
         public abstract void Dispose();
+
+        protected string GetServerUrl()
+        {
+            var serverData = Servers.GetRandomServerData();
+            var url = string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", serverData.Address, serverData.Port);
+            return url;
+        }
+
     }
 
     public class WebElasticClient : AbstractWebElasticClient
@@ -69,15 +73,14 @@ namespace log4stash
             public string Content { get; private set;  }
         }
 
-        public WebElasticClient(string server, int port)
-            : this(server, port, false, false, string.Empty, string.Empty)
+        public WebElasticClient(ServerDataCollection servers)
+            : this(servers, false, false, string.Empty, string.Empty)
         {
         }
 
-        public WebElasticClient(string server, int port,
-                                bool ssl, bool allowSelfSignedServerCert, 
+        public WebElasticClient(ServerDataCollection servers, bool ssl, bool allowSelfSignedServerCert, 
                                 string basicAuthUsername, string basicAuthPassword)
-            : base(server, port, ssl, allowSelfSignedServerCert, basicAuthUsername, basicAuthPassword)
+            : base(servers, ssl, allowSelfSignedServerCert, basicAuthUsername, basicAuthPassword)
         {
             if (Ssl && AllowSelfSignedServerCert)
             {
@@ -92,7 +95,8 @@ namespace log4stash
 
         public override void PutTemplateRaw(string templateName, string rawBody)
         {
-            var webRequest = WebRequest.Create(string.Concat(_url, "_template/", templateName));
+            var serverUrl = GetServerUrl();
+            var webRequest = WebRequest.Create(string.Concat(serverUrl, "_template/", templateName));
             webRequest.ContentType = "text/json";
             webRequest.Method = "PUT";
             SetBasicAuthHeader(webRequest);
@@ -135,8 +139,8 @@ namespace log4stash
         private RequestDetails PrepareRequest(IEnumerable<InnerBulkOperation> bulk)
         {
             var requestString = PrepareBulk(bulk);
-
-            var webRequest = WebRequest.Create(string.Concat(_url, "_bulk"));
+            var serverUrl = GetServerUrl();
+            var webRequest = WebRequest.Create(string.Concat(serverUrl, "_bulk"));
             webRequest.ContentType = "text/plain";
             webRequest.Method = "POST";
             webRequest.Timeout = 10000;
@@ -212,8 +216,9 @@ namespace log4stash
 
             string subjectCn = certificate2.GetNameInfo(X509NameType.DnsName, false);
             string issuerCn = certificate2.GetNameInfo(X509NameType.DnsName, true);
+            var serverAddresses = Servers.Select(s => s.Address);
             if (sslPolicyErrors == SslPolicyErrors.None
-                || (Server.Equals(subjectCn) && subjectCn.Equals(issuerCn)))
+                || (serverAddresses.Contains(subjectCn) && subjectCn.Equals(issuerCn)))
             {
                 return true;
             }

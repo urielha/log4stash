@@ -7,6 +7,7 @@ using log4stash.SmartFormatters;
 using log4net.Util;
 using log4net.Appender;
 using log4net.Core;
+using log4stash.Configuration;
 
 namespace log4stash
 {
@@ -27,8 +28,11 @@ namespace log4stash
         public int TimeoutToWaitForTimer { get; set; }
 
         // elastic configuration
+        [Obsolete]
         public string Server { get; set; }
+        [Obsolete]
         public int Port { get; set; }
+        public ServerDataCollection Servers { get; set; }
         public bool Ssl { get; set; }
         public bool AllowSelfSignedServerCert { get; set; }
         public string BasicAuthUsername { get; set; }
@@ -58,8 +62,7 @@ namespace log4stash
             BulkIdleTimeout = 5000;
             TimeoutToWaitForTimer = 5000;
 
-            Server = "localhost";
-            Port = 9200;
+            Servers = new ServerDataCollection();
             IndexName = "LogEvent-%{+yyyy.MM.dd}";
             IndexType = "LogEvent";
             IndexAsync = true;
@@ -73,7 +76,8 @@ namespace log4stash
 
         public override void ActivateOptions()
         {
-            _client = new WebElasticClient(Server, Port, Ssl, AllowSelfSignedServerCert, BasicAuthUsername, BasicAuthPassword);
+            AddOptionalServer();
+            _client = new WebElasticClient(Servers, Ssl, AllowSelfSignedServerCert, BasicAuthUsername, BasicAuthPassword);
 
             LogEventFactory.Configure(this);
 
@@ -85,6 +89,15 @@ namespace log4stash
             ElasticFilters.PrepareConfiguration(_client);
 
             RestartTimer();
+        }
+
+        private void AddOptionalServer()
+        {
+            if (Server != null && Port != 0)
+            {
+                var serverData = new ServerData() {Address = Server, Port = Port};
+                Servers.Add(serverData);
+            }
         }
 
         private void RestartTimer()

@@ -54,6 +54,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\IServerData.cs" />
+    <Compile Include="Configuration\ServerData.cs" />
+    <Compile Include="Configuration\ServerDataCollection.cs" />
     <Compile Include="ElasticClient\CompositeElasticClient.cs" />
     <Compile Include="ElasticClient\IElasticsearchClient.cs" />
     <Compile Include="ElasticClient\InnerBulkOperation.cs" />

@@ -341,7 +341,7 @@ namespace log4stash.Tests.Integration
                 appender.ActivateOptions();
             });
             string json =
-                "{\"InnerMessage\":\"Starting.\", \"Data\":{\"Type\":\"Server\", \"Host\":\"localhost\", \"Array\":[\"One\", \"Two\"]}}";
+                "{\"InnerMessage\":\"Starting.\", \"Data\":{\"Type\":\"Url\", \"Host\":\"localhost\", \"Array\":[\"One\", \"Two\"]}}";
             log4net.LogicalThreadContext.Properties["JsonRaw"] = json;
             _log.Info("Info");
 
@@ -378,7 +378,7 @@ namespace log4stash.Tests.Integration
             }
             Assert.IsNotNull(actualObj);
             Assert.AreEqual("Starting.", innerMessage);
-            Assert.AreEqual("Server", dataType);
+            Assert.AreEqual("Url", dataType);
             Assert.AreEqual("localhost", dataHost);
             Assert.AreEqual("One", dataArrayFirst);
         }

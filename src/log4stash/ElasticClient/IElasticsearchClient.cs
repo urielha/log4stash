@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
+using log4stash.Configuration;
 
 namespace log4stash
 {
     public interface IElasticsearchClient : IDisposable
     {
-        string Server { get; }
-        int Port { get; }
+        ServerDataCollection Servers { get; }
         bool Ssl { get; }
         bool AllowSelfSignedServerCert { get; }
         string BasicAuthUsername { get; }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using log4stash.Configuration;
 
 namespace log4stash
 {
@@ -10,8 +11,7 @@ namespace log4stash
         private int _current;
         private readonly List<IElasticsearchClient> _clients;
         
-        public string Server { get; private set; }
-        public int Port { get; private set; }
+        public ServerDataCollection Servers { get; private set; }
         public bool Ssl { get; private set; }
         public bool AllowSelfSignedServerCert { get; private set; }
         public string BasicAuthUsername { get; private set; }
