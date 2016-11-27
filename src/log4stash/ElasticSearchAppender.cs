@@ -29,9 +29,7 @@ namespace log4stash
         public int TimeoutToWaitForTimer { get; set; }
 
         // elastic configuration
-        [Obsolete]
         public string Server { get; set; }
-        [Obsolete]
         public int Port { get; set; }
         public ServerDataCollection Servers { get; set; }
         public int ElasticSearchTimeout { get; set; }
@@ -81,7 +79,7 @@ namespace log4stash
         public override void ActivateOptions()
         {
             AddOptionalServer();
-            _client = new WebElasticClient(Servers, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
+            _client = new WebElasticClient(Servers, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
 
             LogEventFactory.Configure(this);
 
@@ -99,7 +97,7 @@ namespace log4stash
         {
             if (Server != null && Port != 0)
             {
-                var serverData = new ServerData() {Address = Server, Port = Port};
+                var serverData = new ServerData {Address = Server, Port = Port};
                 Servers.Add(serverData);
             }
         }

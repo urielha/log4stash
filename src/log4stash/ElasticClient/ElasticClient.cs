@@ -67,7 +67,7 @@ namespace log4stash
         }
 
         public WebElasticClient(ServerDataCollection servers, int timeout)
-            : this(server, port, timeout, false, false, new AuthenticationMethodChooser())
+            : this(servers, timeout, false, false, new AuthenticationMethodChooser())
         {
         }
 
@@ -76,7 +76,7 @@ namespace log4stash
                                 bool ssl,
                                 bool allowSelfSignedServerCert,
                                 AuthenticationMethodChooser authenticationMethod)
-            : base(server, port, timeout, ssl, allowSelfSignedServerCert, authenticationMethod)
+            : base(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod)
         {
             if (Ssl && AllowSelfSignedServerCert)
             {
@@ -86,8 +86,8 @@ namespace log4stash
 
         public override void PutTemplateRaw(string templateName, string rawBody)
         {
-            var serverUrl = GetServerUrl();
-            var webRequest = WebRequest.Create(string.Concat(serverUrl, "_template/", templateName));
+            var url = string.Concat(Url, "_template/", templateName);
+            var webRequest = WebRequest.Create(url);
             webRequest.ContentType = "text/json";
             webRequest.Method = "PUT";
             SetHeaders((HttpWebRequest)webRequest, url, rawBody);
@@ -130,8 +130,8 @@ namespace log4stash
         private RequestDetails PrepareRequest(IEnumerable<InnerBulkOperation> bulk)
         {
             var requestString = PrepareBulk(bulk);
-            var serverUrl = GetServerUrl();
-            var webRequest = WebRequest.Create(string.Concat(serverUrl, "_bulk"));
+            var url = string.Concat(Url, "_bulk");
+            var webRequest = WebRequest.Create(url);
             webRequest.ContentType = "text/plain";
             webRequest.Method = "POST";
             webRequest.Timeout = 10000;
