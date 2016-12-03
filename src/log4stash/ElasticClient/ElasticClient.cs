@@ -88,6 +88,7 @@ namespace log4stash
         {
             var url = string.Concat(Url, "_template/", templateName);
             var webRequest = WebRequest.Create(url);
+            webRequest.Timeout = Timeout;
             webRequest.ContentType = "text/json";
             webRequest.Method = "PUT";
             SetHeaders((HttpWebRequest)webRequest, url, rawBody);
