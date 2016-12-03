@@ -2,11 +2,14 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Compile Include="..\log4stash\*.cs" />
+    <Compile Include="..\log4stash\Configuration\*.cs" />
     <Compile Include="..\log4stash\Extensions\*.cs" />
     <Compile Include="..\log4stash\Filters\*.cs" />
     <Compile Include="..\log4stash\InnerExceptions\*.cs" />
     <Compile Include="..\log4stash\LogEventFactory\*.cs" />
     <Compile Include="..\log4stash\SmartFormatters\*.cs" />
+    <Compile Include="..\log4stash\Authentication\*.cs" />
+    <Compile Include="..\log4stash\Authentication\Aws\*.cs" />
     <Compile Include="..\log4stash\ElasticClient\*.cs" />
     <Compile Include="..\log4stash\JsonConverters\*.cs" />
   </ItemGroup>

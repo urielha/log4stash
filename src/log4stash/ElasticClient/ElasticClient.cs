@@ -1,63 +1,60 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using log4net.Util;
+using log4stash.Authentication;
+using log4stash.Configuration;
 using Newtonsoft.Json;
 
 namespace log4stash
 {
     public abstract class AbstractWebElasticClient : IElasticsearchClient
     {
-        public string Server { get; private set; }
-        public int Port { get; private set; }
+        public ServerDataCollection Servers { get; private set; }
+        public int Timeout { get; private set; }
         public bool Ssl { get; private set; }
         public bool AllowSelfSignedServerCert { get; private set; }
-        public string BasicAuthUsername { get; private set; }
-        public string BasicAuthPassword { get; private set; }
-        public string Url { get { return _url; } }
+        public AuthenticationMethodChooser AuthenticationMethod { get; set; }
+        public string Url { get { return GetServerUrl(); } }
 
-        protected readonly string _url;
-        protected readonly string _encodedAuthInfo;
-
-        protected AbstractWebElasticClient(string server, int port,
-                                bool ssl, bool allowSelfSignedServerCert, 
-                                string basicAuthUsername, string basicAuthPassword)
+        protected AbstractWebElasticClient(ServerDataCollection servers,
+                                           int timeout,
+                                           bool ssl, 
+                                           bool allowSelfSignedServerCert,
+                                           AuthenticationMethodChooser authenticationMethod)
         {
-            Server = server;
-            Port = port;
+            Servers = servers;
+            Timeout = timeout;
             ServicePointManager.Expect100Continue = false;
 
             // SSL related properties
             Ssl = ssl;
             AllowSelfSignedServerCert = allowSelfSignedServerCert;
-            BasicAuthPassword = basicAuthPassword;
-            BasicAuthUsername = basicAuthUsername;
-
-            if(BasicAuthUsername != null && !string.IsNullOrEmpty(BasicAuthUsername.Trim()))
-            {
-                string authInfo = string.Format("{0}:{1}", BasicAuthUsername, BasicAuthPassword);
-                _encodedAuthInfo = Convert.ToBase64String(Encoding.ASCII.GetBytes(authInfo));
-            }
-
-            _url = string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", Server, Port);
+            AuthenticationMethod = authenticationMethod;
         }
 
         public abstract void PutTemplateRaw(string templateName, string rawBody);
         public abstract void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
         public abstract IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
-        
         public abstract void Dispose();
+
+        protected string GetServerUrl()
+        {
+            var serverData = Servers.GetRandomServerData();
+            var url = string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", serverData.Address, serverData.Port);
+            return url;
+        }
+
     }
 
     public class WebElasticClient : AbstractWebElasticClient
     {
-        private readonly string _credentials;
-
-        class RequestDetails
+        private class RequestDetails
         {
             public RequestDetails(WebRequest webRequest, string content)
             {
@@ -69,33 +66,31 @@ namespace log4stash
             public string Content { get; private set;  }
         }
 
-        public WebElasticClient(string server, int port)
-            : this(server, port, false, false, string.Empty, string.Empty)
+        public WebElasticClient(ServerDataCollection servers, int timeout)
+            : this(servers, timeout, false, false, new AuthenticationMethodChooser())
         {
         }
 
-        public WebElasticClient(string server, int port,
-                                bool ssl, bool allowSelfSignedServerCert, 
-                                string basicAuthUsername, string basicAuthPassword)
-            : base(server, port, ssl, allowSelfSignedServerCert, basicAuthUsername, basicAuthPassword)
+        public WebElasticClient(ServerDataCollection servers,
+                                int timeout,
+                                bool ssl,
+                                bool allowSelfSignedServerCert,
+                                AuthenticationMethodChooser authenticationMethod)
+            : base(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod)
         {
             if (Ssl && AllowSelfSignedServerCert)
             {
                 ServicePointManager.ServerCertificateValidationCallback += AcceptSelfSignedServerCertCallback;
             }
-
-            if (!string.IsNullOrEmpty(_encodedAuthInfo))
-            {
-                _credentials = string.Format("{0} {1}", "Basic", _encodedAuthInfo);
-            }
         }
 
         public override void PutTemplateRaw(string templateName, string rawBody)
         {
-            var webRequest = WebRequest.Create(string.Concat(_url, "_template/", templateName));
+            var url = string.Concat(Url, "_template/", templateName);
+            var webRequest = WebRequest.Create(url);
             webRequest.ContentType = "text/json";
             webRequest.Method = "PUT";
-            SetBasicAuthHeader(webRequest);
+            SetHeaders((HttpWebRequest)webRequest, url, rawBody);
             if (SafeSendRequest(new RequestDetails(webRequest, rawBody), webRequest.GetRequestStream))
             {
                 SafeGetAndCheckResponse(webRequest.GetResponse);
@@ -135,12 +130,12 @@ namespace log4stash
         private RequestDetails PrepareRequest(IEnumerable<InnerBulkOperation> bulk)
         {
             var requestString = PrepareBulk(bulk);
-
-            var webRequest = WebRequest.Create(string.Concat(_url, "_bulk"));
+            var url = string.Concat(Url, "_bulk");
+            var webRequest = WebRequest.Create(url);
             webRequest.ContentType = "text/plain";
             webRequest.Method = "POST";
             webRequest.Timeout = 10000;
-            SetBasicAuthHeader(webRequest);
+            SetHeaders((HttpWebRequest)webRequest, url, requestString);
             return new RequestDetails(webRequest, requestString);
         }
 
@@ -194,12 +189,14 @@ namespace log4stash
             }
         }
 
-        private void SetBasicAuthHeader(WebRequest request)
+        private void SetHeaders(HttpWebRequest webRequest, string url, string requestString)
         {
-            if (!string.IsNullOrEmpty(_credentials)) 
-            {
-                request.Headers[HttpRequestHeader.Authorization] = _credentials;
-            }
+            var requestData = new RequestData {WebRequest = webRequest, Url = url, RequestString = requestString};
+
+            var authorizationHeaderValue = AuthenticationMethod.CreateAuthenticationHeader(requestData);
+
+            if (!string.IsNullOrEmpty(authorizationHeaderValue)) 
+                webRequest.Headers[HttpRequestHeader.Authorization] = authorizationHeaderValue;
         }
 
         private bool AcceptSelfSignedServerCertCallback(
@@ -212,8 +209,9 @@ namespace log4stash
 
             string subjectCn = certificate2.GetNameInfo(X509NameType.DnsName, false);
             string issuerCn = certificate2.GetNameInfo(X509NameType.DnsName, true);
+            var serverAddresses = Servers.Select(s => s.Address);
             if (sslPolicyErrors == SslPolicyErrors.None
-                || (Server.Equals(subjectCn) && subjectCn.Equals(issuerCn)))
+                || (serverAddresses.Contains(subjectCn) && subjectCn.Equals(issuerCn)))
             {
                 return true;
             }

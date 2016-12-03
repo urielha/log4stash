@@ -20,9 +20,9 @@ namespace log4stash.Tests.Integration
             QueryConfiguration(appender =>
             {
                 appender.IndexName = TestIndex;
-
-                host = appender.Server;
-                port = appender.Port;
+                var serverData = appender.Servers.GetRandomServerData();
+                host = serverData.Address;
+                port = serverData.Port;
             });
 
             ConnectionSettings elasticSettings =

@@ -5,17 +5,17 @@
     <PackedAssemblyName>$(AssemblyName).dll</PackedAssemblyName>
   </PropertyGroup>
   
-  <Target Name="ilRepack" AfterTargets="Build" Condition="'$(Configuration)' == 'Release'">
+  <Target Name="ilRepack" AfterTargets="Build" Condition="'$(Configuration)' == 'Release' And '$(Travis)' == ''">
     <PropertyGroup>
-      <RepackCmd>&quot;$(SolutionDir)\packages\ILRepack.2.0.10\tools\ILRepack.exe&quot;</RepackCmd>
+      <RepackCmd>&quot;$(SolutionDir)packages\ILRepack.2.0.10\tools\ILRepack.exe&quot;</RepackCmd>
     </PropertyGroup>
     
     <ItemGroup>
-      <InputAssemblies Include="$(OutputPath)\log4stash.dll" />
-      <InputAssemblies Include="$(OutputPath)\Newtonsoft.Json.dll" />
+      <InputAssemblies Include="$(OutputPath)log4stash.dll" />
+      <InputAssemblies Include="$(OutputPath)Newtonsoft.Json.dll" />
     </ItemGroup>
 
-    <Exec Command="$(RepackCmd) -internalize -out:&quot;$(OutputPath)\$(PackedAssemblyName)&quot; @(InputAssemblies-&gt;'&quot;%(FullPath)&quot;', ' ')" />
+    <Exec Command="$(RepackCmd) -internalize -out:&quot;$(OutputPath)$(PackedAssemblyName)&quot; @(InputAssemblies-&gt;'&quot;%(FullPath)&quot;', ' ')" />
     
   </Target>
 </Project>
