@@ -20,6 +20,7 @@ namespace log4stash
         private LogEventSmartFormatter _indexType;
 
         private readonly Timer _timer;
+        private bool _finishedPuttingTemplate;
 
         public FixFlags FixedFields { get; set; }
         public bool SerializeObjects { get; set; }
@@ -74,6 +75,7 @@ namespace log4stash
             AllowSelfSignedServerCert = false;
             Ssl = false;
             AuthenticationMethod = new AuthenticationMethodChooser();
+            _finishedPuttingTemplate = false;
         }
 
         public override void ActivateOptions()
@@ -85,12 +87,20 @@ namespace log4stash
 
             if (Template != null && Template.IsValid)
             {
-                _client.PutTemplateRaw(Template.Name, File.ReadAllText(Template.FileName));
+                PutTemplateToElastic();
             }
 
             ElasticFilters.PrepareConfiguration(_client);
 
             RestartTimer();
+        }
+
+        private void PutTemplateToElastic()
+        {
+            if (_client.PutTemplateRaw(Template.Name, File.ReadAllText(Template.FileName)))
+            {
+                _finishedPuttingTemplate = true;
+            }
         }
 
         private void AddOptionalServer()
@@ -171,12 +181,21 @@ namespace log4stash
             DoIndexNow();
         }
 
+        private void VerifyTemplateIsPut()
+        {
+            if (!_finishedPuttingTemplate)
+            {
+                PutTemplateToElastic();
+            }
+        }
+
         /// <summary>
         /// Send the bulk to Elasticsearch and creating new bluk.
         /// </summary>
         private void DoIndexNow()
         {
             var bulkToSend = Interlocked.Exchange(ref _bulk, new List<InnerBulkOperation>());
+            VerifyTemplateIsPut();
             if (bulkToSend.Count > 0)
             {
                 try

@@ -11,7 +11,7 @@ namespace log4stash
         bool Ssl { get; }
         bool AllowSelfSignedServerCert { get; }
         AuthenticationMethodChooser AuthenticationMethod { get; set; }
-        void PutTemplateRaw(string templateName, string rawBody);
+        bool PutTemplateRaw(string templateName, string rawBody);
         void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
         IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
     }

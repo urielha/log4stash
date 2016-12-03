@@ -38,7 +38,7 @@ namespace log4stash
             AuthenticationMethod = authenticationMethod;
         }
 
-        public abstract void PutTemplateRaw(string templateName, string rawBody);
+        public abstract bool PutTemplateRaw(string templateName, string rawBody);
         public abstract void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
         public abstract IAsyncResult IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
         public abstract void Dispose();
@@ -54,6 +54,7 @@ namespace log4stash
 
     public class WebElasticClient : AbstractWebElasticClient
     {
+
         private class RequestDetails
         {
             public RequestDetails(WebRequest webRequest, string content)
@@ -84,7 +85,7 @@ namespace log4stash
             }
         }
 
-        public override void PutTemplateRaw(string templateName, string rawBody)
+        public override bool PutTemplateRaw(string templateName, string rawBody)
         {
             var url = string.Concat(Url, "_template/", templateName);
             var webRequest = WebRequest.Create(url);
@@ -94,8 +95,9 @@ namespace log4stash
             SetHeaders((HttpWebRequest)webRequest, url, rawBody);
             if (SafeSendRequest(new RequestDetails(webRequest, rawBody), webRequest.GetRequestStream))
             {
-                SafeGetAndCheckResponse(webRequest.GetResponse);
+                return SafeGetAndCheckResponse(webRequest.GetResponse);
             }
+            return false;
         }
 
         public override void IndexBulk(IEnumerable<InnerBulkOperation> bulk)
@@ -175,18 +177,20 @@ namespace log4stash
             return false;
         }
 
-        private void SafeGetAndCheckResponse(Func<WebResponse> getResponse)
+        private bool SafeGetAndCheckResponse(Func<WebResponse> getResponse)
         {
             try
             {
                 using (var httpResponse = (HttpWebResponse)getResponse())
                 {
                     CheckResponse(httpResponse);
+                    return true;
                 }
             }
             catch (Exception ex)
             {
                 LogLog.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
+                return false;
             }
         }
 
