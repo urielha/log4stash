@@ -135,7 +135,7 @@ namespace log4stash
             var webRequest = WebRequest.Create(url);
             webRequest.ContentType = "text/plain";
             webRequest.Method = "POST";
-            webRequest.Timeout = 10000;
+            webRequest.Timeout = Timeout;
             SetHeaders((HttpWebRequest)webRequest, url, requestString);
             return new RequestDetails(webRequest, requestString);
         }
