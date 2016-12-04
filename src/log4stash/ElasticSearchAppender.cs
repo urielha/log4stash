@@ -89,6 +89,10 @@ namespace log4stash
             {
                 PutTemplateToElastic();
             }
+            else
+            {
+                _finishedPuttingTemplate = true;
+            }
 
             ElasticFilters.PrepareConfiguration(_client);
 
