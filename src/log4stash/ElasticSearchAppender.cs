@@ -87,6 +87,10 @@ namespace log4stash
 
             if (Template != null && Template.IsValid)
             {
+                if (!Template.ForcePut)
+                {
+                    _finishedPuttingTemplate = !Template.ForcePut;
+                }
                 PutTemplateToElastic();
             }
             else
@@ -111,7 +115,7 @@ namespace log4stash
         {
             if (Server != null && Port != 0)
             {
-                var serverData = new ServerData {Address = Server, Port = Port};
+                var serverData = new ServerData { Address = Server, Port = Port };
                 Servers.Add(serverData);
             }
         }
