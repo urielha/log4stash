@@ -87,11 +87,8 @@ namespace log4stash
 
             if (Template != null && Template.IsValid)
             {
-                if (!Template.ForcePut)
-                {
-                    _finishedPuttingTemplate = !Template.ForcePut;
-                }
-                PutTemplateToElastic();
+                _finishedPuttingTemplate = !Template.ForcePut ||
+                    _client.PutTemplateRaw(Template.Name, File.ReadAllText(Template.FileName));
             }
             else
             {
@@ -101,14 +98,6 @@ namespace log4stash
             ElasticFilters.PrepareConfiguration(_client);
 
             RestartTimer();
-        }
-
-        private void PutTemplateToElastic()
-        {
-            if (_client.PutTemplateRaw(Template.Name, File.ReadAllText(Template.FileName)))
-            {
-                _finishedPuttingTemplate = true;
-            }
         }
 
         private void AddOptionalServer()
