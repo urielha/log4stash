@@ -159,12 +159,12 @@ namespace log4stash.Tests.Integration
         }
 
         [Test]
-        [TestCase(new[] { ",", " " },   new[] { ":", "=" }, "",     TestName = "Can_read_KvFilter_properties: Regular1")]
-        [TestCase(new[] { ";", " " },   new[] { "~" },      "",     TestName = "Can_read_KvFilter_properties: Regular2")]
-        [TestCase(new[] { ";" },        new[] { "=" },      "",     TestName = "Can_read_KvFilter_properties: No whiteSpace on fieldSplit causes the 'another ' key and raise spaces issue", ExpectedException = typeof(Exception), ExpectedMessage = "spaces issue")]
-        [TestCase(new[] { ";" },        new[] { "=" },      " ",    TestName = "Can_read_KvFilter_properties: No whiteSpace but with trimming, fix the 'another' key")]
-        [TestCase(new[] { "\\|", " " }, new[] { "\\>" },    "",     TestName = "Can_read_KvFilter_properties: Regex chars need to be escaped with backslash")]
-        [TestCase(new[] { "\n" },       new[] { ":" },      " ",    TestName = "Can_read_KvFilter_properties: NewLine")]
+        [TestCase(new[] { ",", " " }, new[] { ":", "=" }, "", TestName = "Can_read_KvFilter_properties: Regular1")]
+        [TestCase(new[] { ";", " " }, new[] { "~" }, "", TestName = "Can_read_KvFilter_properties: Regular2")]
+        [TestCase(new[] { ";" }, new[] { "=" }, "", TestName = "Can_read_KvFilter_properties: No whiteSpace on fieldSplit causes the 'another ' key and raise spaces issue", ExpectedException = typeof(Exception), ExpectedMessage = "spaces issue")]
+        [TestCase(new[] { ";" }, new[] { "=" }, " ", TestName = "Can_read_KvFilter_properties: No whiteSpace but with trimming, fix the 'another' key")]
+        [TestCase(new[] { "\\|", " " }, new[] { "\\>" }, "", TestName = "Can_read_KvFilter_properties: Regex chars need to be escaped with backslash")]
+        [TestCase(new[] { "\n" }, new[] { ":" }, " ", TestName = "Can_read_KvFilter_properties: NewLine")]
         public void Can_read_KvFilter_properties(string[] fieldSplit, string[] valueSplit, string trim)
         {
             ElasticAppenderFilters oldFilters = null;
@@ -199,7 +199,7 @@ namespace log4stash.Tests.Integration
 
             Assert.IsNotNull(entry.key);
             Assert.AreEqual("value", entry.key.ToString());
-            
+
             Assert.IsNotNull(entry["object"]);
             Assert.AreEqual("this is object :)", entry["object"].ToString());
 
@@ -247,7 +247,7 @@ namespace log4stash.Tests.Integration
             _log.Debug("dummy");
 
             Client.Refresh(TestIndex);
-            
+
             var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
             var doc = res.Documents.First();
 
@@ -267,7 +267,7 @@ namespace log4stash.Tests.Integration
                 var convert = new ConvertFilter();
                 convert.AddToString(sourceKey);
 
-                var toArray = new ConvertToArrayFilter {SourceKey = sourceKey};
+                var toArray = new ConvertToArrayFilter { SourceKey = sourceKey };
                 convert.AddToArray(toArray);
 
                 appender.ElasticFilters.AddConvert(convert);
@@ -328,16 +328,16 @@ namespace log4stash.Tests.Integration
         }
 
         [Test]
-        [TestCase(false, TestName = "parse_json_string_as_object2: Should preserve json structure")]
-        [TestCase(true, TestName = "parse_json_string_as_object2: Should flatten the json")]
-        public void parse_json_string_as_object2(bool flatten)
+        [TestCase(false, "_", TestName = "parse_json_string_as_object2: Should preserve json structure")]
+        [TestCase(true, "_", TestName = "parse_json_string_as_object2: Should flatten the json")]
+        public void parse_json_string_as_object2(bool flatten, string separator = "_")
         {
             ElasticAppenderFilters oldFilters = null;
             QueryConfiguration(appender =>
             {
                 oldFilters = appender.ElasticFilters;
                 appender.ElasticFilters = new ElasticAppenderFilters();
-                appender.ElasticFilters.AddFilter(new JsonFilter() {FlattenJson = flatten});
+                appender.ElasticFilters.AddFilter(new JsonFilter() { FlattenJson = flatten, Separator = separator });
                 appender.ActivateOptions();
             });
             string json =
@@ -364,9 +364,9 @@ namespace log4stash.Tests.Integration
             {
                 actualObj = doc;
                 innerMessage = actualObj["InnerMessage"].ToString();
-                dataType = actualObj["Data_Type"].ToString();
-                dataHost = actualObj["Data_Host"].ToString();
-                dataArrayFirst = actualObj["Data_Array_0"].ToString();
+                dataType = actualObj["Data" + separator + "Type"].ToString();
+                dataHost = actualObj["Data" + separator + "Host"].ToString();
+                dataArrayFirst = actualObj["Data" + separator + "Array" + separator + "0"].ToString();
             }
             else
             {

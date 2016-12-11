@@ -18,10 +18,13 @@ namespace log4stash.Filters
 
         public bool FlattenJson { get; set; }
 
+        public string Separator { get; set; }
+
         public JsonFilter()
         {
             SourceKey = "JsonRaw";
             FlattenJson = false;
+            Separator = "_";
         }
 
         public void PrepareConfiguration(IElasticsearchClient client)
@@ -46,7 +49,7 @@ namespace log4stash.Filters
             }
         }
 
-        private static void ScanToken(IDictionary<string, object> logEvent, JToken token, string prefix)
+        private void ScanToken(IDictionary<string, object> logEvent, JToken token, string prefix)
         {
             switch (token.Type)
             {
@@ -74,9 +77,9 @@ namespace log4stash.Filters
             }
         }
 
-        private static string Join(string prefix, string name)
+        private string Join(string prefix, string name)
         {
-            return (string.IsNullOrEmpty(prefix) ? name : prefix + "_" + name);
+            return (string.IsNullOrEmpty(prefix) ? name : prefix + Separator + name);
         }
     }
 }

@@ -123,6 +123,8 @@ You can also set any public property in the appender/filter which didn't appear 
       <Json>
         <SourceKey>JsonRaw</SourceKey>
         <FlattenJson>false</FlattenJson>
+		<!-- the separator property is only relevant when setting the FlattenJson property to 'true' -->
+		<Separator>_</Separator> 
       </Json>
       
       <!-- kv and grok filters similar to logstash's filters -->
