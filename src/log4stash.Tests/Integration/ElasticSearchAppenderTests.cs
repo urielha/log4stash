@@ -483,7 +483,7 @@ namespace log4stash.Tests.Integration
             if (flatten)
             {
                 actualObj = doc;
-                parentKey = actualObj["Parent_@key"].ToString();
+                parentKey = actualObj["Parent.@key"].ToString();
                 dataArrayFirstId = actualObj["Parent.Child.0.@id"].ToString();
             }
             else
