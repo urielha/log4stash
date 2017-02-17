@@ -126,6 +126,12 @@ You can also set any public property in the appender/filter which didn't appear 
 		<!-- the separator property is only relevant when setting the FlattenJson property to 'true' -->
 		<Separator>_</Separator> 
       </Json>
+
+      <!-- converts an xml object to fields in the document -->
+      <Xml>
+        <SourceKey>XmlRaw</SourceKey>
+        <FlattenXml>false</FlattenXml>
+      </Xml>
       
       <!-- kv and grok filters similar to logstash's filters -->
       <Kv>
