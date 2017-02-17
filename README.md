@@ -124,6 +124,12 @@ You can also set any public property in the appender/filter which didn't appear 
         <SourceKey>JsonRaw</SourceKey>
         <FlattenJson>false</FlattenJson>
       </Json>
+	  
+	  <!-- converts an xml object to fields in the document -->
+      <Xml>
+        <SourceKey>XmlRaw</SourceKey>
+        <FlattenXml>false</FlattenXml>
+      </Xml>
       
       <!-- kv and grok filters similar to logstash's filters -->
       <Kv>
