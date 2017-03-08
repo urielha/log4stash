@@ -96,6 +96,11 @@ namespace log4stash
             AddFilter(filter);
         }
 
+        public void AddXml(XmlFilter filter)
+        {
+            AddFilter(filter);
+        }
+
         public void AddConvert(ConvertFilter filter)
         {
             AddFilter(filter);

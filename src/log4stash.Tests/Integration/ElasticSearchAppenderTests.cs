@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 using log4net;
 using log4net.Core;
 using log4stash.Filters;
@@ -26,6 +28,30 @@ namespace log4stash.Tests.Integration
             Client.Refresh(TestIndex);
 
             var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(q => q.Term("Message", "loggingtest")));
+
+            Assert.AreEqual(1, searchResults.Total);
+        }
+
+        [Test]
+        public void Log_With_Custom_Id()
+        {
+            string oldDocId = null;
+            QueryConfiguration(appender =>
+            {
+                oldDocId = appender.DocumentIdSource;
+                appender.DocumentIdSource = "IdSource";
+            });
+            ThreadContext.Properties["IdSource"] = "TEST_ID";
+            _log.Info("loggingtest");
+
+            Client.Refresh(TestIndex);
+
+            var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(q => q.Ids(descriptor => descriptor.Values("TEST_ID"))));
+
+            QueryConfiguration(appender =>
+            {
+                appender.DocumentIdSource = oldDocId;
+            });
 
             Assert.AreEqual(1, searchResults.Total);
         }
@@ -68,7 +94,7 @@ namespace log4stash.Tests.Integration
         [Test]
         public void Log_exception_string_without_object()
         {
-            var exceptionString = "Exception string";
+            const string exceptionString = "Exception string";
             var eventData = new LoggingEventData
             {
                 LoggerName = _log.Logger.Name,
@@ -159,12 +185,12 @@ namespace log4stash.Tests.Integration
         }
 
         [Test]
-        [TestCase(new[] { ",", " " },   new[] { ":", "=" }, "",     TestName = "Can_read_KvFilter_properties: Regular1")]
-        [TestCase(new[] { ";", " " },   new[] { "~" },      "",     TestName = "Can_read_KvFilter_properties: Regular2")]
-        [TestCase(new[] { ";" },        new[] { "=" },      "",     TestName = "Can_read_KvFilter_properties: No whiteSpace on fieldSplit causes the 'another ' key and raise spaces issue", ExpectedException = typeof(Exception), ExpectedMessage = "spaces issue")]
-        [TestCase(new[] { ";" },        new[] { "=" },      " ",    TestName = "Can_read_KvFilter_properties: No whiteSpace but with trimming, fix the 'another' key")]
-        [TestCase(new[] { "\\|", " " }, new[] { "\\>" },    "",     TestName = "Can_read_KvFilter_properties: Regex chars need to be escaped with backslash")]
-        [TestCase(new[] { "\n" },       new[] { ":" },      " ",    TestName = "Can_read_KvFilter_properties: NewLine")]
+        [TestCase(new[] { ",", " " }, new[] { ":", "=" }, "", TestName = "Can_read_KvFilter_properties: Regular1")]
+        [TestCase(new[] { ";", " " }, new[] { "~" }, "", TestName = "Can_read_KvFilter_properties: Regular2")]
+        [TestCase(new[] { ";" }, new[] { "=" }, "", TestName = "Can_read_KvFilter_properties: No whiteSpace on fieldSplit causes the 'another ' key and raise spaces issue", ExpectedException = typeof(Exception), ExpectedMessage = "spaces issue")]
+        [TestCase(new[] { ";" }, new[] { "=" }, " ", TestName = "Can_read_KvFilter_properties: No whiteSpace but with trimming, fix the 'another' key")]
+        [TestCase(new[] { "\\|", " " }, new[] { "\\>" }, "", TestName = "Can_read_KvFilter_properties: Regex chars need to be escaped with backslash")]
+        [TestCase(new[] { "\n" }, new[] { ":" }, " ", TestName = "Can_read_KvFilter_properties: NewLine")]
         public void Can_read_KvFilter_properties(string[] fieldSplit, string[] valueSplit, string trim)
         {
             ElasticAppenderFilters oldFilters = null;
@@ -199,7 +225,7 @@ namespace log4stash.Tests.Integration
 
             Assert.IsNotNull(entry.key);
             Assert.AreEqual("value", entry.key.ToString());
-            
+
             Assert.IsNotNull(entry["object"]);
             Assert.AreEqual("this is object :)", entry["object"].ToString());
 
@@ -247,7 +273,7 @@ namespace log4stash.Tests.Integration
             _log.Debug("dummy");
 
             Client.Refresh(TestIndex);
-            
+
             var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
             var doc = res.Documents.First();
 
@@ -267,7 +293,7 @@ namespace log4stash.Tests.Integration
                 var convert = new ConvertFilter();
                 convert.AddToString(sourceKey);
 
-                var toArray = new ConvertToArrayFilter {SourceKey = sourceKey};
+                var toArray = new ConvertToArrayFilter { SourceKey = sourceKey };
                 convert.AddToArray(toArray);
 
                 appender.ElasticFilters.AddConvert(convert);
@@ -328,16 +354,16 @@ namespace log4stash.Tests.Integration
         }
 
         [Test]
-        [TestCase(false, TestName = "parse_json_string_as_object2: Should preserve json structure")]
-        [TestCase(true, TestName = "parse_json_string_as_object2: Should flatten the json")]
-        public void parse_json_string_as_object2(bool flatten)
+        [TestCase(false, "_", TestName = "parse_json_string_as_object2: Should preserve json structure")]
+        [TestCase(true, "_", TestName = "parse_json_string_as_object2: Should flatten the json")]
+        public void parse_json_string_as_object2(bool flatten, string separator = "_")
         {
             ElasticAppenderFilters oldFilters = null;
             QueryConfiguration(appender =>
             {
                 oldFilters = appender.ElasticFilters;
                 appender.ElasticFilters = new ElasticAppenderFilters();
-                appender.ElasticFilters.AddFilter(new JsonFilter() {FlattenJson = flatten});
+                appender.ElasticFilters.AddFilter(new JsonFilter() { FlattenJson = flatten, Separator = separator });
                 appender.ActivateOptions();
             });
             string json =
@@ -364,9 +390,9 @@ namespace log4stash.Tests.Integration
             {
                 actualObj = doc;
                 innerMessage = actualObj["InnerMessage"].ToString();
-                dataType = actualObj["Data.Type"].ToString();
-                dataHost = actualObj["Data.Host"].ToString();
-                dataArrayFirst = actualObj["Data.Array.0"].ToString();
+                dataType = actualObj["Data" + separator + "Type"].ToString();
+                dataHost = actualObj["Data" + separator + "Host"].ToString();
+                dataArrayFirst = actualObj["Data" + separator + "Array" + separator + "0"].ToString();
             }
             else
             {
@@ -384,49 +410,115 @@ namespace log4stash.Tests.Integration
         }
 
         [Test]
-        [TestCase("1s", 0, TestName = "ttl elapsed")]
-        [TestCase("20m", 1, TestName = "ttl didn't elapsed")]
-        public void test_ttl(string ttlValue, int expectation)
+        public void parse_xml_string_as_object()
         {
-            const string ttlTemplateName = "ttltemplate";
-            const int toWaitMillisec = 3000;
-
-            Client.PutIndexTemplate(ttlTemplateName,
-                descriptor =>
-                    descriptor.Template("*")
-                        .Settings(settings => settings.Setting("indices.ttl.interval", "1s").Setting("index.ttl.interval", "1s"))
-                        .Mappings(mapping => mapping.Map("_default_", desc => desc.TtlField(ttlField => ttlField.Enable().Default("1d")))));
-
+            const string sourceKey = "xmlObject";
             ElasticAppenderFilters oldFilters = null;
-            QueryConfiguration(
-                appender =>
-                {
-                    oldFilters = appender.ElasticFilters;
-                    appender.ElasticFilters = new ElasticAppenderFilters();
-                    appender.ElasticFilters.AddFilter(new AddValueFilter() { Key = "_ttl", Value = ttlValue });
-                });
 
-            _log.Info("test");
-            Client.Refresh(TestIndex);
-            var res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent"));
-            Assert.AreEqual(1, res.Total);
-
-            // "Magic". The time of deletion isn't consistent :/
-            int numOfTries = 20;
-            while (--numOfTries > 0)
+            QueryConfiguration(appender =>
             {
-                Client.Refresh(TestIndex);
-                Client.Optimize(TestIndex);
-                res = Client.Search<dynamic>(s => s.AllTypes().AllIndices());
-                numOfTries = res.Total == expectation ? 0 : numOfTries;
-                Thread.Sleep(toWaitMillisec);
+                oldFilters = appender.ElasticFilters;
+                appender.ElasticFilters = new ElasticAppenderFilters();
+                appender.ElasticFilters.AddFilter(new XmlFilter { SourceKey = sourceKey });
+            });
+
+            var xmlDoc = new XmlDocument();
+            var parentNode = xmlDoc.CreateElement("Parent");
+            var parentAttribute = xmlDoc.CreateAttribute("key");
+            parentAttribute.Value = "value\r\nnewline";
+            parentNode.Attributes.Append(parentAttribute);
+            xmlDoc.AppendChild(parentNode);
+            foreach (var i in Enumerable.Range(0, 5))
+            {
+                var childNode = xmlDoc.CreateElement("Child");
+                var childAttribute = xmlDoc.CreateAttribute("id");
+                childAttribute.Value = i.ToString();
+                childNode.Attributes.Append(childAttribute);
+                parentNode.AppendChild(childNode);
             }
 
-            res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent"));
-            Client.DeleteIndexTemplate(ttlTemplateName);
+            var xmlString = ConvertXmlToString(xmlDoc);
+            LogicalThreadContext.Properties[sourceKey] = xmlString;
+            _log.Info("logging xmlObject");
+
+            Client.Refresh(TestIndex);
+
+            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
+            var doc = res.Documents.First();
+
+            var jsonObject = doc[sourceKey];
             QueryConfiguration(appender => appender.ElasticFilters = oldFilters);
 
-            Assert.AreEqual(expectation, res.Total);
+            Assert.NotNull(jsonObject);
+            Assert.AreEqual(jsonObject["Parent"]["@key"].Value<string>(), "value\r\nnewline");
+            var arr = jsonObject["Parent"]["Child"].ToArray();
+            foreach (var i in Enumerable.Range(0, 5))
+            {
+                Assert.AreEqual(arr[i]["@id"].Value<int>(), i);
+            }
+        }
+
+        [Test]
+        [TestCase(false, TestName = "parse_xml_string_as_object2: Should preserve xml structure in json format")]
+        [TestCase(true, TestName = "parse_xml_string_as_object2: Should flatten the xml")]
+        public void parse_xml_string_as_object2(bool flatten)
+        {
+            ElasticAppenderFilters oldFilters = null;
+
+            QueryConfiguration(appender =>
+            {
+                oldFilters = appender.ElasticFilters;
+                appender.ElasticFilters = new ElasticAppenderFilters();
+                appender.ElasticFilters.AddFilter(new XmlFilter { FlattenXml = flatten});
+            });
+
+            var xmlDoc = new XmlDocument();
+            var parentNode = xmlDoc.CreateElement("Parent");
+            var parentAttribute = xmlDoc.CreateAttribute("key");
+            parentAttribute.Value = "key";
+            parentNode.Attributes.Append(parentAttribute);
+            xmlDoc.AppendChild(parentNode);
+            foreach (var i in Enumerable.Range(1, 2))
+            {
+                var childNode = xmlDoc.CreateElement("Child");
+                var childAttribute = xmlDoc.CreateAttribute("id");
+                childAttribute.Value = i.ToString();
+                childNode.Attributes.Append(childAttribute);
+                parentNode.AppendChild(childNode);
+            }
+
+            var xmlString = ConvertXmlToString(xmlDoc);
+            LogicalThreadContext.Properties["XmlRaw"] = xmlString;
+            _log.Info("Info");
+
+            Client.Refresh(TestIndex);
+            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
+            var doc = res.Documents.First();
+
+            QueryConfiguration(appender =>
+            {
+                appender.ElasticFilters = oldFilters;
+                appender.ActivateOptions();
+            });
+
+            JToken actualObj;
+            string parentKey;
+            string dataArrayFirstId;
+            if (flatten)
+            {
+                actualObj = doc;
+                parentKey = actualObj["Parent.@key"].ToString();
+                dataArrayFirstId = actualObj["Parent.Child.0.@id"].ToString();
+            }
+            else
+            {
+                actualObj = doc["XmlRaw"];
+                parentKey = actualObj["Parent"]["@key"].ToString();
+                dataArrayFirstId = actualObj["Parent"]["Child"][0]["@id"].ToString();
+            }
+            Assert.IsNotNull(actualObj);
+            Assert.AreEqual("key", parentKey);
+            Assert.AreEqual("1", dataArrayFirstId);
         }
 
         [Test]
@@ -446,6 +538,19 @@ namespace log4stash.Tests.Integration
             PerformanceTests.Test(1, 32000);
 
             QueryConfiguration(appender => appender.ElasticFilters = oldFilters);
+        }
+
+        private static string ConvertXmlToString(XmlDocument xmlDoc)
+        {
+            using (var stringWriter = new StringWriter())
+            {
+                using (var xmlWriter = XmlWriter.Create(stringWriter))
+                {
+                    xmlDoc.WriteContentTo(xmlWriter);
+                    xmlWriter.Flush();
+                    return stringWriter.GetStringBuilder().ToString();
+                }
+            }
         }
     }
 
