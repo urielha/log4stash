@@ -145,10 +145,7 @@ namespace log4stash
             foreach (InnerBulkOperation operation in bulk)
             {
                 AddOperationMetadata(operation, sb);
-                sb.Append("\n");
-
-                AddOperationSource(operation, sb);
-                sb.Append("\n");
+                AddOperationDocument(operation, sb);
             }
             return sb.ToString();
         }
@@ -167,12 +164,14 @@ namespace log4stash
                     @"{{ ""index"" : {{ ""_index"" : ""{0}"", ""_type"" : ""{1}""}} }}",
                     operation.IndexName, operation.IndexType);
             }
+            sb.Append("\n");
         }
 
-        private static void AddOperationSource(InnerBulkOperation operation, StringBuilder sb)
+        private static void AddOperationDocument(InnerBulkOperation operation, StringBuilder sb)
         {
             string json = JsonConvert.SerializeObject(operation.Document);
             sb.Append(json);
+            sb.Append("\n");
         }
 
         private bool SafeSendRequest(RequestDetails request, Func<Stream> getRequestStream)
