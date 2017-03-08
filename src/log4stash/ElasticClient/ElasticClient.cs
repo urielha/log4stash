@@ -49,7 +49,6 @@ namespace log4stash
             var url = string.Format("{0}://{1}:{2}/", Ssl ? "https" : "http", serverData.Address, serverData.Port);
             return url;
         }
-
     }
 
     public class WebElasticClient : AbstractWebElasticClient
@@ -88,6 +87,7 @@ namespace log4stash
         {
             var url = string.Concat(Url, "_template/", templateName);
             var webRequest = WebRequest.Create(url);
+            webRequest.Timeout = Timeout;
             webRequest.ContentType = "text/json";
             webRequest.Method = "PUT";
             SetHeaders((HttpWebRequest)webRequest, url, rawBody);
@@ -134,7 +134,7 @@ namespace log4stash
             var webRequest = WebRequest.Create(url);
             webRequest.ContentType = "text/plain";
             webRequest.Method = "POST";
-            webRequest.Timeout = 10000;
+            webRequest.Timeout = Timeout;
             SetHeaders((HttpWebRequest)webRequest, url, requestString);
             return new RequestDetails(webRequest, requestString);
         }

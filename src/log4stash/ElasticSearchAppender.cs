@@ -100,7 +100,7 @@ namespace log4stash
         {
             if (Server != null && Port != 0)
             {
-                var serverData = new ServerData {Address = Server, Port = Port};
+                var serverData = new ServerData { Address = Server, Port = Port };
                 Servers.Add(serverData);
             }
         }
