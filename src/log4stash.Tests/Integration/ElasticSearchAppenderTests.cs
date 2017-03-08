@@ -30,8 +30,14 @@ namespace log4stash.Tests.Integration
         }
 
         [Test]
-        public void Log_Exception_With_Custom_Id()
+        public void Log_With_Custom_Id()
         {
+            string oldDocId = null;
+            QueryConfiguration(appender =>
+            {
+                oldDocId = appender.DocumentIdSource;
+                appender.DocumentIdSource = "IdSource";
+            });
             ThreadContext.Properties["IdSource"] = "TEST_ID";
             _log.Info("loggingtest");
 
@@ -39,13 +45,18 @@ namespace log4stash.Tests.Integration
 
             var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(q => q.Ids(descriptor => descriptor.Values("TEST_ID"))));
 
+            QueryConfiguration(appender =>
+            {
+                appender.DocumentIdSource = oldDocId;
+            });
+
             Assert.AreEqual(1, searchResults.Total);
         }
 
         [Test]
         public void Log_exception_string_without_object()
         {
-            var exceptionString = "Exception string";
+            const string exceptionString = "Exception string";
             var eventData = new LoggingEventData
             {
                 LoggerName = _log.Logger.Name,
