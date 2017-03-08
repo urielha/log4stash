@@ -78,7 +78,6 @@ You can also set any public property in the appender/filter which didn't appear 
     <Template>
       <Name>templateName</Name>
       <FileName>path2template.json</FileName>
-      <ForcePut>False</ForcePut>
     </Template>
 
     <!--Only one credential type can used at once-->

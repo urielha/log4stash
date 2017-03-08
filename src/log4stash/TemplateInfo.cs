@@ -10,12 +10,10 @@ namespace log4stash
         public string Name { get; set; }
         public string FileName { get; set; }
         public bool IsValid { get; private set; }
-        public bool ForcePut { get; private set; }
 
         public TemplateInfo()
         {
             IsValid = false;
-            ForcePut = false;
         }
 
         public void ActivateOptions()
