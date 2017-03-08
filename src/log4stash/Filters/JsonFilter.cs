@@ -7,6 +7,7 @@ namespace log4stash.Filters
 {
     public class JsonFilter : IElasticAppenderFilter
     {
+        public static readonly string DefaultSeparator = "_";
         private LogEventSmartFormatter _sourceKey;
 
         [PropertyNotEmpty]
@@ -24,7 +25,7 @@ namespace log4stash.Filters
         {
             SourceKey = "JsonRaw";
             FlattenJson = false;
-            Separator = "_";
+            Separator = DefaultSeparator;
         }
 
         public void PrepareConfiguration(IElasticsearchClient client)
@@ -79,7 +80,7 @@ namespace log4stash.Filters
 
         private string Join(string prefix, string name)
         {
-            return (string.IsNullOrEmpty(prefix) ? name : prefix + Separator + name);
+            return (string.IsNullOrEmpty(prefix) ? name : string.Concat(prefix, Separator, name));
         }
     }
 }

@@ -319,57 +319,27 @@ namespace log4stash.Tests.Integration
         }
 
         [Test]
-        public void parse_json_string_as_object()
+        [TestCase(false, "_", TestName = "parse_json_string_as_object2: Should preserve json structure")]
+        [TestCase(true, "_", TestName = "parse_json_string_as_object2: Should flatten the json")]
+        [TestCase(true, "S", TestName = "parse_json_string_as_object2: Should flatten the json with 'S' separator")]
+        public void parse_json_string_as_object(bool flatten, string separator = "_")
         {
             const string sourceKey = "jsonObject";
             ElasticAppenderFilters oldFilters = null;
-
             QueryConfiguration(appender =>
             {
                 oldFilters = appender.ElasticFilters;
                 appender.ElasticFilters = new ElasticAppenderFilters();
-                appender.ElasticFilters.AddFilter(new JsonFilter() { SourceKey = sourceKey });
-            });
-
-            var jObject = new JObject { { "key", "value\r\nnewline" }, { "arr", new JArray(Enumerable.Range(0, 5)) } };
-            LogicalThreadContext.Properties[sourceKey] = jObject.ToString();
-            _log.Info("logging jsonObject");
-
-            Client.Refresh(TestIndex);
-
-            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
-            var doc = res.Documents.First();
-
-            var jsonObject = doc[sourceKey];
-            QueryConfiguration(appender => appender.ElasticFilters = oldFilters);
-
-            Assert.NotNull(jsonObject);
-            Assert.AreEqual(jsonObject["key"].Value<string>(), "value\r\nnewline");
-            var arr = jsonObject["arr"].ToArray();
-            foreach (var i in Enumerable.Range(0, 5))
-            {
-                Assert.AreEqual(arr[i].Value<int>(), i);
-            }
-
-        }
-
-        [Test]
-        [TestCase(false, "_", TestName = "parse_json_string_as_object2: Should preserve json structure")]
-        [TestCase(true, "_", TestName = "parse_json_string_as_object2: Should flatten the json")]
-        public void parse_json_string_as_object2(bool flatten, string separator = "_")
-        {
-            ElasticAppenderFilters oldFilters = null;
-            QueryConfiguration(appender =>
-            {
-                oldFilters = appender.ElasticFilters;
-                appender.ElasticFilters = new ElasticAppenderFilters();
-                appender.ElasticFilters.AddFilter(new JsonFilter() { FlattenJson = flatten, Separator = separator });
+                appender.ElasticFilters.AddFilter(new JsonFilter() { FlattenJson = flatten, Separator = separator, SourceKey = sourceKey });
                 appender.ActivateOptions();
             });
-            string json =
-                "{\"InnerMessage\":\"Starting.\", \"Data\":{\"Type\":\"Url\", \"Host\":\"localhost\", \"Array\":[\"One\", \"Two\"]}}";
-            log4net.LogicalThreadContext.Properties["JsonRaw"] = json;
-            _log.Info("Info");
+            var jObject = new JObject
+            {
+                { "key", "value\r\nnewline" }, 
+                { "Data", new JObject{{"Type","Url"}, {"Host","localhost"}, { "Array", new JArray(Enumerable.Range(0, 5)) }} }
+            };
+            log4net.LogicalThreadContext.Properties[sourceKey] = jObject.ToString();
+            _log.Info("logging jsonObject");
 
             Client.Refresh(TestIndex);
             var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
@@ -382,36 +352,43 @@ namespace log4stash.Tests.Integration
             });
 
             JToken actualObj;
-            string innerMessage;
+            string key;
             string dataType;
             string dataHost;
             string dataArrayFirst;
+            string dataArrayLast;
             if (flatten)
             {
                 actualObj = doc;
-                innerMessage = actualObj["InnerMessage"].ToString();
+                key = actualObj["key"].ToString();
                 dataType = actualObj["Data" + separator + "Type"].ToString();
                 dataHost = actualObj["Data" + separator + "Host"].ToString();
                 dataArrayFirst = actualObj["Data" + separator + "Array" + separator + "0"].ToString();
+                dataArrayLast = actualObj["Data" + separator + "Array" + separator + "4"].ToString();
             }
             else
             {
-                actualObj = doc["JsonRaw"];
-                innerMessage = actualObj["InnerMessage"].ToString();
+                actualObj = doc[sourceKey];
+                key = actualObj["key"].ToString();
                 dataType = actualObj["Data"]["Type"].ToString();
                 dataHost = actualObj["Data"]["Host"].ToString();
                 dataArrayFirst = actualObj["Data"]["Array"][0].ToString();
+                dataArrayLast = actualObj["Data"]["Array"][4].ToString();
             }
             Assert.IsNotNull(actualObj);
-            Assert.AreEqual("Starting.", innerMessage);
+            Assert.AreEqual("value\r\nnewline", key);
             Assert.AreEqual("Url", dataType);
             Assert.AreEqual("localhost", dataHost);
-            Assert.AreEqual("One", dataArrayFirst);
+            Assert.AreEqual("0", dataArrayFirst);
+            Assert.AreEqual("4", dataArrayLast);
         }
 
         [Test]
-        public void parse_xml_string_as_object()
+        [TestCase(false, TestName = "parse_xml_string_as_object2: Should preserve xml structure in json format")]
+        [TestCase(true, TestName = "parse_xml_string_as_object2: Should flatten the xml")]
+        public void parse_xml_string_as_object(bool flatten)
         {
+            const string separator = "_";
             const string sourceKey = "xmlObject";
             ElasticAppenderFilters oldFilters = null;
 
@@ -419,7 +396,8 @@ namespace log4stash.Tests.Integration
             {
                 oldFilters = appender.ElasticFilters;
                 appender.ElasticFilters = new ElasticAppenderFilters();
-                appender.ElasticFilters.AddFilter(new XmlFilter { SourceKey = sourceKey });
+                appender.ElasticFilters.AddFilter(new XmlFilter { SourceKey = sourceKey, FlattenXml = flatten, Separator = separator});
+                appender.ActivateOptions();
             });
 
             var xmlDoc = new XmlDocument();
@@ -446,79 +424,30 @@ namespace log4stash.Tests.Integration
             var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
             var doc = res.Documents.First();
 
-            var jsonObject = doc[sourceKey];
-            QueryConfiguration(appender => appender.ElasticFilters = oldFilters);
-
-            Assert.NotNull(jsonObject);
-            Assert.AreEqual(jsonObject["Parent"]["@key"].Value<string>(), "value\r\nnewline");
-            var arr = jsonObject["Parent"]["Child"].ToArray();
-            foreach (var i in Enumerable.Range(0, 5))
-            {
-                Assert.AreEqual(arr[i]["@id"].Value<int>(), i);
-            }
-        }
-
-        [Test]
-        [TestCase(false, TestName = "parse_xml_string_as_object2: Should preserve xml structure in json format")]
-        [TestCase(true, TestName = "parse_xml_string_as_object2: Should flatten the xml")]
-        public void parse_xml_string_as_object2(bool flatten)
-        {
-            ElasticAppenderFilters oldFilters = null;
-
-            QueryConfiguration(appender =>
-            {
-                oldFilters = appender.ElasticFilters;
-                appender.ElasticFilters = new ElasticAppenderFilters();
-                appender.ElasticFilters.AddFilter(new XmlFilter { FlattenXml = flatten});
-            });
-
-            var xmlDoc = new XmlDocument();
-            var parentNode = xmlDoc.CreateElement("Parent");
-            var parentAttribute = xmlDoc.CreateAttribute("key");
-            parentAttribute.Value = "key";
-            parentNode.Attributes.Append(parentAttribute);
-            xmlDoc.AppendChild(parentNode);
-            foreach (var i in Enumerable.Range(1, 2))
-            {
-                var childNode = xmlDoc.CreateElement("Child");
-                var childAttribute = xmlDoc.CreateAttribute("id");
-                childAttribute.Value = i.ToString();
-                childNode.Attributes.Append(childAttribute);
-                parentNode.AppendChild(childNode);
-            }
-
-            var xmlString = ConvertXmlToString(xmlDoc);
-            LogicalThreadContext.Properties["XmlRaw"] = xmlString;
-            _log.Info("Info");
-
-            Client.Refresh(TestIndex);
-            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
-            var doc = res.Documents.First();
-
             QueryConfiguration(appender =>
             {
                 appender.ElasticFilters = oldFilters;
                 appender.ActivateOptions();
             });
 
-            JToken actualObj;
-            string parentKey;
-            string dataArrayFirstId;
             if (flatten)
             {
-                actualObj = doc;
-                parentKey = actualObj["Parent.@key"].ToString();
-                dataArrayFirstId = actualObj["Parent.Child.0.@id"].ToString();
+                Assert.NotNull(doc);
+                Assert.AreEqual(doc["Parent" + separator + "@key"].ToString(), "value\r\nnewline");
+                Assert.AreEqual(doc["Parent" + separator + "Child" + separator + "0" + separator + "@id"].ToString(), "0");
+                Assert.AreEqual(doc["Parent" + separator + "Child" + separator + "1" + separator + "@id"].ToString(), "1");
             }
             else
             {
-                actualObj = doc["XmlRaw"];
-                parentKey = actualObj["Parent"]["@key"].ToString();
-                dataArrayFirstId = actualObj["Parent"]["Child"][0]["@id"].ToString();
+                var jsonObject = doc[sourceKey];
+                Assert.NotNull(jsonObject);
+                Assert.AreEqual(jsonObject["Parent"]["@key"].Value<string>(), "value\r\nnewline");
+                var arr = jsonObject["Parent"]["Child"].ToArray();
+                foreach (var i in Enumerable.Range(0, 5))
+                {
+                    Assert.AreEqual(arr[i]["@id"].Value<int>(), i);
+                }
             }
-            Assert.IsNotNull(actualObj);
-            Assert.AreEqual("key", parentKey);
-            Assert.AreEqual("1", dataArrayFirstId);
         }
 
         [Test]
