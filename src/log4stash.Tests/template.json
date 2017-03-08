@@ -21,6 +21,10 @@
 		},
 
         "LogEvent" : {
+            "_timestamp": {
+                "enabled": true,
+                "path": "@timestamp"
+            },
 
 			"properties" : {
 				"Message" : {

@@ -20,15 +20,18 @@ namespace log4stash.Filters
 
         public bool FlattenXml { get; set; }
 
+        public string Separator { get; set; }
+
         public XmlFilter()
         {
             SourceKey = "XmlRaw";
             FlattenXml = false;
+            Separator = JsonFilter.DefaultSeparator;
         }
 
         public void PrepareConfiguration(IElasticsearchClient client)
         {
-            _jsonFilter = new JsonFilter {FlattenJson = FlattenXml, SourceKey = SourceKey};
+            _jsonFilter = new JsonFilter {FlattenJson = FlattenXml, SourceKey = SourceKey, Separator = Separator};
             _jsonFilter.PrepareConfiguration(client);
         }
 
