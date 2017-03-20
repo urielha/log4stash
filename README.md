@@ -18,9 +18,11 @@ The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.Elast
 * __Upgrading to 1.0.0__: The definition of IElasticAppenderFilter has been changed, PrepareEvent has only one parameter and PrepareConfiguration's parameter type has changed to IElasticsearchClient.
 
 #### Versions notes:
-* :green_book: log4stash 1.1.0 has new feature `SerializeObjects`, if true (the default) it serializes the exception object and message object into json object and add them to Elastic. You can see them under "MessageObject" and "ExceptionObject" keys.  - [Related commit](https://github.com/urielha/log4stash/commit/560676de9b074be70e00f93566c543a846ba5c8e)
+* :green_book: log4stash 2.0.4 has new filters see [filters section][filters-section] for more information. Added support for AWS Version 4 authorization header thanks to [@Marcelo Palladino][mfpalladino]. Support configuring multiple elastic nodes. Add document id source so you can decide your own doc id (instead of getting generated one from the elastic). Add Timeout option for requests. Many thanks to [@eran gil][erangil] for the efforts and the pull requests.
 
-* :green_book: log4stash 2.0.0 has new filter `Json`, you can add it if you have json string in you log event and you want it to be converted to an object and not be passed as string to the elastic. Thanks to [@ignasv](https://github.com/ignasv) for this filter.
+* :green_book: log4stash 2.0.0 has new filter `Json`, you can add it if you have json string in you log event and you want it to be converted to an object and not be passed as string to the elastic. Thanks to [@Ignas Velža][ignasv] for this filter.
+
+* :green_book: log4stash 1.1.0 has new feature `SerializeObjects`, if true (the default) it serializes the exception object and message object into json object and add them to Elastic. You can see them under "MessageObject" and "ExceptionObject" keys.  - [Related commit](https://github.com/urielha/log4stash/commit/560676de9b074be70e00f93566c543a846ba5c8e)
 
 ### Filters:
 * **Add** - add new key and value to the event.
@@ -201,3 +203,8 @@ The inspiration to the filters and style had taken from [elasticsearch/logstash]
 [AppVeyor]:http://www.appveyor.com/
 
 [config-example]:https://github.com/urielha/log4stash#almost-full-configuration
+[filters-section]:https://github.com/urielha/log4stash#filters
+
+[ignasv]:https://github.com/ignasv
+[erangil]:https://github.com/erangil2
+[mfpalladino]:https://github.com/mfpalladino

@@ -24,7 +24,7 @@
         ** #16 Change authentication method configuration with brand new tag.
         ** #18 Support configuring multiple elastic nodes.
         ** #20 Add document id source
-        ** #22 Add Timeout option for the requests
+        ** #22 Add Timeout option for requests
         ** #24 Add Xml filter.
       * Add Convert Filter. Used for converting values to: [lower/upper] string, int or array
       
