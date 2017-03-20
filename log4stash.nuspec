@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>log4stash</id>
-    <version>2.0.2-c</version>
+    <version>2.0.4</version>
     <authors>urielha</authors>
     <owners>urielha</owners>
     <title>log4stash - Elasticsearch log4net appender</title>
@@ -15,14 +15,22 @@
       You can configure few filters to analyze log events before they got sended to Elasticsearch similar to the filters on logstash.
     </description>
     <releaseNotes>
-      * Breaking: Namespace has been renamed from "log4net.ElasticSearch" to "log4stash".
-      * Use Newtonsoft.Json (internally) instead of JavaScriptSerializer.
-      * Add jsonFilter - to parse json strings as objects into ES.
-      * Fixed issues.
-      * (2.0.1) - merged pull request #11 (fix application crash on async index)
-      * (2.0.2-b) - add Convert Filter. Used for converting values to: [lower/upper] string, int or array
+      * Breaking: BasicAuthUsername and BasicAuthPassword moved under AuthenticationMethod, see config example for more information.
+      * Breaking (from 2.0): Namespace has been renamed from "log4net.ElasticSearch" to "log4stash".
+      
+      * Merged pull requests
+        ** #11 (fix application crash on async index)
+        ** #14 Add support for AWS Version 4 authorization header.
+        ** #16 Change authentication method configuration with brand new tag.
+        ** #18 Support configuring multiple elastic nodes.
+        ** #20 Add document id source
+        ** #22 Add Timeout option for the requests
+        ** #24 Add Xml filter.
+      * Add Convert Filter. Used for converting values to: [lower/upper] string, int or array
+      
+      Thanks to @erangil2 and @mfpalladino for their contributions.
     </releaseNotes>
-    <copyright>Copyright 2016</copyright>
+    <copyright>Copyright 2017</copyright>
     <tags>log logging exception elasticsearch log4net appender logstash filters</tags>
     <dependencies>
       <group>
