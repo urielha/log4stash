@@ -162,7 +162,7 @@ namespace log4stash
             var paramStrings = indexParams.Where(kv => kv.Value != null)
                 .Select(kv => string.Format(@"""{0}"" : ""{1}""", kv.Key, kv.Value)).ToArray();
             var documentMetadata = string.Join(",", paramStrings);
-            sb.AppendFormat(@"{{ ""index"" : { {0} }}}", documentMetadata);
+            sb.AppendFormat(@"{{ ""index"" : {{ {0} }} }}", documentMetadata);
             sb.Append("\n");
         }
 
