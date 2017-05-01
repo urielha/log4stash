@@ -23,9 +23,8 @@ namespace log4stash
 
         public FixFlags FixedFields { get; set; }
         public bool SerializeObjects { get; set; }
-
         public string DocumentIdSource { get; set; }
-
+        public string RoutingSource { get; set; }
         public int BulkSize { get; set; }
         public int BulkIdleTimeout { get; set; }
         public int TimeoutToWaitForTimer { get; set; }
@@ -60,6 +59,7 @@ namespace log4stash
         public ElasticSearchAppender()
         {
             DocumentIdSource = null;
+            RoutingSource = null;
             FixedFields = FixFlags.Partial;
             SerializeObjects = true;
 
@@ -166,7 +166,8 @@ namespace log4stash
         private void PrepareAndAddToBulk(Dictionary<string, object> logEvent)
         {
             ElasticFilters.PrepareEvent(logEvent);
-            var documentId = GetDocumentId(logEvent);
+            var documentId = SafeGetValueFromLogEvent(logEvent, DocumentIdSource);
+            var routing = SafeGetValueFromLogEvent(logEvent, RoutingSource);
             var indexName = _indexName.Format(logEvent).ToLower();
             var indexType = _indexType.Format(logEvent);
 
@@ -175,7 +176,8 @@ namespace log4stash
                 Document = logEvent,
                 IndexName = indexName,
                 IndexType = indexType,
-                DocumentId = documentId
+                DocumentId = documentId,
+                Routing = routing,
             };
 
             lock (_bulk)
@@ -184,17 +186,17 @@ namespace log4stash
             }
         }
 
-        private object GetDocumentId(Dictionary<string, object> logEvent)
+        private object SafeGetValueFromLogEvent(IDictionary<string, object> logEvent, string key)
         {
-            object documentId = null;
-            if (!string.IsNullOrEmpty(DocumentIdSource) && 
-                !logEvent.TryGetValue(DocumentIdSource, out documentId))
+            object value = null;
+            if (!string.IsNullOrEmpty(key) && 
+                !logEvent.TryGetValue(key, out value))
             {
                 LogLog.Warn(GetType(),
-                    string.Format("Get documentId failed - key '{0}' not found in the logEvent", DocumentIdSource));
+                    string.Format("Get value failed - key '{0}' not found in the logEvent", key));
                 return null;
             }
-            return documentId;
+            return value;
         }
 
         public void TimerElapsed(object state)
