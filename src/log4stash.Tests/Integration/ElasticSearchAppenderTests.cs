@@ -57,6 +57,34 @@ namespace log4stash.Tests.Integration
         }
 
         [Test]
+        public void Log_With_Custom_Routing()
+        {
+            string oldRoutingSource = null;
+            QueryConfiguration(appender =>
+            {
+                oldRoutingSource = appender.RoutingSource;
+                appender.RoutingSource = "RoutingSource";
+            });
+            ThreadContext.Properties["RoutingSource"] = "ROUTING";
+            _log.Info("loggingtest");
+
+            Client.Refresh(TestIndex);
+            var query = new TermsQuery
+            {
+                Field = "_routing",
+                Terms = new[] {"ROUTING"}
+            };
+            var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(descriptor => query));
+
+            QueryConfiguration(appender =>
+            {
+                appender.RoutingSource = oldRoutingSource;
+            });
+
+            Assert.AreEqual(1, searchResults.Total);
+        }
+
+        [Test]
         public void log_async_message()
         {
             bool originIndexAsync = false;

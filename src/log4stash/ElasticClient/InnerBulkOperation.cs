@@ -6,10 +6,12 @@ namespace log4stash
         public string IndexType { get; set; }
         public object Document { get; set; }
         public object DocumentId { get; set; }
+        public object Routing { get; set; }
 
         public InnerBulkOperation()
         {
             DocumentId = null;
+            Routing = null;
         }
     }
 }
