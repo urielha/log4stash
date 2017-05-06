@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using log4stash.Configuration;
+
 namespace log4stash
 {
     public class InnerBulkOperation 
@@ -5,13 +8,10 @@ namespace log4stash
         public string IndexName { get; set; }
         public string IndexType { get; set; }
         public object Document { get; set; }
-        public object DocumentId { get; set; }
-        public object Routing { get; set; }
+        public Dictionary<string, object> RequestParameters { get; set; }
 
         public InnerBulkOperation()
         {
-            DocumentId = null;
-            Routing = null;
         }
     }
 }

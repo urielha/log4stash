@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using log4stash.LogEventFactory;
 using log4stash.SmartFormatters;
@@ -23,8 +24,16 @@ namespace log4stash
 
         public FixFlags FixedFields { get; set; }
         public bool SerializeObjects { get; set; }
-        public string DocumentIdSource { get; set; }
-        public string RoutingSource { get; set; }
+
+        public string DocumentIdSource
+        {
+            set
+            {
+                RequestParmeters.AddParameter(new RequestParameter("_id", value));
+            }
+        }
+
+        public RequestParameterDictionary RequestParmeters { get; set; }
         public int BulkSize { get; set; }
         public int BulkIdleTimeout { get; set; }
         public int TimeoutToWaitForTimer { get; set; }
@@ -58,8 +67,6 @@ namespace log4stash
 
         public ElasticSearchAppender()
         {
-            DocumentIdSource = null;
-            RoutingSource = null;
             FixedFields = FixFlags.Partial;
             SerializeObjects = true;
 
@@ -81,6 +88,7 @@ namespace log4stash
             AllowSelfSignedServerCert = false;
             Ssl = false;
             AuthenticationMethod = new AuthenticationMethodChooser();
+            RequestParmeters = new RequestParameterDictionary();
         }
 
         public override void ActivateOptions()
@@ -166,18 +174,17 @@ namespace log4stash
         private void PrepareAndAddToBulk(Dictionary<string, object> logEvent)
         {
             ElasticFilters.PrepareEvent(logEvent);
-            var documentId = SafeGetValueFromLogEvent(logEvent, DocumentIdSource);
-            var routing = SafeGetValueFromLogEvent(logEvent, RoutingSource);
             var indexName = _indexName.Format(logEvent).ToLower();
             var indexType = _indexType.Format(logEvent);
+            var requestParameterValues = RequestParmeters.ToDictionary(param => param.Key,
+                param => SafeGetValueFromLogEvent(logEvent, param.Value));
 
             var operation = new InnerBulkOperation
             {
                 Document = logEvent,
                 IndexName = indexName,
                 IndexType = indexType,
-                DocumentId = documentId,
-                Routing = routing,
+                RequestParameters = requestParameterValues
             };
 
             lock (_bulk)
