@@ -1,15 +1,17 @@
-﻿using System.Collections;
+﻿using log4stash.SmartFormatters;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace log4stash.Configuration
 {
-    public class RequestParameterDictionary : IDictionary<string, string>
+    public class RequestParameterDictionary
     {
-        private readonly IDictionary<string, string> _parametersDictionary;
+        private readonly IDictionary<string, LogEventSmartFormatter> _parametersDictionary;
 
         public RequestParameterDictionary()
         {
-            _parametersDictionary = new Dictionary<string, string>();
+            _parametersDictionary = new Dictionary<string, LogEventSmartFormatter>();
         }
 
         public void AddParameter(RequestParameter parameter)
@@ -17,85 +19,24 @@ namespace log4stash.Configuration
             _parametersDictionary[parameter.Key] = parameter.Value;
         }
 
-        public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
+        public Dictionary<string, string> ToDictionary(Dictionary<string, object> logEvent)
         {
-            return _parametersDictionary.GetEnumerator();
+            return _parametersDictionary.ToDictionary(
+                param => param.Key,
+                param => param.Value.Format(logEvent));
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
+        // For Testing
+        public bool TryGetValue(string key, out string stringValue)
         {
-            return ((IEnumerable) _parametersDictionary).GetEnumerator();
-        }
-
-        public void Add(KeyValuePair<string, string> item)
-        {
-            _parametersDictionary.Add(item);
-        }
-
-        public void Clear()
-        {
-            _parametersDictionary.Clear();
-        }
-
-        public bool Contains(KeyValuePair<string, string> item)
-        {
-            return _parametersDictionary.Contains(item);
-        }
-
-        public void CopyTo(KeyValuePair<string, string>[] array, int arrayIndex)
-        {
-            _parametersDictionary.CopyTo(array, arrayIndex);
-        }
-
-        public bool Remove(KeyValuePair<string, string> item)
-        {
-            return _parametersDictionary.Remove(item);
-        }
-
-        public int Count
-        {
-            get { return _parametersDictionary.Count; }
-        }
-
-        public bool IsReadOnly
-        {
-            get { return _parametersDictionary.IsReadOnly; }
-        }
-
-        public bool ContainsKey(string key)
-        {
-            return _parametersDictionary.ContainsKey(key);
-        }
-
-        public void Add(string key, string value)
-        {
-            _parametersDictionary.Add(key, value);
-        }
-
-        public bool Remove(string key)
-        {
-            return _parametersDictionary.Remove(key);
-        }
-
-        public bool TryGetValue(string key, out string value)
-        {
-            return _parametersDictionary.TryGetValue(key, out value);
-        }
-
-        public string this[string key]
-        {
-            get { return _parametersDictionary[key]; }
-            set { _parametersDictionary[key] = value; }
-        }
-
-        public ICollection<string> Keys
-        {
-            get { return _parametersDictionary.Keys; }
-        }
-
-        public ICollection<string> Values
-        {
-            get { return _parametersDictionary.Values; }
+            stringValue = null;
+            LogEventSmartFormatter value;
+            if(_parametersDictionary.TryGetValue(key, out value))
+            {
+                stringValue = value.Raw;
+                return true;
+            }
+            return false;
         }
     }
 }

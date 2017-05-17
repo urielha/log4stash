@@ -8,7 +8,7 @@ namespace log4stash
         public string IndexName { get; set; }
         public string IndexType { get; set; }
         public object Document { get; set; }
-        public Dictionary<string, object> RequestParameters { get; set; }
+        public Dictionary<string, string> RequestParameters { get; set; }
 
         public InnerBulkOperation()
         {

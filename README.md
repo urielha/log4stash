@@ -71,24 +71,24 @@ You can also set any public property in the appender/filter which didn't appear 
     <Bulksize>2000</Bulksize>
     <BulkIdleTimeout>10000</BulkIdleTimeout>
     <IndexAsync>False</IndexAsync>
-    <DocumentIdSource>IdSource</DocumentIdSource>
+    <DocumentIdSource>IdSource</DocumentIdSource> <!-- obsolete -->
 
     <!-- optional: elasticsearch timeout for the request, default = 10000 -->
     <ElasticSearchTimeout>10000</ElasticSearchTimeout>
-	
-	<!--You can add parameters to the request to control the parameters sent to ElasticSearch.
-	for example, as you can see here, you can add a routing specification to the appender.
-	The Key is the key to be added to the request, and the value is the parameter's name in the log event properties.-->
-	<RequestParameters>
-		<Parameter>
-			<Key>key</Key>
-			<Value>value</Value>
-		</Parameter>
-		<Parameter>
-			<Key>_routing</Key>
-			<Value>RoutingSource</Value>
-		</Parameter>
-	</RequestParameters>
+  
+    <!--You can add parameters to the request to control the parameters sent to ElasticSearch.
+    for example, as you can see here, you can add a routing specification to the appender.
+    The Key is the key to be added to the request, and the value is the parameter's name in the log event properties.-->
+    <RequestParameters>
+      <Parameter>
+        <Key>_routing</Key>
+        <Value>%{RoutingSource}</Value>
+      </Parameter>
+      <Parameter>
+        <Key>key</Key>
+        <Value>value</Value>
+      </Parameter>
+    </RequestParameters>
 
     <!-- for more information read about log4net.Core.FixFlags -->
     <FixedFields>Partial</FixedFields>
@@ -141,8 +141,8 @@ You can also set any public property in the appender/filter which didn't appear 
       <Json>
         <SourceKey>JsonRaw</SourceKey>
         <FlattenJson>false</FlattenJson>
-		<!-- the separator property is only relevant when setting the FlattenJson property to 'true' -->
-		<Separator>_</Separator> 
+    <!-- the separator property is only relevant when setting the FlattenJson property to 'true' -->
+    <Separator>_</Separator> 
       </Json>
 
       <!-- converts an xml object to fields in the document -->

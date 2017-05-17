@@ -25,11 +25,12 @@ namespace log4stash
         public FixFlags FixedFields { get; set; }
         public bool SerializeObjects { get; set; }
 
+        [Obsolete]
         public string DocumentIdSource
         {
             set
             {
-                RequestParameters.AddParameter(new RequestParameter("_id", value));
+                RequestParameters.AddParameter(new RequestParameter("_id", string.Format("{0}{1}{2}", "%{", value, "}" )));
             }
         }
 
@@ -176,8 +177,7 @@ namespace log4stash
             ElasticFilters.PrepareEvent(logEvent);
             var indexName = _indexName.Format(logEvent).ToLower();
             var indexType = _indexType.Format(logEvent);
-            var requestParameterValues = RequestParameters.ToDictionary(param => param.Key,
-                param => SafeGetValueFromLogEvent(logEvent, param.Value));
+            var requestParameterValues = RequestParameters.ToDictionary(logEvent);
 
             var operation = new InnerBulkOperation
             {
@@ -191,19 +191,6 @@ namespace log4stash
             {
                 _bulk.Add(operation);
             }
-        }
-
-        private object SafeGetValueFromLogEvent(IDictionary<string, object> logEvent, string key)
-        {
-            object value = null;
-            if (!string.IsNullOrEmpty(key) && 
-                !logEvent.TryGetValue(key, out value))
-            {
-                LogLog.Warn(GetType(),
-                    string.Format("Get value failed - key '{0}' not found in the logEvent", key));
-                return null;
-            }
-            return value;
         }
 
         public void TimerElapsed(object state)

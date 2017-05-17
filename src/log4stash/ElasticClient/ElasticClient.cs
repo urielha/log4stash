@@ -152,14 +152,14 @@ namespace log4stash
 
         private static void AddOperationMetadata(InnerBulkOperation operation, StringBuilder sb)
         {
-            var indexParams = new Dictionary<string, object>(operation.RequestParameters)
+            var indexParams = new Dictionary<string, string>(operation.RequestParameters)
             {
-                { "_index", operation.IndexName},
+                { "_index", operation.IndexName },
                 { "_type", operation.IndexType },
             };
             var paramStrings = indexParams.Where(kv => kv.Value != null)
-                .Select(kv => string.Format(@"""{0}"" : ""{1}""", kv.Key, kv.Value)).ToArray();
-            var documentMetadata = string.Join(",", paramStrings);
+                .Select(kv => string.Format(@"""{0}"" : ""{1}""", kv.Key, kv.Value));
+            var documentMetadata = string.Join(",", paramStrings.ToArray());
             sb.AppendFormat(@"{{ ""index"" : {{ {0} }} }}", documentMetadata);
             sb.Append("\n");
         }
