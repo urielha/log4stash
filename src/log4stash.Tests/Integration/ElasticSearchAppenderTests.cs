@@ -85,7 +85,14 @@ namespace log4stash.Tests.Integration
 
             QueryConfiguration(appender =>
             {
-                appender.IndexOperationParams.AddParameter(new IndexOperationParam("_routing", oldRoutingSource));
+                if (oldRoutingSource == null)
+                {
+                    appender.IndexOperationParams.Remove("_routing");
+                }
+                else
+                {
+                    appender.IndexOperationParams.AddParameter(new IndexOperationParam("_routing", oldRoutingSource));
+                }
             });
 
             Assert.AreEqual(1, searchResults.Total);

@@ -37,5 +37,10 @@ namespace log4stash.Configuration
             }
             return false;
         }
+
+        public void Remove(string key)
+        {
+            _parametersDictionary.Remove(key);
+        }
     }
 }
