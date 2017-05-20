@@ -39,7 +39,7 @@ namespace log4stash.Tests.Integration
             string oldDocId = null;
             QueryConfiguration(appender =>
             {
-                if(!appender.RequestParameters.TryGetValue("_id", out oldDocId)) 
+                if(!appender.IndexOperationParams.TryGetValue("_id", out oldDocId)) 
                 {
                     oldDocId = null;
                 }
@@ -66,11 +66,11 @@ namespace log4stash.Tests.Integration
             string oldRoutingSource = null;
             QueryConfiguration(appender =>
             {
-                if (!appender.RequestParameters.TryGetValue("_routing", out oldRoutingSource))
+                if (!appender.IndexOperationParams.TryGetValue("_routing", out oldRoutingSource))
                 {
                     oldRoutingSource = null;
                 }
-                appender.RequestParameters.AddParameter(new RequestParameter("_routing", "%{RoutingSource}"));
+                appender.IndexOperationParams.AddParameter(new IndexOperationParam("_routing", "%{RoutingSource}"));
             });
             ThreadContext.Properties["RoutingSource"] = "ROUTING";
             _log.Info("loggingtest");
@@ -85,7 +85,7 @@ namespace log4stash.Tests.Integration
 
             QueryConfiguration(appender =>
             {
-                appender.RequestParameters.AddParameter(new RequestParameter("_routing", oldRoutingSource));
+                appender.IndexOperationParams.AddParameter(new IndexOperationParam("_routing", oldRoutingSource));
             });
 
             Assert.AreEqual(1, searchResults.Total);

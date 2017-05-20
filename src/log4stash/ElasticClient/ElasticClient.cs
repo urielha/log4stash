@@ -152,7 +152,7 @@ namespace log4stash
 
         private static void AddOperationMetadata(InnerBulkOperation operation, StringBuilder sb)
         {
-            var indexParams = new Dictionary<string, string>(operation.RequestParameters)
+            var indexParams = new Dictionary<string, string>(operation.IndexOperationParams)
             {
                 { "_index", operation.IndexName },
                 { "_type", operation.IndexType },

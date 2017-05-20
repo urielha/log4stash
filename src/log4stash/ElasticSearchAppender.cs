@@ -30,11 +30,11 @@ namespace log4stash
         {
             set
             {
-                RequestParameters.AddParameter(new RequestParameter("_id", string.Format("{0}{1}{2}", "%{", value, "}" )));
+                IndexOperationParams.AddParameter(new IndexOperationParam("_id", string.Format("{0}{1}{2}", "%{", value, "}" )));
             }
         }
 
-        public RequestParameterDictionary RequestParameters { get; set; }
+        public IndexOperationParamsDictionary IndexOperationParams { get; set; }
         public int BulkSize { get; set; }
         public int BulkIdleTimeout { get; set; }
         public int TimeoutToWaitForTimer { get; set; }
@@ -89,7 +89,7 @@ namespace log4stash
             AllowSelfSignedServerCert = false;
             Ssl = false;
             AuthenticationMethod = new AuthenticationMethodChooser();
-            RequestParameters = new RequestParameterDictionary();
+            IndexOperationParams = new IndexOperationParamsDictionary();
         }
 
         public override void ActivateOptions()
@@ -177,14 +177,14 @@ namespace log4stash
             ElasticFilters.PrepareEvent(logEvent);
             var indexName = _indexName.Format(logEvent).ToLower();
             var indexType = _indexType.Format(logEvent);
-            var requestParameterValues = RequestParameters.ToDictionary(logEvent);
+            var indexOperationParamValues = IndexOperationParams.ToDictionary(logEvent);
 
             var operation = new InnerBulkOperation
             {
                 Document = logEvent,
                 IndexName = indexName,
                 IndexType = indexType,
-                RequestParameters = requestParameterValues
+                IndexOperationParams = indexOperationParamValues
             };
 
             lock (_bulk)
