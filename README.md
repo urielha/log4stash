@@ -79,7 +79,7 @@ You can also set any public property in the appender/filter which didn't appear 
     <!--You can add parameters to the request to control the parameters sent to ElasticSearch.
     for example, as you can see here, you can add a routing specification to the appender.
     The Key is the key to be added to the request, and the value is the parameter's name in the log event properties.-->
-    <RequestParameters>
+    <IndexOperationParams>
       <Parameter>
         <Key>_routing</Key>
         <Value>%{RoutingSource}</Value>
@@ -88,7 +88,7 @@ You can also set any public property in the appender/filter which didn't appear 
         <Key>key</Key>
         <Value>value</Value>
       </Parameter>
-    </RequestParameters>
+    </IndexOperationParams>
 
     <!-- for more information read about log4net.Core.FixFlags -->
     <FixedFields>Partial</FixedFields>
