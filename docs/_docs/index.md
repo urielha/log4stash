@@ -1,6 +1,8 @@
 log4stash
 =====================
 
+[![Build status][TravisImg]][TravisLink] [![Build Status][AppVeyorImg]][AppVeyorLink]
+
 log4stash is a [log4net](http://logging.apache.org/log4net/) appender to log messages to the [ElasticSearch](http://www.elasticsearch.org) document database. ElasticSearch offers robust full-text search engine and analyzation so that errors and messages can be indexed quickly and searched easily.
 
 log4stash provide few logging filters similar to the filters on [logstash](http://logstash.net).
@@ -10,38 +12,14 @@ The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.Elast
 ### Features:
 * Supports .NET 3.5+
 * Easy installation and setup via [Nuget](https://nuget.org/packages/log4stash/)
-* Ability to analyze the log event before sending it to elasticsearch using built-in filters and custom filters similar to [logstash](http://logstash.net/docs/1.4.2/).
+* Ability to analyze the log event before sending it to elasticsearch using built-in [filters][filters_section] and custom filters similar to [logstash](http://logstash.net/docs/1.4.2/).
 
 ### Site Map:
-| [Breaking changes](http://urielha.github.io/log4stash/breaking.html) |
-| [Version Notes](http://urielha.github.io/log4stash/notes.html) |
+* [Breaking changes](http://urielha.github.io/log4stash/breaking.html) 
+* [Version Notes](http://urielha.github.io/log4stash/notes.html) 
 
-### Filters:
-* **Add** - add new key and value to the event.
-* **Remove** - remove key from the event.
-* **Rename** - rename key to another name.
-* **Kv** - analyze value (default is to analyze the 'Message' value) and export key-value pairs using regex (similar to logstash's kv filter).
-* **Grok** - analyze value (default is 'Message') using custom regex and saved patterns (similar to logstash's grok filter).
-* **ConvertToArray** - split raw string to an array by given seperators. 
-* :new: **Json** - convert json string to an object (so it will be parsed as object in elasticsearch).
-* :new: **Convert** - Available convertors: `ToString`, `ToLower`, `ToUpper`, `ToInt` and `ToArray`. See [config example][config-example] for more information. 
-* :new: **Xml** - Parse xml into an object.
+### Configuration Example:
 
-#### Custom filter:
-To add your own filters you just need to implement the interface IElasticAppenderFilter on your assembly and configure it on the log4net configuration file.
-
-<!-- ### Usage:
-Please see the [DOCUMENTATION](https://github.com/urielha/log4stash/wiki/0-Documentation) Wiki page to begin logging errors to ElasticSearch! -->
-
-### Issues:
-I do my best to reply to issues or questions ASAP. Please use the [ISSUES](https://github.com/urielha/log4stash/issues) page to submit questions or errors.
-
-### Configuration Examples:
-
-Almost all the parameters are optional, to see the default values check the [c'tor](https://github.com/urielha/log4stash/blob/master/src/log4stash/ElasticSearchAppender.cs#L52) of the appender and the c'tor of every filter. 
-You can also set any public property in the appender/filter which didn't appear in the example.
-
-##### Simple configuration:
 ```xml
 <appender name="ElasticSearchAppender" type="log4stash.ElasticSearchAppender, log4stash">
     <Server>localhost</Server>
@@ -52,6 +30,29 @@ You can also set any public property in the appender/filter which didn't appear 
     </ElasticFilters>
 </appender>
 ```
+
+Almost all the parameters are optional, to see the default values check the [c'tor](https://github.com/urielha/log4stash/blob/master/src/log4stash/ElasticSearchAppender.cs#L52) of the appender and the c'tor of every filter. 
+You can also set any public property in the appender/filter which didn't appear in the example.
+
+### Filters:
+* **Add** - add new key and value to the event.
+* **Remove** - remove key from the event.
+* **Rename** - rename key to another name.
+* **Kv** - analyze value (default is to analyze the 'Message' value) and export key-value pairs using regex (similar to logstash's kv filter).
+* **Grok** - analyze value (default is 'Message') using custom regex and saved patterns (similar to logstash's grok filter).
+* **ConvertToArray** - split raw string to an array by given seperators. 
+* **Json** - convert json string to an object (so it will be parsed as object in elasticsearch).
+* **Convert** - Available convertors: `ToString`, `ToLower`, `ToUpper`, `ToInt` and `ToArray`. See [config example][config-example] for more information. 
+* **Xml** - Parse xml into an object.
+
+#### Custom filter:
+To add your own filters you just need to implement the interface IElasticAppenderFilter on your assembly and configure it on the log4net configuration file.
+
+<!-- ### Usage:
+Please see the [DOCUMENTATION](https://github.com/urielha/log4stash/wiki/0-Documentation) Wiki page to begin logging errors to ElasticSearch! -->
+
+### Issues:
+I do my best to reply to issues or questions ASAP. Please use the [ISSUES](https://github.com/urielha/log4stash/issues) page to submit questions or errors.
 
 ##### (Almost) Full configuration:
 ```xml
@@ -193,12 +194,6 @@ Thanks to [@jptoto](https://github.com/jptoto) for the idea and the first workin
 Many thanks to [@mpdreamz](https://github.com/Mpdreamz) and the team for their great work on the NEST library!
 The inspiration to the filters and style had taken from [elasticsearch/logstash](https://github.com/elasticsearch/logstash) project.
 
-### Build status:
-
-| Status | Provider |
-| ------ | -------- |
-| [![Build status][TravisImg]][TravisLink] | Mono CI provided by [travis-ci][] |
-| [![Build Status][AppVeyorImg]][AppVeyorLink] | Windows CI provided by [AppVeyor][] (without tests for now) |
 
 [TravisImg]:https://travis-ci.org/urielha/log4stash.svg?branch=master
 [TravisLink]:https://travis-ci.org/urielha/log4stash
