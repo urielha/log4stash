@@ -1,5 +1,9 @@
-Breaking changes
-=====================
+---
+layout: docs
+title: Breaking Changes
+description: List of breaking changes
+redirect_from: "/breaking/"
+---
 
 * __Upgrading to 2.0.4__: BasicAuthUsername and BasicAuthPassword moved under AuthenticationMethod, see [config example][config-example] for more information.
 

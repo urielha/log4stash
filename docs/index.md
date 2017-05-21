@@ -16,7 +16,7 @@ The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.Elast
 
 ### Site Map:
 * [Breaking changes](http://urielha.github.io/log4stash/breaking.html) 
-* [Version Notes](http://urielha.github.io/log4stash/notes.html) 
+* [Version Notes](http://urielha.github.io/log4stash/version_notes.html) 
 
 ### Configuration Example:
 

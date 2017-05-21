@@ -1,5 +1,9 @@
-Version notes
-=====================
+---
+layout: docs
+title: Version Notes
+description: List of version notes
+redirect_from: "/version_notes/"
+---
 
 * ![green book][green_book] log4stash 2.0.4 has new filters see [filters section][filters-section] for more information. Added support for AWS Version 4 authorization header thanks to [@Marcelo Palladino][mfpalladino]. Support configuring multiple elastic nodes. Add document id source so you can decide your own doc id (instead of getting generated one from the elastic). Add Timeout option for requests. Many thanks to [@eran gil][erangil] for the efforts and the pull requests.
 
