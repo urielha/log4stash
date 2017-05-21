@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using log4stash.LogEventFactory;
 using log4stash.SmartFormatters;
@@ -23,8 +24,17 @@ namespace log4stash
 
         public FixFlags FixedFields { get; set; }
         public bool SerializeObjects { get; set; }
-        public string DocumentIdSource { get; set; }
-        public string RoutingSource { get; set; }
+
+        [Obsolete]
+        public string DocumentIdSource
+        {
+            set
+            {
+                IndexOperationParams.AddParameter(new IndexOperationParam("_id", string.Format("{0}{1}{2}", "%{", value, "}" )));
+            }
+        }
+
+        public IndexOperationParamsDictionary IndexOperationParams { get; set; }
         public int BulkSize { get; set; }
         public int BulkIdleTimeout { get; set; }
         public int TimeoutToWaitForTimer { get; set; }
@@ -58,8 +68,6 @@ namespace log4stash
 
         public ElasticSearchAppender()
         {
-            DocumentIdSource = null;
-            RoutingSource = null;
             FixedFields = FixFlags.Partial;
             SerializeObjects = true;
 
@@ -81,6 +89,7 @@ namespace log4stash
             AllowSelfSignedServerCert = false;
             Ssl = false;
             AuthenticationMethod = new AuthenticationMethodChooser();
+            IndexOperationParams = new IndexOperationParamsDictionary();
         }
 
         public override void ActivateOptions()
@@ -166,37 +175,22 @@ namespace log4stash
         private void PrepareAndAddToBulk(Dictionary<string, object> logEvent)
         {
             ElasticFilters.PrepareEvent(logEvent);
-            var documentId = SafeGetValueFromLogEvent(logEvent, DocumentIdSource);
-            var routing = SafeGetValueFromLogEvent(logEvent, RoutingSource);
             var indexName = _indexName.Format(logEvent).ToLower();
             var indexType = _indexType.Format(logEvent);
+            var indexOperationParamValues = IndexOperationParams.ToDictionary(logEvent);
 
             var operation = new InnerBulkOperation
             {
                 Document = logEvent,
                 IndexName = indexName,
                 IndexType = indexType,
-                DocumentId = documentId,
-                Routing = routing,
+                IndexOperationParams = indexOperationParamValues
             };
 
             lock (_bulk)
             {
                 _bulk.Add(operation);
             }
-        }
-
-        private object SafeGetValueFromLogEvent(IDictionary<string, object> logEvent, string key)
-        {
-            object value = null;
-            if (!string.IsNullOrEmpty(key) && 
-                !logEvent.TryGetValue(key, out value))
-            {
-                LogLog.Warn(GetType(),
-                    string.Format("Get value failed - key '{0}' not found in the logEvent", key));
-                return null;
-            }
-            return value;
         }
 
         public void TimerElapsed(object state)

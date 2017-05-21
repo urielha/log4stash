@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using log4net;
 using log4net.Core;
+using log4stash.Configuration;
 using log4stash.Filters;
 using Nest;
 using Newtonsoft.Json.Linq;
@@ -38,7 +39,10 @@ namespace log4stash.Tests.Integration
             string oldDocId = null;
             QueryConfiguration(appender =>
             {
-                oldDocId = appender.DocumentIdSource;
+                if(!appender.IndexOperationParams.TryGetValue("_id", out oldDocId)) 
+                {
+                    oldDocId = null;
+                }
                 appender.DocumentIdSource = "IdSource";
             });
             ThreadContext.Properties["IdSource"] = "TEST_ID";
@@ -62,8 +66,11 @@ namespace log4stash.Tests.Integration
             string oldRoutingSource = null;
             QueryConfiguration(appender =>
             {
-                oldRoutingSource = appender.RoutingSource;
-                appender.RoutingSource = "RoutingSource";
+                if (!appender.IndexOperationParams.TryGetValue("_routing", out oldRoutingSource))
+                {
+                    oldRoutingSource = null;
+                }
+                appender.IndexOperationParams.AddParameter(new IndexOperationParam("_routing", "%{RoutingSource}"));
             });
             ThreadContext.Properties["RoutingSource"] = "ROUTING";
             _log.Info("loggingtest");
@@ -72,13 +79,20 @@ namespace log4stash.Tests.Integration
             var query = new TermsQuery
             {
                 Field = "_routing",
-                Terms = new[] {"ROUTING"}
+                Terms = new[] { "ROUTING" }
             };
             var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(descriptor => query));
 
             QueryConfiguration(appender =>
             {
-                appender.RoutingSource = oldRoutingSource;
+                if (oldRoutingSource == null)
+                {
+                    appender.IndexOperationParams.Remove("_routing");
+                }
+                else
+                {
+                    appender.IndexOperationParams.AddParameter(new IndexOperationParam("_routing", oldRoutingSource));
+                }
             });
 
             Assert.AreEqual(1, searchResults.Total);
@@ -363,7 +377,7 @@ namespace log4stash.Tests.Integration
             });
             var jObject = new JObject
             {
-                { "key", "value\r\nnewline" }, 
+                { "key", "value\r\nnewline" },
                 { "Data", new JObject{{"Type","Url"}, {"Host","localhost"}, { "Array", new JArray(Enumerable.Range(0, 5)) }} }
             };
             log4net.LogicalThreadContext.Properties[sourceKey] = jObject.ToString();
@@ -424,7 +438,7 @@ namespace log4stash.Tests.Integration
             {
                 oldFilters = appender.ElasticFilters;
                 appender.ElasticFilters = new ElasticAppenderFilters();
-                appender.ElasticFilters.AddFilter(new XmlFilter { SourceKey = sourceKey, FlattenXml = flatten, Separator = separator});
+                appender.ElasticFilters.AddFilter(new XmlFilter { SourceKey = sourceKey, FlattenXml = flatten, Separator = separator });
                 appender.ActivateOptions();
             });
 

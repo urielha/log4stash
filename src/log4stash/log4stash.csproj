@@ -62,6 +62,8 @@
     <Compile Include="Authentication\Aws\AWS4SignerForAuthorizationHeader.cs" />
     <Compile Include="Authentication\Aws\AWS4SignerBase.cs" />
     <Compile Include="Configuration\IServerData.cs" />
+    <Compile Include="Configuration\IndexOperationParam.cs" />
+    <Compile Include="Configuration\IndexOperationParamsDictionary.cs" />
     <Compile Include="Configuration\ServerData.cs" />
     <Compile Include="Configuration\ServerDataCollection.cs" />
     <Compile Include="ElasticClient\IElasticsearchClient.cs" />
