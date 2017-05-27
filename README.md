@@ -13,10 +13,7 @@ The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.Elast
 * Ability to analyze the log event before sending it to elasticsearch using built-in filters and custom filters similar to [logstash](http://logstash.net/docs/1.4.2/).
 
 ### Breaking Changes:
-See [Breaking Changes](https://github.com/urielha/log4stash/blob/master/docs/breaking.md) page.
-
-#### Version notes:
-See [Version notes](https://github.com/urielha/log4stash/blob/master/docs/version_notes.md) page.
+Navigate to breaking changes page [here](https://github.com/urielha/log4stash/blob/master/docs/breaking.md). See also [Version notes](https://github.com/urielha/log4stash/blob/master/docs/version_notes.md) page.
 
 ### Filters:
 * [**Add**][docs-filters-add] - add new key and value to the event.
