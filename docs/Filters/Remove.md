@@ -16,6 +16,6 @@ Configuration example:
 
 #### Key
 The name of the tag to be removed.<br/>
-You can use here [smart formatting][smart-formatting].
+You can use [smart formatting][smart-formatting] here.
 
 [smart-formatting]:https://github.com/urielha/log4stash/blob/master/docs/SmartFormatting.md

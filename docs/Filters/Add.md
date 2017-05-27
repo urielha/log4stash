@@ -20,11 +20,11 @@ Configuration example:
 
 #### Key
 The name of the tag.<br/>
-You can use here [smart formatting][smart-formatting].
+You can use [smart formatting][smart-formatting] here.
 
 #### Value
 The value.<br/>
-You can use here [smart formatting][smart-formatting].
+You can use [smart formatting][smart-formatting] here.
 
 #### Overwrite
 Whether to overite or append if this tag already exists.
