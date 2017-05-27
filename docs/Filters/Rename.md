@@ -19,16 +19,16 @@ Configuration example:
 ### Properties:
 
 #### Key
-The name of the tag.
+The name of the tag.<br/>
 You can use [smart formatting][smart-formatting] here.
 
 #### RenameTo
-The new tag name.
+The new tag name.<br/>
 You can use [smart formatting][smart-formatting] here.
 
 #### Overwrite
 Whether to overite or append if this new tag name already exists.
 
-See Add Filter [Overwrite Property](https://github.com/urielha/log4stash/blob/master/docs/Filters/Add.md#Overwrite) for more info.
+See Add Filter [Overwrite Property](https://github.com/urielha/log4stash/blob/master/docs/Filters/Add.md#overwrite) for more info.
 
 

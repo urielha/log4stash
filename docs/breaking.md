@@ -9,7 +9,7 @@ redirect_from: "/breaking/"
 --- -->
 
 
-## __Upgrading to 2.0.4__ 
+### __Upgrading to 2.0.4__ 
 BasicAuthUsername and BasicAuthPassword moved under AuthenticationMethod.
 
 Old configuration:
@@ -35,7 +35,7 @@ Moved into *AuthenticationMethod*
 </AuthenticationMethod>
 ```
 
-## __Upgrading to 2.0.0__ 
+### __Upgrading to 2.0.0__ 
 The namespace has been changed from _log4net.ElasticSearch_ to _log4stash_ 
 So you need to change the *type* attribute in the config file:
 
@@ -53,7 +53,7 @@ New:
 </appender>
 ```
 
-## __Upgrading to 1.0.0__ 
+### __Upgrading to 1.0.0__ 
 The definition of IElasticAppenderFilter has been changed, PrepareEvent has only one parameter and PrepareConfiguration's parameter type has changed to IElasticsearchClient.
 
 
