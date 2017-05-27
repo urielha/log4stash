@@ -13,25 +13,19 @@ The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.Elast
 * Ability to analyze the log event before sending it to elasticsearch using built-in filters and custom filters similar to [logstash](http://logstash.net/docs/1.4.2/).
 
 ### Breaking Changes:
-* __Upgrading to 2.0.4__: BasicAuthUsername and BasicAuthPassword moved under AuthenticationMethod, see [config example][config-example] for more information.
-* __Upgrading to 2.0.0__: The namespace has been changed from _log4net.ElasticSearch_ to _log4stash_ 
-* __Upgrading to 1.0.0__: The definition of IElasticAppenderFilter has been changed, PrepareEvent has only one parameter and PrepareConfiguration's parameter type has changed to IElasticsearchClient.
+See [Breaking Changes](https://github.com/urielha/log4stash/blob/master/docs/breaking.md) page.
 
-#### Versions notes:
-* :green_book: log4stash 2.0.4 has new filters see [filters section][filters-section] for more information. Added support for AWS Version 4 authorization header thanks to [@Marcelo Palladino][mfpalladino]. Support configuring multiple elastic nodes. Add document id source so you can decide your own doc id (instead of getting generated one from the elastic). Add Timeout option for requests. Many thanks to [@eran gil][erangil] for the efforts and the pull requests.
-
-* :green_book: log4stash 2.0.0 has new filter `Json`, you can add it if you have json string in you log event and you want it to be converted to an object and not be passed as string to the elastic. Thanks to [@Ignas Velža][ignasv] for this filter.
-
-* :green_book: log4stash 1.1.0 has new feature `SerializeObjects`, if true (the default) it serializes the exception object and message object into json object and add them to Elastic. You can see them under "MessageObject" and "ExceptionObject" keys.  - [Related commit](https://github.com/urielha/log4stash/commit/560676de9b074be70e00f93566c543a846ba5c8e)
+#### Version notes:
+See [Version notes](https://github.com/urielha/log4stash/blob/master/docs/version_notes.md) page.
 
 ### Filters:
-* **Add** - add new key and value to the event.
-* **Remove** - remove key from the event.
-* **Rename** - rename key to another name.
+* [**Add**][docs-filters-add] - add new key and value to the event.
+* [**Remove**][docs-filters-remove] - remove key from the event.
+* [**Rename**][docs-filters-rename] - rename key to another name.
 * **Kv** - analyze value (default is to analyze the 'Message' value) and export key-value pairs using regex (similar to logstash's kv filter).
 * **Grok** - analyze value (default is 'Message') using custom regex and saved patterns (similar to logstash's grok filter).
 * **ConvertToArray** - split raw string to an array by given seperators. 
-* :new: **Json** - convert json string to an object (so it will be parsed as object in elasticsearch).
+* **Json** - convert json string to an object (so it will be parsed as object in elasticsearch).
 * :new: **Convert** - Available convertors: `ToString`, `ToLower`, `ToUpper`, `ToInt` and `ToArray`. See [config example][config-example] for more information. 
 * :new: **Xml** - Parse xml into an object.
 
@@ -75,7 +69,7 @@ You can also set any public property in the appender/filter which didn't appear 
 
     <!-- optional: elasticsearch timeout for the request, default = 10000 -->
     <ElasticSearchTimeout>10000</ElasticSearchTimeout>
-  
+
     <!--You can add parameters to the request to control the parameters sent to ElasticSearch.
     for example, as you can see here, you can add a routing specification to the appender.
     The Key is the key to be added to the request, and the value is the parameter's name in the log event properties.-->
@@ -101,17 +95,17 @@ You can also set any public property in the appender/filter which didn't appear 
     <!--Only one credential type can used at once-->
     <!--Here we list all possible types-->
     <AuthenticationMethod>
-        <!--For basic authentication purposes-->
-        <Basic>
-            <Username>Username</Username>
-            <Password>Password</Password>
-        </Basic>
-        <!--For AWS ElasticSearch service-->
-        <Aws>
-            <Aws4SignerSecretKey>Secret</Aws4SignerSecretKey>
-            <Aws4SignerAccessKey>AccessKey</Aws4SignerAccessKey>
-            <Aws4SignerRegion>Region</Aws4SignerRegion>
-        </Aws>
+      <!--For basic authentication purposes-->
+      <Basic>
+          <Username>Username</Username>
+          <Password>Password</Password>
+      </Basic>
+      <!--For AWS ElasticSearch service-->
+      <Aws>
+          <Aws4SignerSecretKey>Secret</Aws4SignerSecretKey>
+          <Aws4SignerAccessKey>AccessKey</Aws4SignerAccessKey>
+          <Aws4SignerRegion>Region</Aws4SignerRegion>
+      </Aws>
     </AuthenticationMethod>
     
     <!-- all filters goes in ElasticFilters tag -->
@@ -141,8 +135,8 @@ You can also set any public property in the appender/filter which didn't appear 
       <Json>
         <SourceKey>JsonRaw</SourceKey>
         <FlattenJson>false</FlattenJson>
-    <!-- the separator property is only relevant when setting the FlattenJson property to 'true' -->
-    <Separator>_</Separator> 
+        <!-- the separator property is only relevant when setting the FlattenJson property to 'true' -->
+        <Separator>_</Separator> 
       </Json>
 
       <!-- converts an xml object to fields in the document -->
@@ -218,6 +212,10 @@ The inspiration to the filters and style had taken from [elasticsearch/logstash]
 
 [config-example]:https://github.com/urielha/log4stash#almost-full-configuration
 [filters-section]:https://github.com/urielha/log4stash#filters
+
+[docs-filters-add]:https://github.com/urielha/log4stash/blob/master/docs/Filters/Add.md
+[docs-filters-remove]:https://github.com/urielha/log4stash/blob/master/docs/Filters/Remove.md
+[docs-filters-rename]:https://github.com/urielha/log4stash/blob/master/docs/Filters/Rename.md
 
 [ignasv]:https://github.com/ignasv
 [erangil]:https://github.com/erangil2
