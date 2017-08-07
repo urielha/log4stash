@@ -57,6 +57,8 @@ You can also set any public property in the appender/filter which didn't appear 
 <appender name="ElasticSearchAppender" type="log4stash.ElasticSearchAppender, log4stash">
     <Server>localhost</Server>
     <Port>9200</Port>
+    <!-- optional: in case elasticsearch is located behind a reverse proxy the URL is like http://Server:Port/Path, default = empty string -->
+    <Path>/es5</Path>
     <IndexName>log_test_%{+yyyy-MM-dd}</IndexName>
     <IndexType>LogEvent</IndexType>
     <Bulksize>2000</Bulksize>

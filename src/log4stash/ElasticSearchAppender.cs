@@ -42,6 +42,7 @@ namespace log4stash
         // elastic configuration
         public string Server { get; set; }
         public int Port { get; set; }
+        public string Path { get; set; }
         public ServerDataCollection Servers { get; set; }
         public int ElasticSearchTimeout { get; set; }
         public bool Ssl { get; set; }
@@ -114,7 +115,7 @@ namespace log4stash
         {
             if (!string.IsNullOrEmpty(Server) && Port != 0)
             {
-                var serverData = new ServerData { Address = Server, Port = Port };
+                var serverData = new ServerData { Address = Server, Port = Port, Path = Path };
                 Servers.Add(serverData);
             }
         }
