@@ -17,16 +17,18 @@ namespace log4stash.Tests.Integration
         {
             string host = null;
             int port = 0;
+            string path = null;
             QueryConfiguration(appender =>
             {
                 appender.IndexName = TestIndex;
                 var serverData = appender.Servers.GetRandomServerData();
                 host = serverData.Address;
                 port = serverData.Port;
-            });
+                path = serverData.Path;
+           });
 
             ConnectionSettings elasticSettings =
-                new ConnectionSettings(new Uri(string.Format("http://{0}:{1}", host, port)))
+                new ConnectionSettings(new Uri(string.Format("http://{0}:{1}{2}", host, port, path)))
                     .DefaultIndex(TestIndex);
 
             Client = new ElasticClient(elasticSettings);
