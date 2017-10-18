@@ -60,11 +60,13 @@ namespace log4stash
         public string IndexName
         {
             set { _indexName = value; }
+            get { return _indexName.ToString();  }
         }
 
         public string IndexType
         {
             set { _indexType = value; }
+            get { return _indexType.ToString(); }
         }
 
         public ElasticSearchAppender()
