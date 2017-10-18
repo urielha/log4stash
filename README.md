@@ -62,7 +62,7 @@ You can also set any public property in the appender/filter which didn't appear 
     <Bulksize>2000</Bulksize>
     <BulkIdleTimeout>10000</BulkIdleTimeout>
     <IndexAsync>False</IndexAsync>
-    <DocumentIdSource>IdSource</DocumentIdSource> <!-- obsolete -->
+    <DocumentIdSource>IdSource</DocumentIdSource> <!-- obsolete! use IndexOperationParams -->
 
     <!-- optional: elasticsearch timeout for the request, default = 10000 -->
     <ElasticSearchTimeout>10000</ElasticSearchTimeout>
@@ -74,6 +74,10 @@ You can also set any public property in the appender/filter which didn't appear 
       <Parameter>
         <Key>_routing</Key>
         <Value>%{RoutingSource}</Value>
+      </Parameter>
+      <Parameter>
+        <Key>_id</Key>
+        <Value>%{IdSource}</Value>
       </Parameter>
       <Parameter>
         <Key>key</Key>
