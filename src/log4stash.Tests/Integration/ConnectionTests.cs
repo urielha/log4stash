@@ -27,7 +27,7 @@ namespace log4stash.Tests.Integration
 
             var results = Client.Index(logEvent, descriptor => descriptor.Type("anonymous"));
 
-            Assert.IsNotNullOrEmpty(results.Id);
+            Assert.That(results.Id, Is.Not.Null.Or.Empty);
         }
 
         [Test]

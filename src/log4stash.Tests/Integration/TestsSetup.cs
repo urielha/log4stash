@@ -12,7 +12,6 @@ namespace log4stash.Tests.Integration
         public ElasticClient Client;
         public readonly string TestIndex = "log_test_" + DateTime.Now.ToString("yyyy-MM-dd");
 
-        [TestFixtureSetUp]
         public void FixtureSetup()
         {
             string host = null;
@@ -34,9 +33,10 @@ namespace log4stash.Tests.Integration
             Client = new ElasticClient(elasticSettings);
         }
 
-        [TestFixtureTearDown]
         public void FixtureTearDown()
         {
+            if (Client == null) return;
+
             var response = Client.IndexExists(new IndexExistsRequest(TestIndex));
             if (response.Exists)
             {
@@ -48,6 +48,7 @@ namespace log4stash.Tests.Integration
         public void TestSetup()
         {
             FixtureTearDown();
+            FixtureSetup();
             QueryConfiguration(appender =>
             {
                 appender.BulkSize = 1;

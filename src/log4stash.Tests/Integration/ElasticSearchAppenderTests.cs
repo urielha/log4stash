@@ -227,13 +227,13 @@ namespace log4stash.Tests.Integration
         }
 
         [Test]
-        [TestCase(new[] { ",", " " }, new[] { ":", "=" }, "", TestName = "Can_read_KvFilter_properties: Regular1")]
-        [TestCase(new[] { ";", " " }, new[] { "~" }, "", TestName = "Can_read_KvFilter_properties: Regular2")]
-        [TestCase(new[] { ";" }, new[] { "=" }, "", TestName = "Can_read_KvFilter_properties: No whiteSpace on fieldSplit causes the 'another ' key and raise spaces issue", ExpectedException = typeof(Exception), ExpectedMessage = "spaces issue")]
-        [TestCase(new[] { ";" }, new[] { "=" }, " ", TestName = "Can_read_KvFilter_properties: No whiteSpace but with trimming, fix the 'another' key")]
-        [TestCase(new[] { "\\|", " " }, new[] { "\\>" }, "", TestName = "Can_read_KvFilter_properties: Regex chars need to be escaped with backslash")]
-        [TestCase(new[] { "\n" }, new[] { ":" }, " ", TestName = "Can_read_KvFilter_properties: NewLine")]
-        public void Can_read_KvFilter_properties(string[] fieldSplit, string[] valueSplit, string trim)
+        [TestCase(new[] { ",", " " }, new[] { ":", "=" }, "", false, TestName = "Can_read_KvFilter_properties: Regular1")]
+        [TestCase(new[] { ";", " " }, new[] { "~" }, "", false, TestName = "Can_read_KvFilter_properties: Regular2")]
+        [TestCase(new[] { ";" }, new[] { "=" }, "", true, TestName = "Can_read_KvFilter_properties: No whiteSpace on fieldSplit causes the 'another ' key and raise spaces issue")]
+        [TestCase(new[] { ";" }, new[] { "=" }, " ", false, TestName = "Can_read_KvFilter_properties: No whiteSpace but with trimming, fix the 'another' key")]
+        [TestCase(new[] { "\\|", " " }, new[] { "\\>" }, "", false, TestName = "Can_read_KvFilter_properties: Regex chars need to be escaped with backslash")]
+        [TestCase(new[] { "\n" }, new[] { ":" }, " ", false, TestName = "Can_read_KvFilter_properties: NewLine")]
+        public void Can_read_KvFilter_properties(string[] fieldSplit, string[] valueSplit, string trim, bool expectAnotherToBeNull)
         {
             ElasticAppenderFilters oldFilters = null;
             QueryConfiguration(appender =>
@@ -273,7 +273,7 @@ namespace log4stash.Tests.Integration
 
             if (entry.another == null)
             {
-                throw new Exception("spaces issue");
+                Assert.IsTrue(expectAnotherToBeNull, "only on the spaces issues test this 'another' should be null");
             }
             Assert.AreEqual("another", entry.another.ToString());
         }
@@ -289,7 +289,7 @@ namespace log4stash.Tests.Integration
             var doc = res.Documents.First();
             Assert.AreEqual("UnknownError", doc.name.ToString());
             Assert.AreEqual(newGuid.ToString(), doc.the_guid.ToString());
-            Assert.IsNullOrEmpty(doc["0"]);
+            Assert.That(doc["0"], Is.Not.Null.Or.Empty);
         }
 
         [Test]

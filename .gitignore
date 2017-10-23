@@ -107,8 +107,8 @@ UpgradeLog*.XML
 
 # Nuget file(s)
 *.nupkg
-#src/packages/
+src/packages/
 
 # Exceptions
-#!src/packages/repositories.config
+!src/packages/repositories.config
 
