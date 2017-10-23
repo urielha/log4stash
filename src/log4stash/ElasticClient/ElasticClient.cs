@@ -91,10 +91,8 @@ namespace log4stash
             webRequest.ContentType = "application/json";
             webRequest.Method = "PUT";
             SetHeaders((HttpWebRequest)webRequest, url, rawBody);
-            if (SafeSendRequest(new RequestDetails(webRequest, rawBody), webRequest.GetRequestStream))
-            {
-                SafeGetAndCheckResponse(webRequest.GetResponse);
-            }
+            var request = new RequestDetails(webRequest, rawBody);
+            request.WebRequest.BeginGetRequestStream(FinishGetRequest, request);
         }
 
         public override void IndexBulk(IEnumerable<InnerBulkOperation> bulk)
