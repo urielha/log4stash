@@ -24,7 +24,7 @@ namespace log4stash
 
         protected AbstractWebElasticClient(ServerDataCollection servers,
                                            int timeout,
-                                           bool ssl, 
+                                           bool ssl,
                                            bool allowSelfSignedServerCert,
                                            AuthenticationMethodChooser authenticationMethod)
         {
@@ -62,7 +62,7 @@ namespace log4stash
             }
 
             public WebRequest WebRequest { get; private set; }
-            public string Content { get; private set;  }
+            public string Content { get; private set; }
         }
 
         public WebElasticClient(ServerDataCollection servers, int timeout)
@@ -203,11 +203,11 @@ namespace log4stash
 
         private void SetHeaders(HttpWebRequest webRequest, string url, string requestString)
         {
-            var requestData = new RequestData {WebRequest = webRequest, Url = url, RequestString = requestString};
+            var requestData = new RequestData { WebRequest = webRequest, Url = url, RequestString = requestString };
 
             var authorizationHeaderValue = AuthenticationMethod.CreateAuthenticationHeader(requestData);
 
-            if (!string.IsNullOrEmpty(authorizationHeaderValue)) 
+            if (!string.IsNullOrEmpty(authorizationHeaderValue))
                 webRequest.Headers[HttpRequestHeader.Authorization] = authorizationHeaderValue;
         }
 
@@ -217,7 +217,7 @@ namespace log4stash
             X509Chain chain,
             SslPolicyErrors sslPolicyErrors)
         {
-            var certificate2 = (certificate as X509Certificate2);
+            var certificate2 = (X509Certificate2)certificate;
 
             string subjectCn = certificate2.GetNameInfo(X509NameType.DnsName, false);
             string issuerCn = certificate2.GetNameInfo(X509NameType.DnsName, true);
@@ -233,20 +233,25 @@ namespace log4stash
 
         private static void CheckResponse(HttpWebResponse httpResponse)
         {
-            if (httpResponse.StatusCode != HttpStatusCode.OK)
+            using (var response = httpResponse.GetResponseStream())
             {
-                var buff = new byte[httpResponse.ContentLength];
-                using (var response = httpResponse.GetResponseStream())
+                if (response == null)
                 {
-                    if (response != null)
-                    {
-                        response.Read(buff, 0, (int) httpResponse.ContentLength);
-                    }
+                    return;
                 }
 
-                throw new InvalidOperationException(
-                    string.Format("Some error occurred while sending request to Elasticsearch.{0}{1}",
-                        Environment.NewLine, Encoding.UTF8.GetString(buff)));
+                using (var reader = new StreamReader(response, Encoding.UTF8))
+                {
+                    var stringResponse = reader.ReadToEnd();
+                    var jsonResponse = JsonConvert.DeserializeObject<PartialElasticResponse>(stringResponse);
+
+                    bool responseHasError = jsonResponse.Errors || httpResponse.StatusCode != HttpStatusCode.OK;
+                    if (responseHasError)
+                    {
+                        throw new InvalidOperationException(
+                            $"Some error occurred while sending request to Elasticsearch.{Environment.NewLine}{stringResponse}");
+                    }
+                }
             }
         }
 
