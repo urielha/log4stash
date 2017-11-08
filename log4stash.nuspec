@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>log4stash</id>
-    <version>2.0.5</version>
+    <version>2.1.0</version>
     <authors>urielha</authors>
     <owners>urielha</owners>
     <title>log4stash - Elasticsearch log4net appender</title>
@@ -15,21 +15,29 @@
       You can configure few filters to analyze log events before they got sended to Elasticsearch similar to the filters on logstash.
     </description>
     <releaseNotes>
-      * Main Change: Add IndexOperationParams Configuratino parameter to supports _routing and more...
+      * Change request's content type to support newer version of Elasticsearch
+      * Supports Elastic Cloud indexing
+     
+     * Closed issues:
+        ** #30 Update request content type
+        ** #34 Add getters for IndexName and IndexType fields
+        ** #40 Error 406 with ElasticSearch 6.0 RC 2
       
       * Merged pull requests
         ** #31 Add routing option
         ** #32 Add IndexOperationParams 
+        ** #37 Add config option if elastic is not in the root path
+        ** #41 Changed the way to determine if response contains an error
       
       Thanks a lot to @erangil2 for his tremendous contributions :)
       
-      And thanks to: @zhengziying, @triarc, @prime8, @henkish, @mfpalladino and @ignasv for their contributions.
+      And thanks to: @zhengziying, @triarc, @prime8, @henkish, @mfpalladino, @ignasv, @wpgh and @Thecentury for their contributions.
     </releaseNotes>
     <copyright>Copyright 2017</copyright>
     <tags>log logging exception elasticsearch log4net appender logstash filters</tags>
     <dependencies>
       <group>
-        <dependency id="log4net" version="2.0.5.0" />
+        <dependency id="log4net" version="2.0.8.0" />
       </group>
     </dependencies>
   </metadata>
