@@ -69,6 +69,7 @@
     <Compile Include="Configuration\ServerDataCollection.cs" />
     <Compile Include="ElasticClient\IElasticsearchClient.cs" />
     <Compile Include="ElasticClient\InnerBulkOperation.cs" />
+    <Compile Include="ElasticClient\PartialElasticResponse.cs" />
     <Compile Include="Filters\ConvertFilter.cs" />
     <Compile Include="Filters\XmlFilter.cs" />
     <Compile Include="LogEventFactory\BasicLogEventFactory.cs" />
