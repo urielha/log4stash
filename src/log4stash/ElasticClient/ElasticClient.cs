@@ -217,13 +217,15 @@ namespace log4stash
             X509Chain chain,
             SslPolicyErrors sslPolicyErrors)
         {
-            var certificate2 = (X509Certificate2)certificate;
+            var certificate2 = certificate as X509Certificate2;
+            if (certificate2 == null)
+                return false;
 
             string subjectCn = certificate2.GetNameInfo(X509NameType.DnsName, false);
             string issuerCn = certificate2.GetNameInfo(X509NameType.DnsName, true);
             var serverAddresses = Servers.Select(s => s.Address);
             if (sslPolicyErrors == SslPolicyErrors.None
-                || (serverAddresses.Contains(subjectCn) && subjectCn.Equals(issuerCn)))
+                || (serverAddresses.Contains(subjectCn) && subjectCn != null && subjectCn.Equals(issuerCn)))
             {
                 return true;
             }
@@ -249,7 +251,8 @@ namespace log4stash
                     if (responseHasError)
                     {
                         throw new InvalidOperationException(
-                            $"Some error occurred while sending request to Elasticsearch.{Environment.NewLine}{stringResponse}");
+                            string.Format("Some error occurred while sending request to Elasticsearch.{0}{1}",
+                                Environment.NewLine, stringResponse));
                     }
                 }
             }
