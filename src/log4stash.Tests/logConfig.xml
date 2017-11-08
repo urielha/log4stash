@@ -64,6 +64,12 @@
           <ToArray>
              <SourceKey>anotherIds</SourceKey>
           </ToArray>
+          <!-- For stack objects 
+          <ToString>UserName</ToString>
+          <ToArray>
+            <SourceKey>UserName</SourceKey>
+          </ToArray>
+          -->
         </Convert>
         
       </ElasticFilters>
