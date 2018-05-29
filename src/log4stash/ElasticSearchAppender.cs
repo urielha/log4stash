@@ -30,13 +30,14 @@ namespace log4stash
         {
             set
             {
-                IndexOperationParams.AddParameter(new IndexOperationParam("_id", string.Format("{0}{1}{2}", "%{", value, "}" )));
+                IndexOperationParams.AddParameter(new IndexOperationParam("_id", string.Format("{0}{1}{2}", "%{", value, "}")));
             }
         }
 
         public IndexOperationParamsDictionary IndexOperationParams { get; set; }
         public int BulkSize { get; set; }
         public int BulkIdleTimeout { get; set; }
+        public int BulkListLimit { get; set; }
         public int TimeoutToWaitForTimer { get; set; }
 
         // elastic configuration
@@ -60,7 +61,7 @@ namespace log4stash
         public string IndexName
         {
             set { _indexName = value; }
-            get { return _indexName.ToString();  }
+            get { return _indexName.ToString(); }
         }
 
         public string IndexType
@@ -76,6 +77,7 @@ namespace log4stash
 
             BulkSize = 2000;
             BulkIdleTimeout = 5000;
+            BulkListLimit = -1;
             TimeoutToWaitForTimer = 5000;
 
             Servers = new ServerDataCollection();
@@ -123,7 +125,7 @@ namespace log4stash
         }
         private void CheckObsoleteAuth()
         {
-            if(!string.IsNullOrEmpty(BasicAuthUsername) && !string.IsNullOrEmpty(BasicAuthPassword))
+            if (!string.IsNullOrEmpty(BasicAuthUsername) && !string.IsNullOrEmpty(BasicAuthPassword))
             {
                 LogLog.Warn(GetType(), "BasicAuthUsername & BasicAuthPassword tags are obsolete, Please use AuthenticationMethod new tag");
                 var auth = new BasicAuthenticationMethod { Username = BasicAuthUsername, Password = BasicAuthPassword };
@@ -162,8 +164,13 @@ namespace log4stash
                 return;
             }
 
-            var logEvent = LogEventFactory.CreateLogEvent(loggingEvent);
-            PrepareAndAddToBulk(logEvent);
+            var noLimit = BulkListLimit == -1;
+            var limitNotReached = _bulk.Count < BulkListLimit;
+            if (noLimit || limitNotReached)
+            {
+                var logEvent = LogEventFactory.CreateLogEvent(loggingEvent);
+                PrepareAndAddToBulk(logEvent);
+            }
 
             if (_bulk.Count >= BulkSize && BulkSize > 0)
             {
