@@ -1,10 +1,10 @@
-﻿using System.Net;
+﻿using RestSharp;
 
 namespace log4stash.Authentication
 {
     public class RequestData
     {
-        public HttpWebRequest WebRequest { get; set; }
+        public RestRequest RestRequest { get; set; }
 
         public string Url { get; set; }
 

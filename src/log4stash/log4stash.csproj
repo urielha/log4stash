@@ -45,6 +45,9 @@
       <HintPath>..\packages\Newtonsoft.Json.10.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.105.2.3\lib\net45\RestSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web.Extensions" />
@@ -67,13 +70,14 @@
     <Compile Include="Configuration\IndexOperationParamsDictionary.cs" />
     <Compile Include="Configuration\ServerData.cs" />
     <Compile Include="Configuration\ServerDataCollection.cs" />
+    <Compile Include="ElasticClient\AbstractWebElasticClient.cs" />
     <Compile Include="ElasticClient\IElasticsearchClient.cs" />
     <Compile Include="ElasticClient\InnerBulkOperation.cs" />
     <Compile Include="ElasticClient\PartialElasticResponse.cs" />
     <Compile Include="Filters\ConvertFilter.cs" />
     <Compile Include="Filters\XmlFilter.cs" />
     <Compile Include="LogEventFactory\BasicLogEventFactory.cs" />
-    <Compile Include="ElasticClient\ElasticClient.cs" />
+    <Compile Include="ElasticClient\WebElasticClient.cs" />
     <Compile Include="Filters\AddValueFilter.cs" />
     <Compile Include="Filters\JsonFilter.cs" />
     <Compile Include="AssemblyVersionInfo.cs" />

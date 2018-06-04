@@ -112,3 +112,7 @@ src/packages/
 # Exceptions
 !src/packages/repositories.config
 
+
+src/\.vs/log4stash/v15/
+
+src/\.vs/
