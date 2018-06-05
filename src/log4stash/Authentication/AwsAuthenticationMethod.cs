@@ -36,7 +36,7 @@ namespace log4stash.Authentication
 
             var signer = new Aws4SignerForAuthorizationHeader
             {
-                EndpointUri = new Uri(request.Resource),
+                EndpointUri = new Uri(client.BaseUrl + request.Resource),
                 HttpMethod = request.Method.ToString(),
                 Service = "es",
                 Region = Aws4SignerRegion
