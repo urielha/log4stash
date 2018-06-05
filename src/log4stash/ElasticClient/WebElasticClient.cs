@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Security;
@@ -12,8 +11,6 @@ using log4stash.Authentication;
 using log4stash.Configuration;
 using Newtonsoft.Json;
 using RestSharp;
-using RestSharp.Authenticators;
-using RestSharp.Deserializers;
 
 namespace log4stash
 {
@@ -127,7 +124,7 @@ namespace log4stash
             sb.Append("\n");
         }
 
-        private bool SafeSendRequest(RequestDetails request)
+        private void SafeSendRequest(RequestDetails request)
         {
             IRestResponse response;
             try
@@ -137,20 +134,17 @@ namespace log4stash
             catch (Exception ex)
             {
                 LogLog.Error(GetType(), "Invalid request to ElasticSearch", ex);
-                return false;
+                return;
             }
 
             try
             {
                 CheckResponse(response);
-                return true;
             }
             catch (Exception ex)
             {
                 LogLog.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
             }
-
-            return false;
         }
 
         private async Task<bool> SafeSendRequestAsync(RequestDetails request)
