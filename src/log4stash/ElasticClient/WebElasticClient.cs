@@ -75,11 +75,11 @@ namespace log4stash
             SafeSendRequest(request);
         }
 
-        public override bool IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
+        public override void IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
         {
             var request = PrepareRequest(bulk);
 
-            return SafeSendRequestAsync(request).Result;
+            SafeSendRequestAsync(request);
         }
 
 
@@ -147,7 +147,7 @@ namespace log4stash
             }
         }
 
-        private async Task<bool> SafeSendRequestAsync(RequestDetails request)
+        private async Task SafeSendRequestAsync(RequestDetails request)
         {
             IRestResponse response;
             try
@@ -157,20 +157,18 @@ namespace log4stash
             catch (Exception ex)
             {
                 LogLog.Error(GetType(), "Invalid request to ElasticSearch", ex);
-                return false;
+                return;
             }
 
             try
             {
                 CheckResponse(response);
-                return true;
             }
             catch (Exception ex)
             {
                 LogLog.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
             }
 
-            return false;
         }
 
         private bool AcceptSelfSignedServerCertCallback(

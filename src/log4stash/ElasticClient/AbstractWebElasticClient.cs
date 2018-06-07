@@ -33,7 +33,7 @@ namespace log4stash
 
         public abstract void PutTemplateRaw(string templateName, string rawBody);
         public abstract void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
-        public abstract bool IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
+        public abstract void IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
         public abstract void Dispose();
 
         protected string GetServerUrl()

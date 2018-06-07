@@ -8,18 +8,13 @@ using RestSharp.Authenticators;
 
 namespace log4stash.Authentication
 {
-    public class AwsAuthenticationMethod : IAuthenticationMethod, IAuthenticator
+    public class AwsAuthenticationMethod : IAuthenticator
     {
         public string Aws4SignerSecretKey { get; set; }
 
         public string Aws4SignerAccessKey { get; set; }
 
         public string Aws4SignerRegion { get; set; }
-
-        public string CreateAuthenticationHeader(RequestData requestData)
-        {
-            return null;
-        }
 
         public void Authenticate(IRestClient client, IRestRequest request)
         {
@@ -31,7 +26,7 @@ namespace log4stash.Authentication
             var headers = new Dictionary<string, string>
             {
                 {Aws4SignerBase.X_Amz_Content_SHA256, contentHashString},
-                {"content-type", "text/plain"}
+                {"content-type", "application/json"}
             };
 
             var signer = new Aws4SignerForAuthorizationHeader

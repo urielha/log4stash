@@ -5,7 +5,7 @@ using RestSharp.Authenticators;
 
 namespace log4stash.Authentication
 {
-    public class BasicAuthenticationMethod : IAuthenticationMethod, IAuthenticator
+    public class BasicAuthenticationMethod : IAuthenticator
     {
         public string Password { get; set; }
 

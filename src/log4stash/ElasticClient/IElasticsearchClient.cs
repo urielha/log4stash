@@ -13,6 +13,6 @@ namespace log4stash
         AuthenticationMethodChooser AuthenticationMethod { get; set; }
         void PutTemplateRaw(string templateName, string rawBody);
         void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
-        bool IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
+        void IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
     }
 }
