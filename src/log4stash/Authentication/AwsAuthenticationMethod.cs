@@ -22,7 +22,7 @@ namespace log4stash.Authentication
             var headers = new Dictionary<string, string>
                     {
                         {Aws4SignerBase.X_Amz_Content_SHA256, contentHashString},
-                        {"content-type", "text/plain"}
+                        {"content-type", "application/json"}
                     };
 
             var signer = new Aws4SignerForAuthorizationHeader
