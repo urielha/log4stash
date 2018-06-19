@@ -2,11 +2,11 @@
 <package>
   <metadata>
     <id>log4stash</id>
-    <version>2.2.0</version>
+    <version>2.2.1</version>
     <authors>urielha</authors>
     <owners>urielha</owners>
     <title>log4stash - Elasticsearch log4net appender</title>
-    <iconUrl>http://i.imgur.com/9e8hEh5.png</iconUrl>
+    <iconUrl>https://i.imgur.com/9e8hEh5.png</iconUrl>
     <licenseUrl>https://github.com/urielha/log4stash/blob/master/LICENSE</licenseUrl>
     <projectUrl>https://github.com/urielha/log4stash</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
