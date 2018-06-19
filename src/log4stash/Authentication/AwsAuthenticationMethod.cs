@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using log4stash.Authentication.Aws;
+using RestSharp;
+using RestSharp.Authenticators;
 
 namespace log4stash.Authentication
 {
-    public class AwsAuthenticationMethod : IAuthenticationMethod
+    public class AwsAuthenticationMethod : IAuthenticator
     {
         public string Aws4SignerSecretKey { get; set; }
 
@@ -13,22 +16,23 @@ namespace log4stash.Authentication
 
         public string Aws4SignerRegion { get; set; }
 
-        public string CreateAuthenticationHeader(RequestData requestData)
+        public void Authenticate(IRestClient client, IRestRequest request)
         {
-            var webRequest = requestData.WebRequest;
-            var contentHash = Aws4SignerBase.CanonicalRequestHashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(requestData.RequestString));
+//            var webRequest = requestData.RestRequest;
+            var body = request.Parameters.First(p => p.Type == ParameterType.RequestBody).Value.ToString();
+            var contentHash = Aws4SignerBase.CanonicalRequestHashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(body));
             var contentHashString = Aws4SignerBase.ToHexString(contentHash, true);
 
             var headers = new Dictionary<string, string>
-                    {
-                        {Aws4SignerBase.X_Amz_Content_SHA256, contentHashString},
-                        {"content-type", "text/plain"}
-                    };
+            {
+                {Aws4SignerBase.X_Amz_Content_SHA256, contentHashString},
+                {"content-type", "application/json"}
+            };
 
             var signer = new Aws4SignerForAuthorizationHeader
             {
-                EndpointUri = new Uri(requestData.Url),
-                HttpMethod = webRequest.Method,
+                EndpointUri = new Uri(client.BaseUrl + request.Resource),
+                HttpMethod = request.Method.ToString(),
                 Service = "es",
                 Region = Aws4SignerRegion
             };
@@ -45,13 +49,13 @@ namespace log4stash.Authentication
                     continue;
 
                 if (header.Equals("content-length", StringComparison.OrdinalIgnoreCase))
-                    webRequest.ContentLength = long.Parse(headers[header]);
+                    request.AddHeader("content-length", long.Parse(headers[header]).ToString());
                 else if (header.Equals("content-type", StringComparison.OrdinalIgnoreCase))
-                    webRequest.ContentType = headers[header];
+                    request.AddHeader("content-type", headers[header]);
                 else
-                    webRequest.Headers.Add(header, headers[header]);
+                    request.AddHeader(header, headers[header]);
             }
-            return authorizationHeaderValue;
+            request.AddHeader("Authorization", authorizationHeaderValue);
         }
     }
 }

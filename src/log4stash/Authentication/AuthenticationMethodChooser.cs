@@ -1,19 +1,13 @@
-﻿namespace log4stash.Authentication
+﻿using RestSharp;
+using RestSharp.Authenticators;
+
+namespace log4stash.Authentication
 {
-    public class AuthenticationMethodChooser : IAuthenticationMethod
+    public class AuthenticationMethodChooser : IAuthenticator
     {
-        private IAuthenticationMethod _innerMethod;
+        private IAuthenticator _innerMethod;
 
-        public string CreateAuthenticationHeader(RequestData requestData)
-        {
-            if (_innerMethod == null)
-            {
-                return string.Empty;
-            }
-            return _innerMethod.CreateAuthenticationHeader(requestData);
-        }
-
-        public void AddFilter(IAuthenticationMethod method)
+        public void AddFilter(IAuthenticator method)
         {
             _innerMethod = method;
         }
@@ -31,5 +25,14 @@
         }
 
         #endregion
+
+        public void Authenticate(IRestClient client, IRestRequest request)
+        {
+            if (_innerMethod == null)
+            {
+                return;
+            }
+            _innerMethod.Authenticate(client, request);
+        }
     }
 }
