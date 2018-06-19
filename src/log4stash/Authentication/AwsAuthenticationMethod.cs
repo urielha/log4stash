@@ -18,7 +18,6 @@ namespace log4stash.Authentication
 
         public void Authenticate(IRestClient client, IRestRequest request)
         {
-//            var webRequest = requestData.RestRequest;
             var body = request.Parameters.First(p => p.Type == ParameterType.RequestBody).Value.ToString();
             var contentHash = Aws4SignerBase.CanonicalRequestHashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(body));
             var contentHashString = Aws4SignerBase.ToHexString(contentHash, true);
