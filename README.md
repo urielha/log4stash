@@ -8,7 +8,7 @@ log4stash provide few logging filters similar to the filters on [logstash](http:
 The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.ElasticSearch](https://github.com/jptoto/log4net.ElasticSearch) repository.
 
 ### Features:
-* Supports .NET 3.5+
+* Supports .NET 4.0+ and .NET Core
 * Easy installation and setup via [Nuget](https://nuget.org/packages/log4stash/)
 * Ability to analyze the log event before sending it to elasticsearch using built-in filters and custom filters similar to [logstash](http://logstash.net/docs/1.4.2/).
 
