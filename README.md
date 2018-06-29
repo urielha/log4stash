@@ -65,6 +65,10 @@ You can also set any public property in the appender/filter which didn't appear 
     <BulkIdleTimeout>10000</BulkIdleTimeout>
     <IndexAsync>False</IndexAsync>
     <DocumentIdSource>IdSource</DocumentIdSource> <!-- obsolete! use IndexOperationParams -->
+    
+    <!-- Serialize log object as json (default is true).
+      -- This in case you log the object this way: `logger.Debug(obj);` and not: `logger.Debug("string");` -->
+    <SerializeObjects>True</SerializeObjects> 
 
     <!-- optional: elasticsearch timeout for the request, default = 10000 -->
     <ElasticSearchTimeout>10000</ElasticSearchTimeout>
