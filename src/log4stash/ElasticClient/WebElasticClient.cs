@@ -5,6 +5,7 @@ using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using log4net.Util;
 using log4stash.Authentication;
@@ -19,14 +20,12 @@ namespace log4stash
     {
         private class RequestDetails
         {
-            public RequestDetails(RestRequest restRequest, string content)
+            public RequestDetails(RestRequest restRequest)
             {
                 RestRequest = restRequest;
-                Content = content;
             }
 
             public RestRequest RestRequest { get; private set; }
-            public string Content { get; private set; }
         }
 
         public IRestClient RestClient
@@ -36,8 +35,11 @@ namespace log4stash
 
         private readonly IDictionary<string, RestClient> _restClientByHost;
 
-        public WebElasticClient(ServerDataCollection servers, int timeout)
-            : this(servers, timeout, false, false, new AuthenticationMethodChooser())
+        private int _requests;
+        public int MaxConcurrentRequests { get; private set; }
+
+        public WebElasticClient(ServerDataCollection servers, int timeout, int maxConcurrentRequests)
+            : this(servers, timeout, false, false, new AuthenticationMethodChooser(), maxConcurrentRequests)
         {
         }
 
@@ -45,9 +47,14 @@ namespace log4stash
                                 int timeout,
                                 bool ssl,
                                 bool allowSelfSignedServerCert,
-                                AuthenticationMethodChooser authenticationMethod)
+                                AuthenticationMethodChooser authenticationMethod,
+                                int maxConcurrentRequests
+            )
             : base(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod)
         {
+            _requests = 0;
+            MaxConcurrentRequests = maxConcurrentRequests;
+
             if (Ssl && AllowSelfSignedServerCert)
             {
                 ServicePointManager.ServerCertificateValidationCallback += AcceptSelfSignedServerCertCallback;
@@ -64,7 +71,7 @@ namespace log4stash
         public override void PutTemplateRaw(string templateName, string rawBody)
         {
             var url = string.Concat("_template/", templateName);
-            var restRequest = new RestRequest(url, Method.PUT) {RequestFormat = DataFormat.Json};
+            var restRequest = new RestRequest(url, Method.PUT) { RequestFormat = DataFormat.Json };
             restRequest.AddParameter("application/json", rawBody, ParameterType.RequestBody);
             RestClient.ExecuteAsync(restRequest, response => { });
         }
@@ -77,6 +84,16 @@ namespace log4stash
 
         public override void IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
         {
+            if (MaxConcurrentRequests > 0 &&
+                Interlocked.Increment(ref _requests) > MaxConcurrentRequests)
+            {
+                LogLog.Error(GetType(),
+                    string.Format("Number of concurrent requests ({0}) exceeded the limit ({1})! Bulk lost.",
+                    _requests, MaxConcurrentRequests));
+                Interlocked.Decrement(ref _requests);
+                return;
+            }
+
             var request = PrepareRequest(bulk);
 
             SafeSendRequestAsync(request);
@@ -89,7 +106,7 @@ namespace log4stash
             var restRequest = new RestRequest("_bulk", Method.POST);
             restRequest.AddParameter("application/json", requestString, ParameterType.RequestBody);
 
-            return new RequestDetails(restRequest, requestString);
+            return new RequestDetails(restRequest);
         }
 
         private static string PrepareBulk(IEnumerable<InnerBulkOperation> bulk)
@@ -147,7 +164,7 @@ namespace log4stash
             }
         }
 
-        private async Task SafeSendRequestAsync(RequestDetails request)
+        private async void SafeSendRequestAsync(RequestDetails request)
         {
             IRestResponse response;
             try
@@ -158,6 +175,13 @@ namespace log4stash
             {
                 LogLog.Error(GetType(), "Invalid request to ElasticSearch", ex);
                 return;
+            }
+            finally
+            {
+                if (MaxConcurrentRequests > 0)
+                {
+                    Interlocked.Decrement(ref _requests);                    
+                }
             }
 
             try
@@ -203,7 +227,7 @@ namespace log4stash
             var stringResponse = response.Content;
             var jsonResponse = JsonConvert.DeserializeObject<PartialElasticResponse>(stringResponse);
 
-            bool responseHasError = jsonResponse.Errors || response.StatusCode != HttpStatusCode.OK;
+            bool responseHasError = jsonResponse == null || jsonResponse.Errors || response.StatusCode != HttpStatusCode.OK;
             if (responseHasError)
             {
                 throw new InvalidOperationException(

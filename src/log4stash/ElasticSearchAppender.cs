@@ -38,6 +38,7 @@ namespace log4stash
         public int BulkSize { get; set; }
         public int BulkIdleTimeout { get; set; }
         public int TimeoutToWaitForTimer { get; set; }
+        public int MaxConcurrentRequests { get; set; }
 
         // elastic configuration
         public string Server { get; set; }
@@ -52,6 +53,7 @@ namespace log4stash
         public TemplateInfo Template { get; set; }
         public ElasticAppenderFilters ElasticFilters { get; set; }
         public ILogEventFactory LogEventFactory { get; set; }
+
         [Obsolete]
         public string BasicAuthUsername { get; set; }
         [Obsolete]
@@ -77,6 +79,7 @@ namespace log4stash
             BulkSize = 2000;
             BulkIdleTimeout = 5000;
             TimeoutToWaitForTimer = 5000;
+            MaxConcurrentRequests = -1;
 
             Servers = new ServerDataCollection();
             ElasticSearchTimeout = 10000;
@@ -99,7 +102,7 @@ namespace log4stash
         {
             AddOptionalServer();
             CheckObsoleteAuth();
-            _client = new WebElasticClient(Servers, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
+            _client = new WebElasticClient(Servers, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, AuthenticationMethod, MaxConcurrentRequests);
 
             LogEventFactory.Configure(this);
 

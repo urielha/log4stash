@@ -39,8 +39,7 @@ namespace log4stash
         protected string GetServerUrl()
         {
             var serverData = Servers.GetRandomServerData();
-            var url = string.Format("{0}://{1}:{2}{3}/", Ssl ? "https" : "http", serverData.Address, serverData.Port, String.IsNullOrEmpty(serverData.Path) ? "" : serverData.Path);
-            return url;
+            return GetServerUrl(serverData);
         }
 
         protected string GetServerUrl(IServerData serverData)
