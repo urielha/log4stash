@@ -82,7 +82,7 @@ namespace log4stash
             ElasticSearchTimeout = 10000;
             IndexName = "LogEvent-%{+yyyy.MM.dd}";
             IndexType = "LogEvent";
-            IndexAsync = true;
+            IndexAsync = false;
             Template = null;
             LogEventFactory = new BasicLogEventFactory();
 
