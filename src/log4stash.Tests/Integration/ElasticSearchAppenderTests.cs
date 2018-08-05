@@ -253,7 +253,6 @@ namespace log4stash.Tests.Integration
                     TrimKey = trim,
                     TrimValue = trim
                 });
-                appender.ActivateOptions();
             });
 
             _log.InfoFormat(
@@ -265,11 +264,7 @@ namespace log4stash.Tests.Integration
 
             var entry = searchResults.Documents.First();
 
-            QueryConfiguration(appender =>
-            {
-                appender.ElasticFilters = oldFilters;
-                appender.ActivateOptions();
-            });
+            QueryConfiguration(appender => appender.ElasticFilters = oldFilters);
 
             Assert.IsNotNull(entry.key);
             Assert.AreEqual("value", entry.key.ToString());
@@ -382,7 +377,6 @@ namespace log4stash.Tests.Integration
                 oldFilters = appender.ElasticFilters;
                 appender.ElasticFilters = new ElasticAppenderFilters();
                 appender.ElasticFilters.AddFilter(new JsonFilter() { FlattenJson = flatten, Separator = separator, SourceKey = sourceKey });
-                appender.ActivateOptions();
             });
             var jObject = new JObject
             {
@@ -399,7 +393,6 @@ namespace log4stash.Tests.Integration
             QueryConfiguration(appender =>
             {
                 appender.ElasticFilters = oldFilters;
-                appender.ActivateOptions();
             });
 
             JToken actualObj;
@@ -448,7 +441,6 @@ namespace log4stash.Tests.Integration
                 oldFilters = appender.ElasticFilters;
                 appender.ElasticFilters = new ElasticAppenderFilters();
                 appender.ElasticFilters.AddFilter(new XmlFilter { SourceKey = sourceKey, FlattenXml = flatten, Separator = separator });
-                appender.ActivateOptions();
             });
 
             var xmlDoc = new XmlDocument();
@@ -478,7 +470,6 @@ namespace log4stash.Tests.Integration
             QueryConfiguration(appender =>
             {
                 appender.ElasticFilters = oldFilters;
-                appender.ActivateOptions();
             });
 
             if (flatten)
@@ -499,6 +490,40 @@ namespace log4stash.Tests.Integration
                     Assert.AreEqual(arr[i]["@id"].Value<int>(), i);
                 }
             }
+        }
+
+        [Test]
+        public void DropEventsOverBulkLimit()
+        {
+            const int timeout = 1000;
+            int oldBulkSize = 0;
+            int oldTimeout = 0;
+            QueryConfiguration(appender =>
+            {
+                appender.DropEventsOverBulkLimit = true;
+                oldBulkSize = appender.BulkSize;
+                oldTimeout = appender.BulkIdleTimeout;
+                appender.BulkSize = 1;
+                appender.BulkIdleTimeout = timeout;
+            });
+
+            for (int i = 0; i < 10; i++)
+            {
+                _log.Info("info...");
+            }
+            Thread.Sleep(timeout);
+
+            Client.Refresh(TestIndex);
+
+            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent"));
+            Assert.AreEqual(1, res.Total);
+
+            QueryConfiguration(appender =>
+            {
+                appender.DropEventsOverBulkLimit = false;
+                appender.BulkSize = oldBulkSize;
+                appender.BulkIdleTimeout = oldTimeout;
+            });
         }
 
         [Test]

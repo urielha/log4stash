@@ -52,6 +52,7 @@ namespace log4stash
         public TemplateInfo Template { get; set; }
         public ElasticAppenderFilters ElasticFilters { get; set; }
         public ILogEventFactory LogEventFactory { get; set; }
+        public bool DropEventsOverBulkLimit { get; set; }
         [Obsolete]
         public string BasicAuthUsername { get; set; }
         [Obsolete]
@@ -76,6 +77,7 @@ namespace log4stash
 
             BulkSize = 2000;
             BulkIdleTimeout = 5000;
+            DropEventsOverBulkLimit = false;
             TimeoutToWaitForTimer = 5000;
 
             Servers = new ServerDataCollection();
@@ -162,10 +164,16 @@ namespace log4stash
                 return;
             }
 
+            if (DropEventsOverBulkLimit && _bulk.Count >= BulkSize)
+            {
+                LogLog.Warn(GetType(), "Message lost due to bulk overflow! Set DropEventsOverBulkLimit to false in order to prevent that.");
+                return;
+            }
+
             var logEvent = LogEventFactory.CreateLogEvent(loggingEvent);
             PrepareAndAddToBulk(logEvent);
 
-            if (_bulk.Count >= BulkSize && BulkSize > 0)
+            if (!DropEventsOverBulkLimit && _bulk.Count >= BulkSize && BulkSize > 0)
             {
                 DoIndexNow();
             }
