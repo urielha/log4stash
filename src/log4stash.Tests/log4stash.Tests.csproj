@@ -81,6 +81,9 @@
     <Compile Include="Integration\TestsSetup.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="other.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="app.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
