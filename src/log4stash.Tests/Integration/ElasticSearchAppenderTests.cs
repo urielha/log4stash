@@ -511,7 +511,8 @@ namespace log4stash.Tests.Integration
             {
                 _log.Info("info...");
             }
-            Thread.Sleep(timeout);
+
+            Thread.Sleep(timeout + 1000);
 
             Client.Refresh(TestIndex);
 

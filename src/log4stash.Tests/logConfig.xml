@@ -20,6 +20,7 @@
       <BulkIdleTimeout>-1</BulkIdleTimeout>
       <IndexAsync>False</IndexAsync>
       <FixedFields>Partial</FixedFields>
+      <TolerateLogLogInSec>5</TolerateLogLogInSec>
       <Template>
         <Name>template1</Name>
         <FileName>template.json</FileName>
