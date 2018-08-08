@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Unit\LogEventFactory.cs" />
+    <Compile Include="Unit\ToleratedLogLog.cs" />
     <Compile Include="Unit\Ssl.cs" />
     <Compile Include="Integration\ElasticSearchAppenderTests.cs" />
     <Compile Include="Integration\ConnectionTests.cs" />
