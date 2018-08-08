@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>log4stash</id>
-    <version>2.2.1</version>
+    <version>2.2.2</version>
     <authors>urielha</authors>
     <owners>urielha</owners>
     <title>log4stash - Elasticsearch log4net appender</title>
@@ -15,23 +15,17 @@
       You can configure few filters to analyze log events before they got sended to Elasticsearch similar to the filters on logstash.
     </description>
     <releaseNotes>
-      * Supporting .net core 2.
-      * Using RestSharp for the ElasticClient instead of legacy code.
-      * Update content-type in aws signing code.
-     
-     * Closed issues:
-        ** #26 Make compatible with .NET Core
-        ** #40 Error 406 with ElasticSearch 6.0 RC 2
-        ** #47 Remove `(Begin/End)GetRequest` async mechanism
-      
+      * Add option to dropping events when bulksize overflow.
+
+      * Closed issues:
+      ** 
+
       * Merged pull requests
-        ** #42 Updated the nuspec to support .net core 2.0 
-        ** #48 Replaced WebRequest with RestSharp
-        ** #49 update content-type in aws signing code to application/json for ES 6.0
-      
+      ** 
+
       Thanks a lot to @erangil2 for his tremendous contributions :)
-      
-      And thanks to: @zhengziying, @triarc, @prime8, @henkish, @mfpalladino, @ignasv, @wpgh, @Thecentury and @pnumainville for their contributions.
+
+      And thanks to: @zhengziying, @triarc, @prime8, @henkish, @mfpalladino, @ignasv, @wpgh, @Thecentury, @pnumainville and @Aleksandre for their contributions.
     </releaseNotes>
     <copyright>Copyright 2018</copyright>
     <tags>log logging exception elasticsearch log4net appender logstash filters</tags>
