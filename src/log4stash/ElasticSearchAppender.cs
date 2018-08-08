@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using log4stash.Extensions;
 using log4stash.LogEventFactory;
 using log4stash.SmartFormatters;
 using log4net.Util;
@@ -19,6 +20,7 @@ namespace log4stash
         private IElasticsearchClient _client;
         private LogEventSmartFormatter _indexName;
         private LogEventSmartFormatter _indexType;
+        private TolerateCallsBase _tolerateCalls;
 
         private readonly Timer _timer;
 
@@ -38,6 +40,14 @@ namespace log4stash
         public int BulkSize { get; set; }
         public int BulkIdleTimeout { get; set; }
         public int TimeoutToWaitForTimer { get; set; }
+
+        public int TolerateLogLogInSec
+        {
+            set
+            {
+                _tolerateCalls = TolerateCallsFactory.Create(value);
+            }
+        }
 
         // elastic configuration
         public string Server { get; set; }
@@ -79,6 +89,8 @@ namespace log4stash
             BulkIdleTimeout = 5000;
             DropEventsOverBulkLimit = false;
             TimeoutToWaitForTimer = 5000;
+
+            _tolerateCalls = new TolerateCallsBase();
 
             Servers = new ServerDataCollection();
             ElasticSearchTimeout = 10000;
@@ -166,7 +178,10 @@ namespace log4stash
 
             if (DropEventsOverBulkLimit && _bulk.Count >= BulkSize)
             {
-                LogLog.Warn(GetType(), "Message lost due to bulk overflow! Set DropEventsOverBulkLimit to false in order to prevent that.");
+                _tolerateCalls.Call(() =>
+                    LogLog.Warn(GetType(),
+                        "Message lost due to bulk overflow! Set DropEventsOverBulkLimit to false in order to prevent that."),
+                    GetType(), 0);
                 return;
             }
 

@@ -3,6 +3,14 @@ using System.Collections.Concurrent;
 
 namespace log4stash.Extensions
 {
+    public class TolerateCallsBase
+    {
+        public virtual void Call(Action action, Type type, int hint)
+        {
+            action();
+        }
+    }
+
     /// <summary>
     /// Tolerating calls to function in given timespan.
     /// First call to <see cref="Call"/> with given type and hint key will call the action.
@@ -10,18 +18,18 @@ namespace log4stash.Extensions
     /// 
     /// The function <see cref="Call"/> is thread safe.
     /// </summary>
-    public class ToleratedCalls
+    public class TolerateCalls : TolerateCallsBase
     {
         private readonly TimeSpan _tolerance;
         private readonly ConcurrentDictionary<Tuple<Type, int>, DateTime> 
             _errorsHistory = new ConcurrentDictionary<Tuple<Type, int>, DateTime>();
 
-        public ToleratedCalls(TimeSpan tolerance)
+        public TolerateCalls(TimeSpan tolerance)
         {
             _tolerance = tolerance;
         }
 
-        public void Call(Action action, Type type, int hint)
+        public override void Call(Action action, Type type, int hint)
         {
             var tup = new Tuple<Type, int>(type, hint);
             var now = DateTime.Now;
@@ -39,6 +47,19 @@ namespace log4stash.Extensions
                     action();
                 }
             }
+        }
+    }
+
+    public static class TolerateCallsFactory
+    {
+        public static TolerateCallsBase Create(int toleranceSec)
+        {
+            if (toleranceSec <= 0)
+            {
+                return new TolerateCallsBase();
+            }
+
+            return new TolerateCalls(TimeSpan.FromSeconds(toleranceSec));
         }
     }
 }
