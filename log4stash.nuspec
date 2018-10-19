@@ -15,13 +15,7 @@
       You can configure few filters to analyze log events before they got sended to Elasticsearch similar to the filters on logstash.
     </description>
     <releaseNotes>
-      * Add option to dropping events when bulksize overflow.
-
-      * Closed issues:
-      ** 
-
-      * Merged pull requests
-      ** 
+      * Add option to dropping events when bulksize overflow, named: `DropEventsOverBulkLimit` default: false.
 
       Thanks a lot to @erangil2 for his tremendous contributions :)
 
