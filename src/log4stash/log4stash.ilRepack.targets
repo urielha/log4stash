@@ -9,6 +9,7 @@
     <ItemGroup>
       <InputAssemblies Include="$(OutputPath)log4stash.dll" />
       <InputAssemblies Include="$(OutputPath)Newtonsoft.Json.dll" />
+      <InputAssemblies Include="$(OutputPath)RestSharp.dll" />
     </ItemGroup>
     
     <PropertyGroup>
