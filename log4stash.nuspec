@@ -16,6 +16,7 @@
     </description>
     <releaseNotes>
       * Add option to dropping events when bulksize overflow, named: `DropEventsOverBulkLimit` default: false.
+      * Fix handling errors from server
 
       Thanks a lot to @erangil2 for his tremendous contributions :)
 
