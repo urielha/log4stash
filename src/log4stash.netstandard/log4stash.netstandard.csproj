@@ -5,7 +5,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{055FD962-C4DC-4E3C-BE56-E1E0EAA4ACCA}</ProjectGuid>
+    <ProjectGuid>{F9DD323A-1EB7-404A-81FE-EE4FA711A483}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>log4stash</RootNamespace>
