@@ -193,23 +193,57 @@ namespace log4stash
             return false;
         }
 
-        private static void CheckResponse(IRestResponse response)
+        private static string GetResponseErrorIfAny(IRestResponse response)
         {
             if (response == null)
+            {
+                return "Got null response";
+            }
+
+            // Handle network transport or framework exception
+            if (response.ErrorException != null)
+            {
+                return response.ErrorException.ToString();
+            }
+
+            // Handle request errors
+            if (!response.StatusCode.HasFlag(HttpStatusCode.OK))
+            {
+                var err = new StringBuilder();
+                err.AppendFormat("Got non ok status code: {0}.", response.StatusCode);
+                err.AppendLine(response.Content);
+                return err.ToString();
+            }
+
+            // Handle index error
+            try
+            {
+                var jsonResponse = JsonConvert.DeserializeObject<PartialElasticResponse>(response.Content);
+                if (jsonResponse != null && jsonResponse.Errors)
+                {
+                    return response.Content;
+                }
+            }
+            catch (JsonReaderException)
+            {
+                return string.Format("Can't parse Elastic response: {0}", response.Content);
+            }
+
+            return null;
+        }
+
+        private static void CheckResponse(IRestResponse response)
+        {
+            var errString = GetResponseErrorIfAny(response);
+            if (string.IsNullOrEmpty(errString))
             {
                 return;
             }
 
-            var stringResponse = response.Content;
-            var jsonResponse = JsonConvert.DeserializeObject<PartialElasticResponse>(stringResponse);
-
-            bool responseHasError = jsonResponse.Errors || response.StatusCode != HttpStatusCode.OK;
-            if (responseHasError)
-            {
-                throw new InvalidOperationException(
-                    string.Format("Some error occurred while sending request to Elasticsearch.{0}{1}",
-                        Environment.NewLine, stringResponse));
-            }
+            throw new InvalidOperationException(
+                string.Format("Some error occurred while sending request to Elasticsearch.{0}{1}",
+                    Environment.NewLine, errString));
+            
         }
 
         public override void Dispose()
