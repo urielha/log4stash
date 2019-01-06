@@ -22,7 +22,7 @@
 
       And thanks to: @zhengziying, @triarc, @prime8, @henkish, @mfpalladino, @ignasv, @wpgh, @Thecentury, @pnumainville and @Aleksandre for their contributions.
     </releaseNotes>
-    <copyright>Copyright 2018</copyright>
+    <copyright>Copyright 2019</copyright>
     <tags>log logging exception elasticsearch log4net appender logstash filters</tags>
     <dependencies>
 		
