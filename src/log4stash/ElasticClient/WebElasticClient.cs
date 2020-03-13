@@ -65,7 +65,7 @@ namespace log4stash
         {
             var url = string.Concat("_template/", templateName);
             var restRequest = new RestRequest(url, Method.PUT) {RequestFormat = DataFormat.Json};
-            restRequest.AddParameter("application/json", rawBody, ParameterType.RequestBody);
+            restRequest.AddParameter("application/x-ndjson", rawBody, ParameterType.RequestBody);
             RestClient.ExecuteAsync(restRequest, response => { });
         }
 
@@ -87,7 +87,7 @@ namespace log4stash
         {
             var requestString = PrepareBulk(bulk);
             var restRequest = new RestRequest("_bulk", Method.POST);
-            restRequest.AddParameter("application/json", requestString, ParameterType.RequestBody);
+            restRequest.AddParameter("application/x-ndjson", requestString, ParameterType.RequestBody);
 
             return new RequestDetails(restRequest, requestString);
         }
