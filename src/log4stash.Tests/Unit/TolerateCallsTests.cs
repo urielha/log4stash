@@ -57,9 +57,10 @@ namespace log4stash.Tests.Unit
         [Test]
         public void Factory()
         {
-            Checker(TolerateCallsFactory.Create(0), false);
-            Checker(TolerateCallsFactory.Create(-1), false);
-            Checker(TolerateCallsFactory.Create(TimeSec), true);
+            var factory = new TolerateCallsFactory();
+            Checker(factory.Create(0), false);
+            Checker(factory.Create(-1), false);
+            Checker(factory.Create(TimeSec), true);
         }
     }
 }

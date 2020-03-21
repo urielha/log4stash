@@ -104,6 +104,8 @@
     <Compile Include="Filters\RemoveKeyFilter.cs" />
     <Compile Include="Filters\RenameKeyFilter.cs" />
     <Compile Include="TemplateInfo.cs" />
+    <Compile Include="Timing\IIndexingTimer.cs" />
+    <Compile Include="Timing\IndexingTimer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="log4stash.props" />

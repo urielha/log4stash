@@ -11,6 +11,7 @@ using log4net.Appender;
 using log4net.Core;
 using log4stash.Authentication;
 using log4stash.Configuration;
+using log4stash.Timing;
 using RestSharp.Authenticators;
 
 namespace log4stash
@@ -23,7 +24,7 @@ namespace log4stash
         private LogEventSmartFormatter _indexType;
         private TolerateCallsBase _tolerateCalls;
 
-        private readonly Timer _timer;
+        private readonly IIndexingTimer _timer;
         private readonly ITolerateCallsFactory _tolerateCallsFactory;
 
         public FixFlags FixedFields { get; set; }
@@ -92,7 +93,7 @@ namespace log4stash
             TimeoutToWaitForTimer = 5000;
 
             _tolerateCallsFactory = new TolerateCallsFactory();
-            _tolerateCalls = new TolerateCallsBase();
+            _tolerateCalls = _tolerateCallsFactory.Create(0);
 
             Servers = new ServerDataCollection();
             ElasticSearchTimeout = 10000;
@@ -102,7 +103,8 @@ namespace log4stash
             Template = null;
             LogEventFactory = new BasicLogEventFactory();
 
-            _timer = new Timer(TimerElapsed, null, Timeout.Infinite, Timeout.Infinite);
+            _timer = new IndexingTimer(Timeout.Infinite) { WaitTimeout = 5000};
+            _timer.Elapsed += TimerElapsed;
             ElasticFilters = new ElasticAppenderFilters();
 
             AllowSelfSignedServerCert = false;
@@ -111,12 +113,13 @@ namespace log4stash
             IndexOperationParams = new IndexOperationParamsDictionary();
         }
 
-        public ElasticSearchAppender(IElasticsearchClient client, LogEventSmartFormatter indexName, LogEventSmartFormatter indexType, Timer timer, ITolerateCallsFactory tolerateCallsFactory)
+        public ElasticSearchAppender(IElasticsearchClient client, LogEventSmartFormatter indexName, LogEventSmartFormatter indexType, IIndexingTimer timer, ITolerateCallsFactory tolerateCallsFactory)
         {
             _client = client;
             _indexName = indexName;
             _indexType = indexType;
             _timer = timer;
+            _timer.Elapsed += TimerElapsed;
             _tolerateCallsFactory = tolerateCallsFactory;
         }
 
@@ -158,8 +161,7 @@ namespace log4stash
 
         private void RestartTimer()
         {
-            var timeout = TimeSpan.FromMilliseconds(BulkIdleTimeout);
-            _timer.Change(timeout, timeout);
+            _timer.Restart(BulkIdleTimeout);
         }
 
         /// <summary>
@@ -170,9 +172,7 @@ namespace log4stash
             DoIndexNow();
 
             // let the timer finish its job
-            WaitHandle notifyObj = new AutoResetEvent(false);
-            _timer.Dispose(notifyObj);
-            notifyObj.WaitOne(TimeoutToWaitForTimer);
+            _timer.Dispose();
             _client.Dispose();
         }
 
@@ -230,7 +230,7 @@ namespace log4stash
             }
         }
 
-        public void TimerElapsed(object state)
+        public void TimerElapsed(object state, object o)
         {
             DoIndexNow();
         }
