@@ -49,17 +49,4 @@ namespace log4stash.Extensions
             }
         }
     }
-
-    public static class TolerateCallsFactory
-    {
-        public static TolerateCallsBase Create(int toleranceSec)
-        {
-            if (toleranceSec <= 0)
-            {
-                return new TolerateCallsBase();
-            }
-
-            return new TolerateCalls(TimeSpan.FromSeconds(toleranceSec));
-        }
-    }
 }

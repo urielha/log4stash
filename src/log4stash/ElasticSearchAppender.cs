@@ -11,6 +11,7 @@ using log4net.Appender;
 using log4net.Core;
 using log4stash.Authentication;
 using log4stash.Configuration;
+using RestSharp.Authenticators;
 
 namespace log4stash
 {
@@ -23,6 +24,7 @@ namespace log4stash
         private TolerateCallsBase _tolerateCalls;
 
         private readonly Timer _timer;
+        private readonly ITolerateCallsFactory _tolerateCallsFactory;
 
         public FixFlags FixedFields { get; set; }
         public bool SerializeObjects { get; set; }
@@ -45,7 +47,7 @@ namespace log4stash
         {
             set
             {
-                _tolerateCalls = TolerateCallsFactory.Create(value);
+                _tolerateCalls = _tolerateCallsFactory.Create(value);
             }
         }
 
@@ -53,14 +55,14 @@ namespace log4stash
         public string Server { get; set; }
         public int Port { get; set; }
         public string Path { get; set; }
-        public ServerDataCollection Servers { get; set; }
+        public IServerDataCollection Servers { get; set; }
         public int ElasticSearchTimeout { get; set; }
         public bool Ssl { get; set; }
         public bool AllowSelfSignedServerCert { get; set; }
-        public AuthenticationMethodChooser AuthenticationMethod { get; set; }
+        public IAuthenticationMethodChooser AuthenticationMethod { get; set; }
         public bool IndexAsync { get; set; }
         public TemplateInfo Template { get; set; }
-        public ElasticAppenderFilters ElasticFilters { get; set; }
+        public IElasticAppenderFilter ElasticFilters { get; set; }
         public ILogEventFactory LogEventFactory { get; set; }
         public bool DropEventsOverBulkLimit { get; set; }
         [Obsolete]
@@ -84,12 +86,12 @@ namespace log4stash
         {
             FixedFields = FixFlags.Partial;
             SerializeObjects = true;
-
             BulkSize = 2000;
             BulkIdleTimeout = 5000;
             DropEventsOverBulkLimit = false;
             TimeoutToWaitForTimer = 5000;
 
+            _tolerateCallsFactory = new TolerateCallsFactory();
             _tolerateCalls = new TolerateCallsBase();
 
             Servers = new ServerDataCollection();
@@ -107,6 +109,15 @@ namespace log4stash
             Ssl = false;
             AuthenticationMethod = new AuthenticationMethodChooser();
             IndexOperationParams = new IndexOperationParamsDictionary();
+        }
+
+        public ElasticSearchAppender(IElasticsearchClient client, LogEventSmartFormatter indexName, LogEventSmartFormatter indexType, Timer timer, ITolerateCallsFactory tolerateCallsFactory)
+        {
+            _client = client;
+            _indexName = indexName;
+            _indexType = indexType;
+            _timer = timer;
+            _tolerateCallsFactory = tolerateCallsFactory;
         }
 
         public override void ActivateOptions()

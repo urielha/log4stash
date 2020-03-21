@@ -241,18 +241,20 @@ namespace log4stash.Tests.Integration
         public void Can_read_KvFilter_properties(string[] fieldSplit, string[] valueSplit, string trim,
             bool expectAnotherToBeNull)
         {
-            ElasticAppenderFilters oldFilters = null;
+            IElasticAppenderFilter oldFilters = null;
             QueryConfiguration(appender =>
             {
                 oldFilters = appender.ElasticFilters;
-                appender.ElasticFilters = new ElasticAppenderFilters();
-                appender.ElasticFilters.AddFilter(new KvFilter()
+                var newFilters = new ElasticAppenderFilters();
+                
+                newFilters.AddFilter(new KvFilter()
                 {
                     FieldSplit = string.Join("", fieldSplit),
                     ValueSplit = string.Join("", valueSplit),
                     TrimKey = trim,
                     TrimValue = trim
                 });
+                appender.ElasticFilters = newFilters;
             });
 
             _log.InfoFormat(
@@ -331,18 +333,18 @@ namespace log4stash.Tests.Integration
         {
             const string sourceKey = "UserName";
 
-            ElasticAppenderFilters oldFilters = null;
+            IElasticAppenderFilter oldFilters = null;
             QueryConfiguration(appender =>
             {
                 oldFilters = appender.ElasticFilters;
-                appender.ElasticFilters = new ElasticAppenderFilters();
+                var newFilters = new ElasticAppenderFilters();
                 var convert = new ConvertFilter();
                 convert.AddToString(sourceKey);
 
                 var toArray = new ConvertToArrayFilter { SourceKey = sourceKey };
                 convert.AddToArray(toArray);
-
-                appender.ElasticFilters.AddConvert(convert);
+                newFilters.AddConvert(convert);
+                appender.ElasticFilters = newFilters;
             });
 
             LogicalThreadContext.Stacks[sourceKey].Push("name1");
@@ -371,12 +373,13 @@ namespace log4stash.Tests.Integration
         public void parse_json_string_as_object(bool flatten, string separator = "_")
         {
             const string sourceKey = "jsonObject";
-            ElasticAppenderFilters oldFilters = null;
+            IElasticAppenderFilter oldFilters = null;
             QueryConfiguration(appender =>
             {
                 oldFilters = appender.ElasticFilters;
-                appender.ElasticFilters = new ElasticAppenderFilters();
-                appender.ElasticFilters.AddFilter(new JsonFilter() { FlattenJson = flatten, Separator = separator, SourceKey = sourceKey });
+                var newFilters = new ElasticAppenderFilters();
+                newFilters.AddFilter(new JsonFilter() { FlattenJson = flatten, Separator = separator, SourceKey = sourceKey });
+                appender.ElasticFilters = newFilters;
             });
             var jObject = new JObject
             {
@@ -434,13 +437,14 @@ namespace log4stash.Tests.Integration
         {
             const string separator = "_";
             const string sourceKey = "xmlObject";
-            ElasticAppenderFilters oldFilters = null;
+            IElasticAppenderFilter oldFilters = null;
 
             QueryConfiguration(appender =>
             {
                 oldFilters = appender.ElasticFilters;
-                appender.ElasticFilters = new ElasticAppenderFilters();
-                appender.ElasticFilters.AddFilter(new XmlFilter { SourceKey = sourceKey, FlattenXml = flatten, Separator = separator });
+                var newFilters = new ElasticAppenderFilters();
+                newFilters.AddFilter(new XmlFilter { SourceKey = sourceKey, FlattenXml = flatten, Separator = separator });
+                appender.ElasticFilters = newFilters;
             });
 
             var xmlDoc = new XmlDocument();
@@ -531,14 +535,15 @@ namespace log4stash.Tests.Integration
         [Ignore("the build agent have problems on running performance")]
         public static void Performance()
         {
-            ElasticAppenderFilters oldFilters = null;
+            IElasticAppenderFilter oldFilters = null;
             QueryConfiguration(appender =>
             {
                 appender.BulkSize = 4000;
                 appender.BulkIdleTimeout = -1;
                 oldFilters = appender.ElasticFilters;
-                //appender.ElasticFilters = new ElasticAppenderFilters();
-                appender.ElasticFilters.AddFilter(new GrokFilter() { Pattern = "testNum: {INT:testNum}, name is {WORD:name} and guid {UUID:guid}" });
+                var newFilters = new ElasticAppenderFilters();
+                newFilters.AddFilter(new GrokFilter() { Pattern = "testNum: {INT:testNum}, name is {WORD:name} and guid {UUID:guid}" });
+                appender.ElasticFilters = newFilters;
             });
 
             PerformanceTests.Test(1, 32000);

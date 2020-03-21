@@ -3,23 +3,24 @@ using System.Collections.Generic;
 using System.Net;
 using log4stash.Authentication;
 using log4stash.Configuration;
+using RestSharp.Authenticators;
 
 namespace log4stash
 {
     public abstract class AbstractWebElasticClient : IElasticsearchClient
     {
-        public ServerDataCollection Servers { get; private set; }
+        public IServerDataCollection Servers { get; private set; }
         public int Timeout { get; private set; }
         public bool Ssl { get; private set; }
         public bool AllowSelfSignedServerCert { get; private set; }
-        public AuthenticationMethodChooser AuthenticationMethod { get; set; }
+        public IAuthenticator AuthenticationMethod { get; set; }
         public string Url { get { return GetServerUrl(); } }
 
-        protected AbstractWebElasticClient(ServerDataCollection servers,
+        protected AbstractWebElasticClient(IServerDataCollection servers,
             int timeout,
             bool ssl,
             bool allowSelfSignedServerCert,
-            AuthenticationMethodChooser authenticationMethod)
+            IAuthenticator authenticationMethod)
         {
             Servers = servers;
             Timeout = timeout;

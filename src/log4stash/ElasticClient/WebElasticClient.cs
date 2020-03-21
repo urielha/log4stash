@@ -11,6 +11,7 @@ using log4stash.Authentication;
 using log4stash.Configuration;
 using Newtonsoft.Json;
 using RestSharp;
+using RestSharp.Authenticators;
 
 namespace log4stash
 {
@@ -41,11 +42,11 @@ namespace log4stash
         {
         }
 
-        public WebElasticClient(ServerDataCollection servers,
+        public WebElasticClient(IServerDataCollection servers,
                                 int timeout,
                                 bool ssl,
                                 bool allowSelfSignedServerCert,
-                                AuthenticationMethodChooser authenticationMethod)
+                                IAuthenticator authenticationMethod)
             : base(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod)
         {
             if (Ssl && AllowSelfSignedServerCert)
