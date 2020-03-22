@@ -116,8 +116,9 @@ namespace log4stash
             _bulk = new LogBulkSet();
         }
 
-        public ElasticSearchAppender(IElasticsearchClient client, LogEventSmartFormatter indexName, LogEventSmartFormatter indexType, IIndexingTimer timer, ITolerateCallsFactory tolerateCallsFactory, ILogBulkSet bulk)
+        public ElasticSearchAppender(IElasticsearchClient client, LogEventSmartFormatter indexName, LogEventSmartFormatter indexType, IIndexingTimer timer, ITolerateCallsFactory tolerateCallsFactory, ILogBulkSet bulk, ILogEventFactory logEventFactory)
         {
+            LogEventFactory = logEventFactory;
             _client = client;
             _indexName = indexName;
             _indexType = indexType;

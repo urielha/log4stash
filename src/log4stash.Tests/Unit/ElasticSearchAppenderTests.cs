@@ -1,22 +1,22 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using log4stash.Bulk;
 using log4stash.Extensions;
+using log4stash.LogEventFactory;
 using log4stash.Timing;
 using NSubstitute;
 using NUnit.Framework;
 
 namespace log4stash.Tests.Unit
 {
+    [TestFixture]
     class ElasticSearchAppenderTests
     {
         private IElasticsearchClient _elasticClient;
         private ITolerateCallsFactory _tolerateCallsFactory;
         private IIndexingTimer _timer;
         private ILogBulkSet _bulk;
+        private ILogEventFactory _logEventFactory;
 
         [SetUp]
         public void Setup()
@@ -25,13 +25,15 @@ namespace log4stash.Tests.Unit
             _timer = Substitute.For<IIndexingTimer>();
             _tolerateCallsFactory = Substitute.For<ITolerateCallsFactory>();
             _bulk = Substitute.For<ILogBulkSet>();
+            _logEventFactory = Substitute.For<ILogEventFactory>();
         }
 
         [Test]
         public void BULK_SHOULD_BE_RESET_WHEN_TIMER_ELAPSED()
         {
             //Arrange
-            var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory, _bulk);
+            var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory,
+                _bulk, _logEventFactory);
             _bulk.ResetBulk().Returns(new List<InnerBulkOperation>());
             
             //Act
