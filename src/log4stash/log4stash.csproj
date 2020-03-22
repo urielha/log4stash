@@ -66,6 +66,8 @@
     <Compile Include="Authentication\RequestData.cs" />
     <Compile Include="Authentication\Aws\AWS4SignerForAuthorizationHeader.cs" />
     <Compile Include="Authentication\Aws\AWS4SignerBase.cs" />
+    <Compile Include="Bulk\ILogBulkSet.cs" />
+    <Compile Include="Bulk\LogBulkSet.cs" />
     <Compile Include="Configuration\IServerData.cs" />
     <Compile Include="Configuration\IndexOperationParam.cs" />
     <Compile Include="Configuration\IndexOperationParamsDictionary.cs" />
@@ -76,6 +78,7 @@
     <Compile Include="ElasticClient\IElasticsearchClient.cs" />
     <Compile Include="ElasticClient\InnerBulkOperation.cs" />
     <Compile Include="ElasticClient\PartialElasticResponse.cs" />
+    <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Extensions\ITolerateCallsFactory.cs" />
     <Compile Include="Extensions\TolerateCallsFactory.cs" />
     <Compile Include="Extensions\ToleratedCalls.cs" />

@@ -10,6 +10,7 @@ using log4net.Util;
 using log4net.Appender;
 using log4net.Core;
 using log4stash.Authentication;
+using log4stash.Bulk;
 using log4stash.Configuration;
 using log4stash.Timing;
 using RestSharp.Authenticators;
@@ -18,7 +19,8 @@ namespace log4stash
 {
     public class ElasticSearchAppender : AppenderSkeleton, ILogEventFactoryParams
     {
-        private List<InnerBulkOperation> _bulk = new List<InnerBulkOperation>();
+
+        private ILogBulkSet _bulk;
         private IElasticsearchClient _client;
         private LogEventSmartFormatter _indexName;
         private LogEventSmartFormatter _indexType;
@@ -104,23 +106,25 @@ namespace log4stash
             LogEventFactory = new BasicLogEventFactory();
 
             _timer = new IndexingTimer(Timeout.Infinite) { WaitTimeout = 5000};
-            _timer.Elapsed += TimerElapsed;
+            _timer.Elapsed += (o, e) => DoIndexNow();
             ElasticFilters = new ElasticAppenderFilters();
 
             AllowSelfSignedServerCert = false;
             Ssl = false;
             AuthenticationMethod = new AuthenticationMethodChooser();
             IndexOperationParams = new IndexOperationParamsDictionary();
+            _bulk = new LogBulkSet();
         }
 
-        public ElasticSearchAppender(IElasticsearchClient client, LogEventSmartFormatter indexName, LogEventSmartFormatter indexType, IIndexingTimer timer, ITolerateCallsFactory tolerateCallsFactory)
+        public ElasticSearchAppender(IElasticsearchClient client, LogEventSmartFormatter indexName, LogEventSmartFormatter indexType, IIndexingTimer timer, ITolerateCallsFactory tolerateCallsFactory, ILogBulkSet bulk)
         {
             _client = client;
             _indexName = indexName;
             _indexType = indexType;
             _timer = timer;
-            _timer.Elapsed += TimerElapsed;
+            _timer.Elapsed += (o,e) => DoIndexNow();
             _tolerateCallsFactory = tolerateCallsFactory;
+            _bulk = bulk;
         }
 
         public override void ActivateOptions()
@@ -211,28 +215,8 @@ namespace log4stash
         /// <param name="logEvent"></param>
         private void PrepareAndAddToBulk(Dictionary<string, object> logEvent)
         {
-            ElasticFilters.PrepareEvent(logEvent);
-            var indexName = _indexName.Format(logEvent).ToLower();
-            var indexType = _indexType.Format(logEvent);
-            var indexOperationParamValues = IndexOperationParams.ToDictionary(logEvent);
-
-            var operation = new InnerBulkOperation
-            {
-                Document = logEvent,
-                IndexName = indexName,
-                IndexType = indexType,
-                IndexOperationParams = indexOperationParamValues
-            };
-
-            lock (_bulk)
-            {
-                _bulk.Add(operation);
-            }
-        }
-
-        public void TimerElapsed(object state, object o)
-        {
-            DoIndexNow();
+            logEvent.ApplyFilter(ElasticFilters);
+            _bulk.AddEventToBulk(logEvent, _indexName, _indexType, IndexOperationParams);
         }
 
         /// <summary>
@@ -240,7 +224,7 @@ namespace log4stash
         /// </summary>
         private void DoIndexNow()
         {
-            var bulkToSend = Interlocked.Exchange(ref _bulk, new List<InnerBulkOperation>());
+            var bulkToSend = _bulk.ResetBulk();
             if (bulkToSend.Count > 0)
             {
                 try
