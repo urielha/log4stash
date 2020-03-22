@@ -5,6 +5,7 @@ using log4stash.Extensions;
 using log4stash.LogEventFactory;
 using log4stash.Timing;
 using NSubstitute;
+using NSubstitute.ExceptionExtensions;
 using NUnit.Framework;
 
 namespace log4stash.Tests.Unit
@@ -47,7 +48,8 @@ namespace log4stash.Tests.Unit
         public void EMPTY_BULK_IS_NOT_INDEXED_WHEN_TIMER_ELAPSES()
         {
             //Arrange
-            var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory, _bulk);
+            var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory,
+                _bulk, _logEventFactory);
             _bulk.ResetBulk().Returns(new List<InnerBulkOperation>());
 
             //Act
@@ -62,7 +64,8 @@ namespace log4stash.Tests.Unit
         public void BULK_IS_INDEXED_ASYNC_WHEN_TIMER_ELAPSES()
         {
             //Arrange
-            var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory, _bulk);
+            var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory,
+                _bulk, _logEventFactory);
             var bulk = new List<InnerBulkOperation> {new InnerBulkOperation()};
             _bulk.ResetBulk().Returns(bulk);
             appender.IndexAsync = true;
@@ -78,16 +81,63 @@ namespace log4stash.Tests.Unit
         public void BULK_IS_INDEXED_WHEN_TIMER_ELAPSES()
         {
             //Arrange
-            var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory, _bulk);
+            var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory,
+                _bulk, _logEventFactory);
             var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
             _bulk.ResetBulk().Returns(bulk);
             appender.IndexAsync = false;
 
-            //Act
+            //Act   
             _timer.Elapsed += Raise.Event<EventHandler<object>>(this, null);
 
             //Assert
             _elasticClient.Received().IndexBulk(bulk);
+        }
+
+        [Test]
+        public void CALLS_TOLERATOR_CREATED_WHEN_PROPERTY_CHANGED()
+        {
+            //Arrange
+            var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory,
+                _bulk, _logEventFactory); var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+
+            //Act   
+            appender.TolerateLogLogInSec = 1;
+
+            //Assert
+            _tolerateCallsFactory.Received().Create(1);
+        }
+
+        [Test]
+        public void INDEX_BULK_ASYNC_EXCEPTION_IS_NOT_THROWN_IN_APPENDER()
+        {
+            //Arrange
+            var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory,
+                _bulk, _logEventFactory) {IndexAsync = true};
+            _elasticClient.WhenForAnyArgs(x => x.IndexBulkAsync(null)).Throw(new Exception());
+            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            _bulk.ResetBulk().Returns(bulk);
+            
+            //Act   
+            _timer.Elapsed += Raise.Event<EventHandler<object>>(this, null);
+
+            //Assert
+        }
+
+        [Test]
+        public void INDEX_BULK_EXCEPTION_IS_NOT_THROWN_IN_APPENDER()
+        {
+            //Arrange
+            var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory,
+                _bulk, _logEventFactory) {IndexAsync = false};
+            _elasticClient.WhenForAnyArgs(x => x.IndexBulkAsync(null)).Throw(new Exception());
+            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            _bulk.ResetBulk().Returns(bulk);
+
+            //Act   
+            _timer.Elapsed += Raise.Event<EventHandler<object>>(this, null);
+
+            //Assert
         }
 
 
