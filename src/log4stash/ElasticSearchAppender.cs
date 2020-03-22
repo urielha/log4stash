@@ -226,23 +226,21 @@ namespace log4stash
         private void DoIndexNow()
         {
             var bulkToSend = _bulk.ResetBulk();
-            if (bulkToSend.Count > 0)
+            if (bulkToSend.Count <= 0) return;
+            try
             {
-                try
+                if (IndexAsync)
                 {
-                    if (IndexAsync)
-                    {
-                        _client.IndexBulkAsync(bulkToSend);
-                    }
-                    else
-                    {
-                        _client.IndexBulk(bulkToSend);
-                    }
+                    _client.IndexBulkAsync(bulkToSend);
                 }
-                catch (Exception ex)
+                else
                 {
-                    LogLog.Error(GetType(), "IElasticsearchClient inner exception occurred", ex);
+                    _client.IndexBulk(bulkToSend);
                 }
+            }
+            catch (Exception ex)
+            {
+                LogLog.Error(GetType(), "IElasticsearchClient inner exception occurred", ex);
             }
         }
     }

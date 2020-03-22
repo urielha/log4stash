@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using log4net.Util;
 using log4stash.Authentication;
 using log4stash.Configuration;
+using log4stash.ElasticClient;
 using Newtonsoft.Json;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -18,25 +19,13 @@ namespace log4stash
 
     public class WebElasticClient : AbstractWebElasticClient
     {
-        private class RequestDetails
-        {
-            public RequestDetails(RestRequest restRequest, string content)
-            {
-                RestRequest = restRequest;
-                Content = content;
-            }
-
-            public RestRequest RestRequest { get; private set; }
-            public string Content { get; private set; }
-        }
-
         public IRestClient RestClient
         {
             get { return _restClientByHost[GetServerUrl()]; }
         }
 
         private readonly IDictionary<string, RestClient> _restClientByHost;
-
+        private readonly IRequestFactory _requestFactory;
         public WebElasticClient(ServerDataCollection servers, int timeout)
             : this(servers, timeout, false, false, new AuthenticationMethodChooser())
         {
@@ -49,6 +38,7 @@ namespace log4stash
                                 IAuthenticator authenticationMethod)
             : base(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod)
         {
+            _requestFactory =  new RequestFactory();
             if (Ssl && AllowSelfSignedServerCert)
             {
                 ServicePointManager.ServerCertificateValidationCallback += AcceptSelfSignedServerCertCallback;
@@ -72,57 +62,14 @@ namespace log4stash
 
         public override void IndexBulk(IEnumerable<InnerBulkOperation> bulk)
         {
-            var request = PrepareRequest(bulk);
+            var request = _requestFactory.PrepareRequest(bulk);
             SafeSendRequest(request);
         }
 
         public override void IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
         {
-            var request = PrepareRequest(bulk);
-
-            SafeSendRequestAsync(request);
-        }
-
-
-        private RequestDetails PrepareRequest(IEnumerable<InnerBulkOperation> bulk)
-        {
-            var requestString = PrepareBulk(bulk);
-            var restRequest = new RestRequest("_bulk", Method.POST);
-            restRequest.AddParameter("application/json", requestString, ParameterType.RequestBody);
-
-            return new RequestDetails(restRequest, requestString);
-        }
-
-        private static string PrepareBulk(IEnumerable<InnerBulkOperation> bulk)
-        {
-            var sb = new StringBuilder();
-            foreach (InnerBulkOperation operation in bulk)
-            {
-                AddOperationMetadata(operation, sb);
-                AddOperationDocument(operation, sb);
-            }
-            return sb.ToString();
-        }
-
-        private static void AddOperationMetadata(InnerBulkOperation operation, StringBuilder sb)
-        {
-            var indexParams = new Dictionary<string, string>(operation.IndexOperationParams)
-            {
-                { "_index", operation.IndexName },
-                { "_type", operation.IndexType },
-            };
-            var paramStrings = indexParams.Where(kv => kv.Value != null)
-                .Select(kv => string.Format(@"""{0}"" : ""{1}""", kv.Key, kv.Value));
-            var documentMetadata = string.Join(",", paramStrings.ToArray());
-            sb.AppendFormat(@"{{ ""index"" : {{ {0} }} }}", documentMetadata);
-            sb.Append("\n");
-        }
-
-        private static void AddOperationDocument(InnerBulkOperation operation, StringBuilder sb)
-        {
-            string json = JsonConvert.SerializeObject(operation.Document);
-            sb.Append(json);
-            sb.Append("\n");
+            var request = _requestFactory.PrepareRequest(bulk);
+            Task.Run(() => SafeSendRequestAsync(request));
         }
 
         private void SafeSendRequest(RequestDetails request)

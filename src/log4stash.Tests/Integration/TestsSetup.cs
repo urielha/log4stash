@@ -9,7 +9,7 @@ namespace log4stash.Tests.Integration
 {
     public class TestsSetup
     {
-        public ElasticClient Client;
+        public IElasticClient Client;
         public readonly string TestIndex = "log_test_" + DateTime.Now.ToString("yyyy-MM-dd");
 
         public void FixtureSetup()
@@ -30,7 +30,7 @@ namespace log4stash.Tests.Integration
                 new ConnectionSettings(new Uri(string.Format("http://{0}:{1}{2}", host, port, path)))
                     .DefaultIndex(TestIndex);
 
-            Client = new ElasticClient(elasticSettings);
+            Client = new Nest.ElasticClient(elasticSettings);
         }
 
         public void FixtureTearDown()

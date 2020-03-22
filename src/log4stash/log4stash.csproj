@@ -77,7 +77,10 @@
     <Compile Include="ElasticClient\AbstractWebElasticClient.cs" />
     <Compile Include="ElasticClient\IElasticsearchClient.cs" />
     <Compile Include="ElasticClient\InnerBulkOperation.cs" />
+    <Compile Include="ElasticClient\IRequestFactory.cs" />
     <Compile Include="ElasticClient\PartialElasticResponse.cs" />
+    <Compile Include="ElasticClient\RequestDetails.cs" />
+    <Compile Include="ElasticClient\RequestFactory.cs" />
     <Compile Include="Extensions\DictionaryExtensions.cs" />
     <Compile Include="Extensions\ITolerateCallsFactory.cs" />
     <Compile Include="Extensions\TolerateCallsFactory.cs" />

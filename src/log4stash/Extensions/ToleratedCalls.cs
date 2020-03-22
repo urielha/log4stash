@@ -40,12 +40,10 @@ namespace log4stash.Extensions
             }
 
             var lastErr = _errorsHistory[tup];
-            if (now - lastErr > _tolerance)
+            if (now - lastErr <= _tolerance) return;
+            if (_errorsHistory.TryUpdate(tup, now, lastErr))
             {
-                if (_errorsHistory.TryUpdate(tup, now, lastErr))
-                {
-                    action();
-                }
+                action();
             }
         }
     }
