@@ -12,6 +12,7 @@ using log4net.Core;
 using log4stash.Authentication;
 using log4stash.Bulk;
 using log4stash.Configuration;
+using log4stash.ElasticClient;
 using log4stash.FileAccess;
 using log4stash.Timing;
 using RestSharp.Authenticators;
@@ -24,6 +25,7 @@ namespace log4stash
         private readonly ILogBulkSet _bulk;
         private readonly IFileAccessor _fileAccessor;
         private IElasticsearchClient _client;
+        private IElasticClientFactory _elasticClientFactory;
         private LogEventSmartFormatter _indexName;
         private LogEventSmartFormatter _indexType;
         private TolerateCallsBase _tolerateCalls;
@@ -88,19 +90,19 @@ namespace log4stash
         }
 
         public ElasticSearchAppender()
-            : this(null, "LogEvent-%{+yyyy.MM.dd}",
+            : this(new WebElasticClientFactory(), "LogEvent-%{+yyyy.MM.dd}",
                 "LogEvent", new IndexingTimer(Timeout.Infinite) { WaitTimeout = 5000 },
                 new TolerateCallsFactory(), new LogBulkSet(),
                 new BasicLogEventFactory(), new ElasticAppenderFilters(), new BasicFileAccessor())
         {
         }
 
-        public ElasticSearchAppender(IElasticsearchClient client, LogEventSmartFormatter indexName,
+        public ElasticSearchAppender(IElasticClientFactory clientFactory, LogEventSmartFormatter indexName,
             LogEventSmartFormatter indexType, IIndexingTimer timer, ITolerateCallsFactory tolerateCallsFactory,
             ILogBulkSet bulk, ILogEventFactory logEventFactory, IElasticAppenderFilter elasticFilters, IFileAccessor fileAccessor)
         {
             LogEventFactory = logEventFactory;
-            _client = client;
+            _elasticClientFactory = clientFactory;
             _indexName = indexName;
             _indexType = indexType;
             _timer = timer;
@@ -131,7 +133,7 @@ namespace log4stash
         {
             AddOptionalServer();
             CheckObsoleteAuth();
-            _client = new WebElasticClient(Servers, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
+            _client = _elasticClientFactory.CreateClient(Servers, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
 
             LogEventFactory.Configure(this);
 
