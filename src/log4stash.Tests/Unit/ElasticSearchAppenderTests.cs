@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using log4net.Core;
 using log4stash.Bulk;
 using log4stash.ElasticClient;
 using log4stash.Extensions;
@@ -164,7 +165,6 @@ namespace log4stash.Tests.Unit
                 _tolerateCallsFactory,
                 _bulk, _logEventFactory, _elasticFilters, _fileAccessor)
             {
-                IndexAsync = false,
                 Template = null
             };
 
@@ -183,7 +183,7 @@ namespace log4stash.Tests.Unit
                 _tolerateCallsFactory,
                 _bulk, _logEventFactory, _elasticFilters, _fileAccessor)
             {
-                IndexAsync = false, Template = new TemplateInfo()
+                Template = new TemplateInfo()
             };
 
             //Act   
@@ -210,7 +210,6 @@ namespace log4stash.Tests.Unit
                 _tolerateCallsFactory,
                 _bulk, _logEventFactory, _elasticFilters, _fileAccessor)
             {
-                IndexAsync = false,
                 Template = template
             };
 
@@ -219,6 +218,132 @@ namespace log4stash.Tests.Unit
 
             //Assert
             _elasticClient.Received().PutTemplateRaw(template.Name, rawBody);
+        }
+
+        [Test]
+        public void BULK_IS_DROPPED_WHEN_OVERFLOW()
+        {
+            //Arrange
+            const int bulkSize = 1;
+            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
+                _tolerateCallsFactory,
+                _bulk, _logEventFactory, _elasticFilters, _fileAccessor)
+            {
+                DropEventsOverBulkLimit = true,
+                BulkSize = bulkSize
+            };
+            _bulk.Count.Returns(bulkSize);
+            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            _bulk.ResetBulk().Returns(bulk);
+            appender.ActivateOptions();
+
+            //Act   
+            appender.DoAppend(new LoggingEvent(new LoggingEventData()));
+
+            //Assert
+            _elasticClient.DidNotReceiveWithAnyArgs().IndexBulk(null);
+            _elasticClient.DidNotReceiveWithAnyArgs().IndexBulkAsync(null);
+        }
+        
+        [Test]
+        public void BULK_IS_INDEXED_WHEN_BULK_LIMIT_IS_REACHED()
+        {
+            //Arrange
+            const int bulkSize = 1;
+            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
+                _tolerateCallsFactory,
+                _bulk, _logEventFactory, _elasticFilters, _fileAccessor)
+            {
+                DropEventsOverBulkLimit = false,
+                BulkSize = bulkSize,
+                IndexAsync = false
+            };
+            _bulk.Count.Returns(bulkSize);
+            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            _bulk.ResetBulk().Returns(bulk);
+            appender.ActivateOptions();
+
+            //Act   
+            appender.DoAppend(new LoggingEvent(new LoggingEventData()));
+
+            //Assert
+            _elasticClient.Received().IndexBulk(bulk);
+            //_elasticClient.DidNotReceiveWithAnyArgs().IndexBulkAsync(null);
+        }
+
+        [Test]
+        public void BULK_IS_INDEXED_ASYNC_WHEN_BULK_LIMIT_IS_REACHED()
+        {
+            //Arrange
+            const int bulkSize = 1;
+            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
+                _tolerateCallsFactory,
+                _bulk, _logEventFactory, _elasticFilters, _fileAccessor)
+            {
+                DropEventsOverBulkLimit = false,
+                BulkSize = bulkSize,
+                IndexAsync = true
+            };
+            _bulk.Count.Returns(bulkSize);
+            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            _bulk.ResetBulk().Returns(bulk);
+            appender.ActivateOptions();
+
+            //Act   
+            appender.DoAppend(new LoggingEvent(new LoggingEventData()));
+
+            //Assert
+            _elasticClient.Received().IndexBulkAsync(bulk);
+        }
+
+        [Test]
+        public void BULK_IS_NOT_INDEXED_WHEN_EVENT_IS_NULL()
+        {
+            //Arrange
+            const int bulkSize = 1;
+            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
+                _tolerateCallsFactory,
+                _bulk, _logEventFactory, _elasticFilters, _fileAccessor)
+            {
+                DropEventsOverBulkLimit = false,
+                BulkSize = bulkSize
+            };
+            _bulk.Count.Returns(bulkSize);
+            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            _bulk.ResetBulk().Returns(bulk);
+            appender.ActivateOptions();
+
+            //Act   
+            appender.DoAppend((LoggingEvent) null);
+
+            //Assert
+            _elasticClient.DidNotReceiveWithAnyArgs().IndexBulk(null);
+            _elasticClient.DidNotReceiveWithAnyArgs().IndexBulkAsync(null);
+        }
+
+        [Test]
+        public void BULK_IS_NOT_INDEXED_WHEN_BULK_LIMIT_IS_ZERO()
+        {
+            //Arrange
+            const int bulkSize = 0;
+            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
+                _tolerateCallsFactory,
+                _bulk, _logEventFactory, _elasticFilters, _fileAccessor)
+            {
+                DropEventsOverBulkLimit = false,
+                BulkSize = bulkSize,
+            };
+            _bulk.Count.Returns(bulkSize + 1);
+            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            _bulk.ResetBulk().Returns(bulk);
+            appender.ActivateOptions();
+
+            //Act   
+            appender.DoAppend(new LoggingEvent(new LoggingEventData()));
+
+            //Assert
+            _elasticClient.DidNotReceiveWithAnyArgs().IndexBulk(null);
+            _elasticClient.DidNotReceiveWithAnyArgs().IndexBulkAsync(null);
         }
 
 

@@ -103,8 +103,8 @@ namespace log4stash
         {
             LogEventFactory = logEventFactory;
             _elasticClientFactory = clientFactory;
-            _indexName = indexName;
-            _indexType = indexType;
+            IndexName = indexName;
+            IndexType = indexType;
             _timer = timer;
             _timer.Elapsed += (o,e) => DoIndexNow();
             _tolerateCallsFactory = tolerateCallsFactory;
