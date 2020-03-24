@@ -11,6 +11,15 @@ namespace log4stash
     {
         private readonly List<IElasticAppenderFilter> _filters = new List<IElasticAppenderFilter>();
 
+        public ElasticAppenderFilters()
+        {
+        }
+
+        public ElasticAppenderFilters(List<IElasticAppenderFilter> filters)
+        {
+            _filters = filters;
+        }
+
         public void PrepareConfiguration(IElasticsearchClient client)
         {
             foreach (var filter in _filters)

@@ -157,6 +157,25 @@ namespace log4stash.Tests.Unit
         }
 
         [Test]
+        public void TEMPLATE_IS_NOT_PUT_WHEN_IS_NULL()
+        {
+            //Arrange
+            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
+                _tolerateCallsFactory,
+                _bulk, _logEventFactory, _elasticFilters, _fileAccessor)
+            {
+                IndexAsync = false,
+                Template = null
+            };
+
+            //Act   
+            appender.ActivateOptions();
+
+            //Assert
+            _elasticClient.DidNotReceiveWithAnyArgs().PutTemplateRaw(null, null);
+        }
+
+        [Test]
         public void TEMPLATE_IS_NOT_PUT_WHEN_IS_NOT_VALID()
         {
             //Arrange
@@ -172,6 +191,34 @@ namespace log4stash.Tests.Unit
 
             //Assert
             _elasticClient.DidNotReceiveWithAnyArgs().PutTemplateRaw(null, null);
+        }
+
+        [Test]
+        public void TEMPLATE_IS_PUT_WHEN_IS_VALID()
+        {
+            //Arrange
+            var template = new TemplateInfo(_fileAccessor)
+            {
+                FileName = "file",
+                Name = "template"
+            };
+            var rawBody = "body";
+            _fileAccessor.Exists("file").Returns(true);
+            _fileAccessor.ReadAllText(template.FileName).Returns(rawBody);
+            template.ActivateOptions();
+            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
+                _tolerateCallsFactory,
+                _bulk, _logEventFactory, _elasticFilters, _fileAccessor)
+            {
+                IndexAsync = false,
+                Template = template
+            };
+
+            //Act   
+            appender.ActivateOptions();
+
+            //Assert
+            _elasticClient.Received().PutTemplateRaw(template.Name, rawBody);
         }
 
 

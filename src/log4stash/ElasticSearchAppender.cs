@@ -133,6 +133,7 @@ namespace log4stash
         {
             AddOptionalServer();
             CheckObsoleteAuth();
+
             _client = _elasticClientFactory.CreateClient(Servers, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
 
             LogEventFactory.Configure(this);
@@ -144,7 +145,7 @@ namespace log4stash
 
             ElasticFilters.PrepareConfiguration(_client);
 
-            RestartTimer();
+            _timer.Restart(BulkIdleTimeout);
         }
 
         private void AddOptionalServer()
@@ -163,11 +164,6 @@ namespace log4stash
                 var auth = new BasicAuthenticationMethod { Username = BasicAuthUsername, Password = BasicAuthPassword };
                 AuthenticationMethod.AddBasic(auth);
             }
-        }
-
-        private void RestartTimer()
-        {
-            _timer.Restart(BulkIdleTimeout);
         }
 
         /// <summary>
