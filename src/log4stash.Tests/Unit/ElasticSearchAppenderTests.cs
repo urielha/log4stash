@@ -20,6 +20,7 @@ namespace log4stash.Tests.Unit
         private ILogBulkSet _bulk;
         private ILogEventFactory _logEventFactory;
         private IFileAccessor _fileAccessor;
+        private IElasticAppenderFilter _elasticFilters;
 
         [SetUp]
         public void Setup()
@@ -29,6 +30,7 @@ namespace log4stash.Tests.Unit
             _tolerateCallsFactory = Substitute.For<ITolerateCallsFactory>();
             _bulk = Substitute.For<ILogBulkSet>();
             _logEventFactory = Substitute.For<ILogEventFactory>();
+            _elasticFilters = Substitute.For<IElasticAppenderFilter>();
             _fileAccessor = Substitute.For<IFileAccessor>();
         }
 
@@ -37,7 +39,7 @@ namespace log4stash.Tests.Unit
         {
             //Arrange
             var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory,
-                _bulk, _logEventFactory, _fileAccessor);
+                _bulk, _logEventFactory, _elasticFilters, _fileAccessor);
             _bulk.ResetBulk().Returns(new List<InnerBulkOperation>());
             
             //Act
@@ -52,7 +54,7 @@ namespace log4stash.Tests.Unit
         {
             //Arrange
             var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory,
-                _bulk, _logEventFactory, _fileAccessor);
+                _bulk, _logEventFactory, _elasticFilters, _fileAccessor);
             _bulk.ResetBulk().Returns(new List<InnerBulkOperation>());
 
             //Act
@@ -68,7 +70,7 @@ namespace log4stash.Tests.Unit
         {
             //Arrange
             var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory,
-                _bulk, _logEventFactory, _fileAccessor);
+                _bulk, _logEventFactory, _elasticFilters, _fileAccessor);
             var bulk = new List<InnerBulkOperation> {new InnerBulkOperation()};
             _bulk.ResetBulk().Returns(bulk);
             appender.IndexAsync = true;
@@ -85,7 +87,7 @@ namespace log4stash.Tests.Unit
         {
             //Arrange
             var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory,
-                _bulk, _logEventFactory, _fileAccessor);
+                _bulk, _logEventFactory, _elasticFilters, _fileAccessor);
             var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
             _bulk.ResetBulk().Returns(bulk);
             appender.IndexAsync = false;
@@ -104,7 +106,7 @@ namespace log4stash.Tests.Unit
         {
             //Arrange
             var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory,
-                _bulk, _logEventFactory, _fileAccessor); var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+                _bulk, _logEventFactory, _elasticFilters, _fileAccessor); var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
 
             //Act   
             appender.TolerateLogLogInSec = numOfSeconds;
@@ -118,7 +120,7 @@ namespace log4stash.Tests.Unit
         {
             //Arrange
             var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory,
-                _bulk, _logEventFactory, _fileAccessor) {IndexAsync = true};
+                _bulk, _logEventFactory, _elasticFilters, _fileAccessor) {IndexAsync = true};
             _elasticClient.WhenForAnyArgs(x => x.IndexBulkAsync(null)).Throw(new Exception());
             var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
             _bulk.ResetBulk().Returns(bulk);
@@ -134,7 +136,7 @@ namespace log4stash.Tests.Unit
         {
             //Arrange
             var appender = new ElasticSearchAppender(_elasticClient, "index", "type", _timer, _tolerateCallsFactory,
-                _bulk, _logEventFactory, _fileAccessor) {IndexAsync = false};
+                _bulk, _logEventFactory, _elasticFilters, _fileAccessor) {IndexAsync = false};
             _elasticClient.WhenForAnyArgs(x => x.IndexBulkAsync(null)).Throw(new Exception());
             var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
             _bulk.ResetBulk().Returns(bulk);

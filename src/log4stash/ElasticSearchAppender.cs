@@ -88,40 +88,16 @@ namespace log4stash
         }
 
         public ElasticSearchAppender()
+            : this(null, "LogEvent-%{+yyyy.MM.dd}",
+                "LogEvent", new IndexingTimer(Timeout.Infinite) { WaitTimeout = 5000 },
+                new TolerateCallsFactory(), new LogBulkSet(),
+                new BasicLogEventFactory(), new ElasticAppenderFilters(), new BasicFileAccessor())
         {
-            FixedFields = FixFlags.Partial;
-            SerializeObjects = true;
-            BulkSize = 2000;
-            BulkIdleTimeout = 5000;
-            DropEventsOverBulkLimit = false;
-            TimeoutToWaitForTimer = 5000;
-
-            _tolerateCallsFactory = new TolerateCallsFactory();
-            _tolerateCalls = _tolerateCallsFactory.Create(0);
-
-            Servers = new ServerDataCollection();
-            ElasticSearchTimeout = 10000;
-            IndexName = "LogEvent-%{+yyyy.MM.dd}";
-            IndexType = "LogEvent";
-            IndexAsync = true;
-            Template = null;
-            LogEventFactory = new BasicLogEventFactory();
-
-            _timer = new IndexingTimer(Timeout.Infinite) { WaitTimeout = 5000};
-            _timer.Elapsed += (o, e) => DoIndexNow();
-            ElasticFilters = new ElasticAppenderFilters();
-
-            AllowSelfSignedServerCert = false;
-            Ssl = false;
-            AuthenticationMethod = new AuthenticationMethodChooser();
-            IndexOperationParams = new IndexOperationParamsDictionary();
-            _bulk = new LogBulkSet();
-            _fileAccessor = new BasicFileAccessor();
         }
 
         public ElasticSearchAppender(IElasticsearchClient client, LogEventSmartFormatter indexName,
             LogEventSmartFormatter indexType, IIndexingTimer timer, ITolerateCallsFactory tolerateCallsFactory,
-            ILogBulkSet bulk, ILogEventFactory logEventFactory, IFileAccessor fileAccessor)
+            ILogBulkSet bulk, ILogEventFactory logEventFactory, IElasticAppenderFilter elasticFilters, IFileAccessor fileAccessor)
         {
             LogEventFactory = logEventFactory;
             _client = client;
@@ -132,6 +108,23 @@ namespace log4stash
             _tolerateCallsFactory = tolerateCallsFactory;
             _bulk = bulk;
             _fileAccessor = fileAccessor;
+
+            FixedFields = FixFlags.Partial;
+            SerializeObjects = true;
+            BulkSize = 2000;
+            BulkIdleTimeout = 5000;
+            DropEventsOverBulkLimit = false;
+            TimeoutToWaitForTimer = 5000;
+            ElasticSearchTimeout = 10000;
+            IndexAsync = true;
+            Template = null;
+            AllowSelfSignedServerCert = false;
+            Ssl = false; 
+            _tolerateCalls = _tolerateCallsFactory.Create(0);
+            Servers = new ServerDataCollection();
+            ElasticFilters = elasticFilters;
+            AuthenticationMethod = new AuthenticationMethodChooser();
+            IndexOperationParams = new IndexOperationParamsDictionary();
         }
 
         public override void ActivateOptions()
