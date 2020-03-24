@@ -24,9 +24,10 @@ namespace log4stash
             get { return _restClientByHost[GetServerUrl()]; }
         }
 
-        private readonly IDictionary<string, RestClient> _restClientByHost;
+        private readonly IDictionary<string, IRestClient> _restClientByHost;
         private readonly IRequestFactory _requestFactory;
-        public WebElasticClient(ServerDataCollection servers, int timeout)
+
+        public WebElasticClient(IServerDataCollection servers, int timeout)
             : this(servers, timeout, false, false, new AuthenticationMethodChooser())
         {
         }
@@ -45,19 +46,26 @@ namespace log4stash
             }
 
             _restClientByHost = servers.ToDictionary(GetServerUrl,
-                serverData => new RestClient(GetServerUrl(serverData))
+                serverData => (IRestClient) new RestClient(GetServerUrl(serverData))
                 {
                     Timeout = timeout,
                     Authenticator = authenticationMethod
                 });
         }
 
+        public WebElasticClient(IServerDataCollection servers, int timeout,
+            bool ssl, bool allowSelfSignedServerCert, IAuthenticator authenticationMethod,
+            IDictionary<string, IRestClient> restClientByHost, IRequestFactory requestFactory)
+            : base(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod)
+        {
+            _restClientByHost = restClientByHost;
+            _requestFactory = requestFactory;
+        }
+
         public override void PutTemplateRaw(string templateName, string rawBody)
         {
-            var url = string.Concat("_template/", templateName);
-            var restRequest = new RestRequest(url, Method.PUT) {RequestFormat = DataFormat.Json};
-            restRequest.AddParameter("application/json", rawBody, ParameterType.RequestBody);
-            RestClient.ExecuteAsync(restRequest, response => { });
+            var request = _requestFactory.CreatePutTemplateRequest(templateName, rawBody);
+            RestClient.ExecuteAsync(request, response => { });
         }
 
         public override void IndexBulk(IEnumerable<InnerBulkOperation> bulk)

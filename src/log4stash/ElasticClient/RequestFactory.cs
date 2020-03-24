@@ -18,6 +18,14 @@ namespace log4stash.ElasticClient
             return new RequestDetails(restRequest, requestString);
         }
 
+        public IRestRequest CreatePutTemplateRequest(string templateName, string rawBody)
+        {
+            var url = string.Concat("_template/", templateName);
+            var restRequest = new RestRequest(url, Method.PUT) { RequestFormat = DataFormat.Json };
+            restRequest.AddParameter("application/json", rawBody, ParameterType.RequestBody);
+            return restRequest;
+        }
+
         private static string PrepareBulk(IEnumerable<InnerBulkOperation> bulk)
         {
             var sb = new StringBuilder();
@@ -49,5 +57,7 @@ namespace log4stash.ElasticClient
             sb.Append(json);
             sb.Append("\n");
         }
+
+
     }
 }

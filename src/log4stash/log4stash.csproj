@@ -85,6 +85,8 @@
     <Compile Include="Extensions\ITolerateCallsFactory.cs" />
     <Compile Include="Extensions\TolerateCallsFactory.cs" />
     <Compile Include="Extensions\ToleratedCalls.cs" />
+    <Compile Include="FileAccess\BasicFileAccessor.cs" />
+    <Compile Include="FileAccess\IFileAccessor.cs" />
     <Compile Include="Filters\ConvertFilter.cs" />
     <Compile Include="Filters\XmlFilter.cs" />
     <Compile Include="LogEventFactory\BasicLogEventFactory.cs" />

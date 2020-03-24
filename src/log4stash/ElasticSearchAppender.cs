@@ -12,6 +12,7 @@ using log4net.Core;
 using log4stash.Authentication;
 using log4stash.Bulk;
 using log4stash.Configuration;
+using log4stash.FileAccess;
 using log4stash.Timing;
 using RestSharp.Authenticators;
 
@@ -20,7 +21,8 @@ namespace log4stash
     public class ElasticSearchAppender : AppenderSkeleton, ILogEventFactoryParams
     {
 
-        private ILogBulkSet _bulk;
+        private readonly ILogBulkSet _bulk;
+        private readonly IFileAccessor _fileAccessor;
         private IElasticsearchClient _client;
         private LogEventSmartFormatter _indexName;
         private LogEventSmartFormatter _indexType;
@@ -114,9 +116,12 @@ namespace log4stash
             AuthenticationMethod = new AuthenticationMethodChooser();
             IndexOperationParams = new IndexOperationParamsDictionary();
             _bulk = new LogBulkSet();
+            _fileAccessor = new BasicFileAccessor();
         }
 
-        public ElasticSearchAppender(IElasticsearchClient client, LogEventSmartFormatter indexName, LogEventSmartFormatter indexType, IIndexingTimer timer, ITolerateCallsFactory tolerateCallsFactory, ILogBulkSet bulk, ILogEventFactory logEventFactory)
+        public ElasticSearchAppender(IElasticsearchClient client, LogEventSmartFormatter indexName,
+            LogEventSmartFormatter indexType, IIndexingTimer timer, ITolerateCallsFactory tolerateCallsFactory,
+            ILogBulkSet bulk, ILogEventFactory logEventFactory, IFileAccessor fileAccessor)
         {
             LogEventFactory = logEventFactory;
             _client = client;
@@ -126,6 +131,7 @@ namespace log4stash
             _timer.Elapsed += (o,e) => DoIndexNow();
             _tolerateCallsFactory = tolerateCallsFactory;
             _bulk = bulk;
+            _fileAccessor = fileAccessor;
         }
 
         public override void ActivateOptions()
@@ -138,7 +144,7 @@ namespace log4stash
 
             if (Template != null && Template.IsValid)
             {
-                _client.PutTemplateRaw(Template.Name, File.ReadAllText(Template.FileName));
+                _client.PutTemplateRaw(Template.Name, _fileAccessor.ReadAllText(Template.FileName));
             }
 
             ElasticFilters.PrepareConfiguration(_client);

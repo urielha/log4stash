@@ -1,6 +1,6 @@
 ﻿using RestSharp;
 
-namespace log4stash
+namespace log4stash.ElasticClient
 {
     public class RequestDetails
     {
