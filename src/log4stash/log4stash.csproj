@@ -102,6 +102,7 @@
     <Compile Include="Filters\GrokFilter.cs" />
     <Compile Include="Filters\KvFilter.cs" />
     <Compile Include="IElasticAppenderFilter.cs" />
+    <Compile Include="LogEvent\IJsonSerializableExceptionFactory.cs" />
     <Compile Include="LogEvent\ILogEventConverter.cs" />
     <Compile Include="InnerExceptions\InvalidFilterConfigurationException.cs" />
     <Compile Include="Extensions\FixFlagsExtensions.cs" />
@@ -109,6 +110,7 @@
     <Compile Include="LogEvent\ILoggingEventParser.cs" />
     <Compile Include="LogEvent\JsonSerializableException.cs" />
     <Compile Include="LogEvent\BasicLoggingEventParser.cs" />
+    <Compile Include="LogEvent\JsonSerializableExceptionFactory.cs" />
     <Compile Include="LogEvent\LogEventConverterFactory.cs" />
     <Compile Include="SmartFormatters\GrokSmartFormatter.cs" />
     <Compile Include="SmartFormatters\LogEventSmartFormatter.cs" />

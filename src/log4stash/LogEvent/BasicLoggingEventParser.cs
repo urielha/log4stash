@@ -10,12 +10,19 @@ namespace log4stash.LogEvent
         private readonly string _machineName;
         private readonly FixFlags _fixedFields;
         private readonly bool _serializeObjects;
+        private readonly IJsonSerializableExceptionFactory _exceptionFactory;
 
         public BasicLoggingEventParser(string machineName, FixFlags fixedFields, bool serializeObjects)
+        : this(machineName, fixedFields, serializeObjects, new BasicJsonSerializableExceptionFactory())
+        {
+        }
+
+        public BasicLoggingEventParser(string machineName, FixFlags fixedFields, bool serializeObjects, IJsonSerializableExceptionFactory exceptionFactory)
         {
             _machineName = machineName;
             _fixedFields = fixedFields;
             _serializeObjects = serializeObjects;
+            _exceptionFactory = exceptionFactory;
         }
 
         public void ParseBasicFields(LoggingEvent loggingEvent, Dictionary<string, object> resultDictionary)
@@ -76,7 +83,7 @@ namespace log4stash.LogEvent
             var exceptionObject = loggingEvent.MessageObject as Exception;
             if (exceptionObject != null)
             {
-                resultDictionary["MessageObject"] = JsonSerializableException.Create(exceptionObject);
+                resultDictionary["MessageObject"] = _exceptionFactory.Create(exceptionObject);
             }
             else
             {
@@ -97,7 +104,7 @@ namespace log4stash.LogEvent
 
             if (_serializeObjects && exception != null)
             {
-                resultDictionary["ExceptionObject"] = JsonSerializableException.Create(exception);
+                resultDictionary["ExceptionObject"] = _exceptionFactory.Create(exception);
             }
         }
 
