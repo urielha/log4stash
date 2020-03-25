@@ -53,39 +53,34 @@ namespace log4stash.LogEvent
         public void ParseLocationInfo(LoggingEvent loggingEvent, Dictionary<string, object> resultDictionary)
         {
             var locationInformation = loggingEvent.LocationInformation;
-            if (_fixedFields.ContainsFlag(FixFlags.LocationInfo) && locationInformation != null)
-            {
-                var locationInfo = new Dictionary<string, object>();
-                resultDictionary["LocationInformation"] = locationInfo;
+            if (!_fixedFields.ContainsFlag(FixFlags.LocationInfo) || locationInformation == null) return;
+            var locationInfo = new Dictionary<string, object>();
+            resultDictionary["LocationInformation"] = locationInfo;
 
-                locationInfo["ClassName"] = locationInformation.ClassName;
-                locationInfo["FileName"] = locationInformation.FileName;
-                locationInfo["LineNumber"] = locationInformation.LineNumber;
-                locationInfo["FullInfo"] = locationInformation.FullInfo;
-                locationInfo["MethodName"] = locationInformation.MethodName;
-            }
+            locationInfo["ClassName"] = locationInformation.ClassName;
+            locationInfo["FileName"] = locationInformation.FileName;
+            locationInfo["LineNumber"] = locationInformation.LineNumber;
+            locationInfo["FullInfo"] = locationInformation.FullInfo;
+            locationInfo["MethodName"] = locationInformation.MethodName;
         }
 
         public void ParseMessage(LoggingEvent loggingEvent, Dictionary<string, object> resultDictionary)
         {
-            if (_fixedFields.ContainsFlag(FixFlags.Message))
-            {
-                resultDictionary["Message"] = loggingEvent.RenderedMessage;
+            if (!_fixedFields.ContainsFlag(FixFlags.Message)) return;
+            resultDictionary["Message"] = loggingEvent.RenderedMessage;
 
-                // Added special handling of the MessageObject since it may be an exception. 
-                // Exception Types require specialized serialization to prevent serialization exceptions.
-                if (_serializeObjects && loggingEvent.MessageObject != null && !(loggingEvent.MessageObject is string))
-                {
-                    var exceptionObject = loggingEvent.MessageObject as Exception;
-                    if (exceptionObject != null)
-                    {
-                        resultDictionary["MessageObject"] = JsonSerializableException.Create(exceptionObject);
-                    }
-                    else
-                    {
-                        resultDictionary["MessageObject"] = loggingEvent.MessageObject;
-                    }
-                }
+            // Added special handling of the MessageObject since it may be an exception. 
+            // Exception Types require specialized serialization to prevent serialization exceptions.
+            if (!_serializeObjects || loggingEvent.MessageObject == null ||
+                loggingEvent.MessageObject is string) return;
+            var exceptionObject = loggingEvent.MessageObject as Exception;
+            if (exceptionObject != null)
+            {
+                resultDictionary["MessageObject"] = JsonSerializableException.Create(exceptionObject);
+            }
+            else
+            {
+                resultDictionary["MessageObject"] = loggingEvent.MessageObject;
             }
         }
 
