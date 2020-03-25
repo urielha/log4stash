@@ -91,7 +91,7 @@
     <Compile Include="FileAccess\IFileAccessor.cs" />
     <Compile Include="Filters\ConvertFilter.cs" />
     <Compile Include="Filters\XmlFilter.cs" />
-    <Compile Include="LogEventFactory\BasicLogEventFactory.cs" />
+    <Compile Include="LogEvent\BasicLogEventConverter.cs" />
     <Compile Include="ElasticClient\WebElasticClient.cs" />
     <Compile Include="Filters\AddValueFilter.cs" />
     <Compile Include="Filters\JsonFilter.cs" />
@@ -102,10 +102,14 @@
     <Compile Include="Filters\GrokFilter.cs" />
     <Compile Include="Filters\KvFilter.cs" />
     <Compile Include="IElasticAppenderFilter.cs" />
-    <Compile Include="LogEventFactory\ILogEventFactory.cs" />
+    <Compile Include="LogEvent\ILogEventConverter.cs" />
     <Compile Include="InnerExceptions\InvalidFilterConfigurationException.cs" />
     <Compile Include="Extensions\FixFlagsExtensions.cs" />
-    <Compile Include="LogEventFactory\JsonSerializableException.cs" />
+    <Compile Include="LogEvent\ILogEventConverterFactory.cs" />
+    <Compile Include="LogEvent\ILoggingEventParser.cs" />
+    <Compile Include="LogEvent\JsonSerializableException.cs" />
+    <Compile Include="LogEvent\BasicLoggingEventParser.cs" />
+    <Compile Include="LogEvent\LogEventConverterFactory.cs" />
     <Compile Include="SmartFormatters\GrokSmartFormatter.cs" />
     <Compile Include="SmartFormatters\LogEventSmartFormatter.cs" />
     <Compile Include="SmartFormatters\SmartFormatter.cs" />

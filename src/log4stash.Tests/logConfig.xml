@@ -19,7 +19,7 @@
       <Bulksize>1</Bulksize>
       <BulkIdleTimeout>-1</BulkIdleTimeout>
       <IndexAsync>False</IndexAsync>
-      <FixedFields>Partial</FixedFields>
+      <_fixedFields>Partial</_fixedFields>
       <TolerateLogLogInSec>5</TolerateLogLogInSec>
       <Template>
         <Name>template1</Name>

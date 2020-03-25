@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using log4stash.Extensions;
-using log4stash.LogEventFactory;
 using log4stash.SmartFormatters;
 using log4net.Util;
 using log4net.Appender;
@@ -14,27 +13,28 @@ using log4stash.Bulk;
 using log4stash.Configuration;
 using log4stash.ElasticClient;
 using log4stash.FileAccess;
+using log4stash.LogEvent;
 using log4stash.Timing;
 using RestSharp.Authenticators;
 
 namespace log4stash
 {
-    public class ElasticSearchAppender : AppenderSkeleton, ILogEventFactoryParams
+    public class ElasticSearchAppender : AppenderSkeleton
     {
 
         private readonly ILogBulkSet _bulk;
         private readonly IFileAccessor _fileAccessor;
         private IElasticsearchClient _client;
-        private IElasticClientFactory _elasticClientFactory;
+        private readonly IElasticClientFactory _elasticClientFactory;
         private LogEventSmartFormatter _indexName;
         private LogEventSmartFormatter _indexType;
         private TolerateCallsBase _tolerateCalls;
-
+        private ILogEventConverter _logEventConverter;
+        private readonly ILogEventConverterFactory _logEventConverterFactory;
         private readonly IIndexingTimer _timer;
         private readonly ITolerateCallsFactory _tolerateCallsFactory;
 
-        public FixFlags FixedFields { get; set; }
-        public bool SerializeObjects { get; set; }
+        
 
         [Obsolete]
         public string DocumentIdSource
@@ -44,7 +44,8 @@ namespace log4stash
                 IndexOperationParams.AddParameter(new IndexOperationParam("_id", string.Format("{0}{1}{2}", "%{", value, "}" )));
             }
         }
-
+        public FixFlags FixedFields { get; set; }
+        public bool SerializeObjects { get; set; }
         public IndexOperationParamsDictionary IndexOperationParams { get; set; }
         public int BulkSize { get; set; }
         public int BulkIdleTimeout { get; set; }
@@ -70,7 +71,6 @@ namespace log4stash
         public bool IndexAsync { get; set; }
         public TemplateInfo Template { get; set; }
         public IElasticAppenderFilter ElasticFilters { get; set; }
-        public ILogEventFactory LogEventFactory { get; set; }
         public bool DropEventsOverBulkLimit { get; set; }
         [Obsolete]
         public string BasicAuthUsername { get; set; }
@@ -93,15 +93,15 @@ namespace log4stash
             : this(new WebElasticClientFactory(), "LogEvent-%{+yyyy.MM.dd}",
                 "LogEvent", new IndexingTimer(Timeout.Infinite) { WaitTimeout = 5000 },
                 new TolerateCallsFactory(), new LogBulkSet(),
-                new BasicLogEventFactory(), new ElasticAppenderFilters(), new BasicFileAccessor())
+                new BasicLogEventConverterFactory(), new ElasticAppenderFilters(), new BasicFileAccessor())
         {
         }
 
         public ElasticSearchAppender(IElasticClientFactory clientFactory, LogEventSmartFormatter indexName,
             LogEventSmartFormatter indexType, IIndexingTimer timer, ITolerateCallsFactory tolerateCallsFactory,
-            ILogBulkSet bulk, ILogEventFactory logEventFactory, IElasticAppenderFilter elasticFilters, IFileAccessor fileAccessor)
+            ILogBulkSet bulk, ILogEventConverterFactory logEventConverterFactory, IElasticAppenderFilter elasticFilters, IFileAccessor fileAccessor)
         {
-            LogEventFactory = logEventFactory;
+            _logEventConverterFactory = logEventConverterFactory;
             _elasticClientFactory = clientFactory;
             IndexName = indexName;
             IndexType = indexType;
@@ -136,7 +136,7 @@ namespace log4stash
 
             _client = _elasticClientFactory.CreateClient(Servers, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
 
-            LogEventFactory.Configure(this);
+            _logEventConverter = _logEventConverterFactory.Create(FixedFields, SerializeObjects);
 
             if (Template != null && Template.IsValid)
             {
@@ -198,7 +198,7 @@ namespace log4stash
                 return;
             }
 
-            var logEvent = LogEventFactory.CreateLogEvent(loggingEvent);
+            var logEvent = _logEventConverter.ConvertLogEventToDictionary(loggingEvent);
             PrepareAndAddToBulk(logEvent);
 
             if (!DropEventsOverBulkLimit && _bulk.Count >= BulkSize && BulkSize > 0)
