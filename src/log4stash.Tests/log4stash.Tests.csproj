@@ -91,7 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Unit\ElasticSearchAppenderTests.cs" />
-    <Compile Include="Unit\LogEventConverterTests.cs" />
+    <Compile Include="Unit\LogEventParserTests.cs" />
     <Compile Include="Unit\TemplateInfoTests.cs" />
     <Compile Include="Unit\TolerateCallsTests.cs" />
     <Compile Include="Unit\Ssl.cs" />

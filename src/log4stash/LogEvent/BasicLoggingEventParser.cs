@@ -41,11 +41,6 @@ namespace log4stash.LogEvent
                 resultDictionary["AppDomain"] = loggingEvent.Domain;
             }
 
-            if (loggingEvent.Level != null)
-            {
-                resultDictionary["Level"] = loggingEvent.Level.DisplayName;
-            }
-
             if (_fixedFields.ContainsFlag(FixFlags.Identity))
             {
                 resultDictionary["Identity"] = loggingEvent.Identity;
@@ -54,6 +49,11 @@ namespace log4stash.LogEvent
             if (_fixedFields.ContainsFlag(FixFlags.UserName))
             {
                 resultDictionary["UserName"] = loggingEvent.UserName;
+            }
+
+            if (loggingEvent.Level != null)
+            {
+                resultDictionary["Level"] = loggingEvent.Level.DisplayName;
             }
         }
 
