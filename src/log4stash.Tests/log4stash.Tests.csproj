@@ -91,6 +91,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Unit\ElasticSearchAppenderTests.cs" />
+    <Compile Include="Unit\FiltersTests.cs" />
     <Compile Include="Unit\LogEventConverterTests.cs" />
     <Compile Include="Unit\LogEventParserTests.cs" />
     <Compile Include="Unit\TemplateInfoTests.cs" />
@@ -126,6 +127,7 @@
       <Name>log4stash</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
