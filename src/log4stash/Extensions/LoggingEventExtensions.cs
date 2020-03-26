@@ -27,6 +27,11 @@ namespace log4stash.Extensions
             }
         }
 
+        public static void ApplyFilter(this Dictionary<string, object> loggingEvent, IElasticAppenderFilter filter)
+        {
+            filter.PrepareEvent(loggingEvent);
+        }
+
         public static void AddTag(this Dictionary<string, object> loggingEvent, string tag)
         {
             loggingEvent.AddOrSet(TagsKeyName, tag);
@@ -34,7 +39,7 @@ namespace log4stash.Extensions
 
         public static bool TryGetStringValue(this Dictionary<string, object> loggingEvent, string key, out string value)
         {
-            value = string.Empty;
+            value = String.Empty;
             object token;
             if(loggingEvent.TryGetValue(key, out token))
             {
