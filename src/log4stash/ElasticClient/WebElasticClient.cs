@@ -10,6 +10,7 @@ using log4net.Util;
 using log4stash.Authentication;
 using log4stash.Configuration;
 using log4stash.ElasticClient;
+using log4stash.ElasticClient.RestSharp;
 using log4stash.ErrorHandling;
 using Newtonsoft.Json;
 using RestSharp;
@@ -17,10 +18,9 @@ using RestSharp.Authenticators;
 
 namespace log4stash
 {
-
     public class WebElasticClient : AbstractWebElasticClient
     {
-        public IRestClient RestClient
+        private IRestClient RestClient
         {
             get { return _restClientByHost[GetServerUrl()]; }
         }
@@ -35,36 +35,30 @@ namespace log4stash
         }
 
         public WebElasticClient(IServerDataCollection servers,
-                                int timeout,
-                                bool ssl,
-                                bool allowSelfSignedServerCert,
-                                IAuthenticator authenticationMethod)
+            int timeout,
+            bool ssl,
+            bool allowSelfSignedServerCert,
+            IAuthenticator authenticationMethod)
+            : this(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod, new RestSharpClientFactory(),
+                new RequestFactory(), new LogLogEventWriter())
+        {
+        }
+
+        public WebElasticClient(IServerDataCollection servers, int timeout,
+            bool ssl, bool allowSelfSignedServerCert, IAuthenticator authenticationMethod,
+            IRestClientFactory restClientFactory, IRequestFactory requestFactory,
+            IExternalEventWriter eventWriter)
             : base(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod)
         {
-            _requestFactory =  new RequestFactory();
+            _requestFactory = requestFactory;
+            _eventWriter = eventWriter;
             if (Ssl && AllowSelfSignedServerCert)
             {
                 ServicePointManager.ServerCertificateValidationCallback += AcceptSelfSignedServerCertCallback;
             }
 
             _restClientByHost = servers.ToDictionary(GetServerUrl,
-                serverData => (IRestClient) new RestClient(GetServerUrl(serverData))
-                {
-                    Timeout = timeout,
-                    Authenticator = authenticationMethod
-                });
-            _eventWriter = new LogLogEventWriter();
-        }
-
-        public WebElasticClient(IServerDataCollection servers, int timeout,
-            bool ssl, bool allowSelfSignedServerCert, IAuthenticator authenticationMethod,
-            IDictionary<string, IRestClient> restClientByHost, IRequestFactory requestFactory,
-            IExternalEventWriter eventWriter)
-            : base(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod)
-        {
-            _restClientByHost = restClientByHost;
-            _requestFactory = requestFactory;
-            _eventWriter = eventWriter;
+                serverData => restClientFactory.Create(GetServerUrl(serverData), timeout, authenticationMethod));
         }
 
         public override void PutTemplateRaw(string templateName, string rawBody)
@@ -129,7 +123,6 @@ namespace log4stash
             {
                 _eventWriter.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
             }
-
         }
 
         private bool AcceptSelfSignedServerCertCallback(
@@ -204,7 +197,6 @@ namespace log4stash
             throw new InvalidOperationException(
                 string.Format("Some error occurred while sending request to ElasticSearch.{0}{1}",
                     Environment.NewLine, errString));
-            
         }
 
         public override void Dispose()

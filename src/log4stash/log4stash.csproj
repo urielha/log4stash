@@ -82,6 +82,8 @@
     <Compile Include="ElasticClient\PartialElasticResponse.cs" />
     <Compile Include="ElasticClient\RequestDetails.cs" />
     <Compile Include="ElasticClient\RequestFactory.cs" />
+    <Compile Include="ElasticClient\RestSharp\IRestClientFactory.cs" />
+    <Compile Include="ElasticClient\RestSharp\RestSharpClientFactory.cs" />
     <Compile Include="ElasticClient\WebElasticClientFactory.cs" />
     <Compile Include="ErrorHandling\IExternalEventWriter.cs" />
     <Compile Include="ErrorHandling\LogLogEventWriter.cs" />
