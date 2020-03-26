@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using log4net.Core;
 using log4stash.Bulk;
 using log4stash.ElasticClient;
+using log4stash.ErrorHandling;
 using log4stash.Extensions;
 using log4stash.FileAccess;
 using log4stash.LogEvent;
@@ -23,6 +24,7 @@ namespace log4stash.Tests.Unit
         private ILogEventConverterFactory _logEventConverterFactory;
         private ILogEventConverter _logEventConverter;
         private IFileAccessor _fileAccessor;
+        private IExternalEventWriter _eventWriter;
         private IElasticAppenderFilter _elasticFilters;
 
         [SetUp]
@@ -37,6 +39,7 @@ namespace log4stash.Tests.Unit
             _logEventConverter = Substitute.For<ILogEventConverter>();
             _elasticFilters = Substitute.For<IElasticAppenderFilter>();
             _fileAccessor = Substitute.For<IFileAccessor>();
+            _eventWriter = Substitute.For<IExternalEventWriter>();
             _elasticClientFactory.CreateClient(null, 0, false, false, null).ReturnsForAnyArgs(_elasticClient);
             _logEventConverterFactory.Create(FixFlags.All, false).ReturnsForAnyArgs(_logEventConverter);
         }
@@ -45,10 +48,11 @@ namespace log4stash.Tests.Unit
         public void BULK_SHOULD_BE_RESET_WHEN_TIMER_ELAPSED()
         {
             //Arrange
-            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer, _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor);
+            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
+                _tolerateCallsFactory,
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter);
             _bulk.ResetBulk().Returns(new List<InnerBulkOperation>());
-            
+
             //Act
             _timer.Elapsed += Raise.Event<EventHandler<object>>(this, null);
 
@@ -60,8 +64,9 @@ namespace log4stash.Tests.Unit
         public void EMPTY_BULK_IS_NOT_INDEXED_WHEN_TIMER_ELAPSES()
         {
             //Arrange
-            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer, _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor);
+            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
+                _tolerateCallsFactory,
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter);
             _bulk.ResetBulk().Returns(new List<InnerBulkOperation>());
 
             //Act
@@ -76,8 +81,9 @@ namespace log4stash.Tests.Unit
         public void BULK_IS_INDEXED_ASYNC_WHEN_TIMER_ELAPSES()
         {
             //Arrange
-            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer, _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor);
+            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
+                _tolerateCallsFactory,
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter);
             var bulk = new List<InnerBulkOperation> {new InnerBulkOperation()};
             _bulk.ResetBulk().Returns(bulk);
             appender.IndexAsync = true;
@@ -94,9 +100,10 @@ namespace log4stash.Tests.Unit
         public void BULK_IS_INDEXED_WHEN_TIMER_ELAPSES()
         {
             //Arrange
-            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer, _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor);
-            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
+                _tolerateCallsFactory,
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter);
+            var bulk = new List<InnerBulkOperation> {new InnerBulkOperation()};
             _bulk.ResetBulk().Returns(bulk);
             appender.IndexAsync = false;
             appender.ActivateOptions();
@@ -114,8 +121,9 @@ namespace log4stash.Tests.Unit
         public void CALLS_TOLERATOR_CREATED_WHEN_PROPERTY_CHANGED(int numOfSeconds)
         {
             //Arrange
-            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer, _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor); var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
+                _tolerateCallsFactory,
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter);
             appender.ActivateOptions();
 
             //Act   
@@ -129,10 +137,11 @@ namespace log4stash.Tests.Unit
         public void INDEX_BULK_ASYNC_EXCEPTION_IS_NOT_THROWN_IN_APPENDER()
         {
             //Arrange
-            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer, _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor) {IndexAsync = true};
+            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
+                _tolerateCallsFactory,
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter) {IndexAsync = true};
             _elasticClient.WhenForAnyArgs(x => x.IndexBulkAsync(null)).Throw(new Exception());
-            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            var bulk = new List<InnerBulkOperation> {new InnerBulkOperation()};
             _bulk.ResetBulk().Returns(bulk);
             appender.ActivateOptions();
 
@@ -146,10 +155,11 @@ namespace log4stash.Tests.Unit
         public void INDEX_BULK_EXCEPTION_IS_NOT_THROWN_IN_APPENDER()
         {
             //Arrange
-            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer, _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor) {IndexAsync = false};
+            var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
+                _tolerateCallsFactory,
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter) {IndexAsync = false};
             _elasticClient.WhenForAnyArgs(x => x.IndexBulkAsync(null)).Throw(new Exception());
-            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            var bulk = new List<InnerBulkOperation> {new InnerBulkOperation()};
             _bulk.ResetBulk().Returns(bulk);
             appender.ActivateOptions();
 
@@ -165,7 +175,7 @@ namespace log4stash.Tests.Unit
             //Arrange
             var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
                 _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor)
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter)
             {
                 Template = null
             };
@@ -183,7 +193,7 @@ namespace log4stash.Tests.Unit
             //Arrange
             var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
                 _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor)
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter)
             {
                 Template = new TemplateInfo()
             };
@@ -199,7 +209,7 @@ namespace log4stash.Tests.Unit
         public void TEMPLATE_IS_PUT_WHEN_IS_VALID()
         {
             //Arrange
-            var template = new TemplateInfo(_fileAccessor)
+            var template = new TemplateInfo(_fileAccessor, _eventWriter)
             {
                 FileName = "file",
                 Name = "template"
@@ -210,7 +220,7 @@ namespace log4stash.Tests.Unit
             template.ActivateOptions();
             var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
                 _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor)
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter)
             {
                 Template = template
             };
@@ -229,13 +239,13 @@ namespace log4stash.Tests.Unit
             const int bulkSize = 1;
             var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
                 _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor)
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter)
             {
                 DropEventsOverBulkLimit = true,
                 BulkSize = bulkSize
             };
             _bulk.Count.Returns(bulkSize);
-            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            var bulk = new List<InnerBulkOperation> {new InnerBulkOperation()};
             _bulk.ResetBulk().Returns(bulk);
             appender.ActivateOptions();
 
@@ -246,7 +256,7 @@ namespace log4stash.Tests.Unit
             _elasticClient.DidNotReceiveWithAnyArgs().IndexBulk(null);
             _elasticClient.DidNotReceiveWithAnyArgs().IndexBulkAsync(null);
         }
-        
+
         [Test]
         public void BULK_IS_INDEXED_WHEN_BULK_LIMIT_IS_REACHED()
         {
@@ -254,14 +264,14 @@ namespace log4stash.Tests.Unit
             const int bulkSize = 1;
             var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
                 _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor)
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter)
             {
                 DropEventsOverBulkLimit = false,
                 BulkSize = bulkSize,
                 IndexAsync = false
             };
             _bulk.Count.Returns(bulkSize);
-            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            var bulk = new List<InnerBulkOperation> {new InnerBulkOperation()};
             _bulk.ResetBulk().Returns(bulk);
             appender.ActivateOptions();
 
@@ -280,14 +290,14 @@ namespace log4stash.Tests.Unit
             const int bulkSize = 1;
             var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
                 _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor)
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter)
             {
                 DropEventsOverBulkLimit = false,
                 BulkSize = bulkSize,
                 IndexAsync = true
             };
             _bulk.Count.Returns(bulkSize);
-            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            var bulk = new List<InnerBulkOperation> {new InnerBulkOperation()};
             _bulk.ResetBulk().Returns(bulk);
             appender.ActivateOptions();
 
@@ -305,13 +315,13 @@ namespace log4stash.Tests.Unit
             const int bulkSize = 1;
             var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
                 _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor)
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter)
             {
                 DropEventsOverBulkLimit = false,
                 BulkSize = bulkSize
             };
             _bulk.Count.Returns(bulkSize);
-            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            var bulk = new List<InnerBulkOperation> {new InnerBulkOperation()};
             _bulk.ResetBulk().Returns(bulk);
             appender.ActivateOptions();
 
@@ -330,13 +340,13 @@ namespace log4stash.Tests.Unit
             const int bulkSize = 0;
             var appender = new ElasticSearchAppender(_elasticClientFactory, "index", "type", _timer,
                 _tolerateCallsFactory,
-                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor)
+                _bulk, _logEventConverterFactory, _elasticFilters, _fileAccessor, _eventWriter)
             {
                 DropEventsOverBulkLimit = false,
                 BulkSize = bulkSize,
             };
             _bulk.Count.Returns(bulkSize + 1);
-            var bulk = new List<InnerBulkOperation> { new InnerBulkOperation() };
+            var bulk = new List<InnerBulkOperation> {new InnerBulkOperation()};
             _bulk.ResetBulk().Returns(bulk);
             appender.ActivateOptions();
 
@@ -347,7 +357,5 @@ namespace log4stash.Tests.Unit
             _elasticClient.DidNotReceiveWithAnyArgs().IndexBulk(null);
             _elasticClient.DidNotReceiveWithAnyArgs().IndexBulkAsync(null);
         }
-
-
     }
 }

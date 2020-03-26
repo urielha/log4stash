@@ -12,6 +12,7 @@ using log4stash.Authentication;
 using log4stash.Bulk;
 using log4stash.Configuration;
 using log4stash.ElasticClient;
+using log4stash.ErrorHandling;
 using log4stash.FileAccess;
 using log4stash.LogEvent;
 using log4stash.Timing;
@@ -24,6 +25,7 @@ namespace log4stash
 
         private readonly ILogBulkSet _bulk;
         private readonly IFileAccessor _fileAccessor;
+        private readonly IExternalEventWriter _eventWriter;
         private IElasticsearchClient _client;
         private readonly IElasticClientFactory _elasticClientFactory;
         private LogEventSmartFormatter _indexName;
@@ -93,13 +95,15 @@ namespace log4stash
             : this(new WebElasticClientFactory(), "LogEvent-%{+yyyy.MM.dd}",
                 "LogEvent", new IndexingTimer(Timeout.Infinite) { WaitTimeout = 5000 },
                 new TolerateCallsFactory(), new LogBulkSet(),
-                new BasicLogEventConverterFactory(), new ElasticAppenderFilters(), new BasicFileAccessor())
+                new BasicLogEventConverterFactory(), new ElasticAppenderFilters(),
+                new BasicFileAccessor(), new LogLogEventWriter())
         {
         }
 
         public ElasticSearchAppender(IElasticClientFactory clientFactory, LogEventSmartFormatter indexName,
             LogEventSmartFormatter indexType, IIndexingTimer timer, ITolerateCallsFactory tolerateCallsFactory,
-            ILogBulkSet bulk, ILogEventConverterFactory logEventConverterFactory, IElasticAppenderFilter elasticFilters, IFileAccessor fileAccessor)
+            ILogBulkSet bulk, ILogEventConverterFactory logEventConverterFactory, IElasticAppenderFilter elasticFilters,
+            IFileAccessor fileAccessor, IExternalEventWriter eventWriter)
         {
             _logEventConverterFactory = logEventConverterFactory;
             _elasticClientFactory = clientFactory;
@@ -110,6 +114,7 @@ namespace log4stash
             _tolerateCallsFactory = tolerateCallsFactory;
             _bulk = bulk;
             _fileAccessor = fileAccessor;
+            _eventWriter = eventWriter;
 
             FixedFields = FixFlags.Partial;
             SerializeObjects = true;
@@ -160,7 +165,7 @@ namespace log4stash
         {
             if(!string.IsNullOrEmpty(BasicAuthUsername) && !string.IsNullOrEmpty(BasicAuthPassword))
             {
-                LogLog.Warn(GetType(), "BasicAuthUsername & BasicAuthPassword tags are obsolete, Please use AuthenticationMethod new tag");
+                _eventWriter.Warn(GetType(), "BasicAuthUsername & BasicAuthPassword tags are obsolete, Please use AuthenticationMethod new tag");
                 var auth = new BasicAuthenticationMethod { Username = BasicAuthUsername, Password = BasicAuthPassword };
                 AuthenticationMethod.AddBasic(auth);
             }
@@ -192,7 +197,7 @@ namespace log4stash
             if (DropEventsOverBulkLimit && _bulk.Count >= BulkSize)
             {
                 _tolerateCalls.Call(() =>
-                    LogLog.Warn(GetType(),
+                    _eventWriter.Warn(GetType(),
                         "Message lost due to bulk overflow! Set DropEventsOverBulkLimit to false in order to prevent that."),
                     GetType(), 0);
                 return;
@@ -237,7 +242,7 @@ namespace log4stash
             }
             catch (Exception ex)
             {
-                LogLog.Error(GetType(), "IElasticsearchClient inner exception occurred", ex);
+                _eventWriter.Error(GetType(), "IElasticsearchClient inner exception occurred", ex);
             }
         }
     }

@@ -10,6 +10,7 @@ using log4net.Util;
 using log4stash.Authentication;
 using log4stash.Configuration;
 using log4stash.ElasticClient;
+using log4stash.ErrorHandling;
 using Newtonsoft.Json;
 using RestSharp;
 using RestSharp.Authenticators;
@@ -26,6 +27,7 @@ namespace log4stash
 
         private readonly IDictionary<string, IRestClient> _restClientByHost;
         private readonly IRequestFactory _requestFactory;
+        private readonly IExternalEventWriter _eventWriter;
 
         public WebElasticClient(IServerDataCollection servers, int timeout)
             : this(servers, timeout, false, false, new AuthenticationMethodChooser())
@@ -51,15 +53,18 @@ namespace log4stash
                     Timeout = timeout,
                     Authenticator = authenticationMethod
                 });
+            _eventWriter = new LogLogEventWriter();
         }
 
         public WebElasticClient(IServerDataCollection servers, int timeout,
             bool ssl, bool allowSelfSignedServerCert, IAuthenticator authenticationMethod,
-            IDictionary<string, IRestClient> restClientByHost, IRequestFactory requestFactory)
+            IDictionary<string, IRestClient> restClientByHost, IRequestFactory requestFactory,
+            IExternalEventWriter eventWriter)
             : base(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod)
         {
             _restClientByHost = restClientByHost;
             _requestFactory = requestFactory;
+            _eventWriter = eventWriter;
         }
 
         public override void PutTemplateRaw(string templateName, string rawBody)
@@ -89,7 +94,7 @@ namespace log4stash
             }
             catch (Exception ex)
             {
-                LogLog.Error(GetType(), "Invalid request to ElasticSearch", ex);
+                _eventWriter.Error(GetType(), "Invalid request to ElasticSearch", ex);
                 return;
             }
 
@@ -99,7 +104,7 @@ namespace log4stash
             }
             catch (Exception ex)
             {
-                LogLog.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
+                _eventWriter.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
             }
         }
 
@@ -112,7 +117,7 @@ namespace log4stash
             }
             catch (Exception ex)
             {
-                LogLog.Error(GetType(), "Invalid request to ElasticSearch", ex);
+                _eventWriter.Error(GetType(), "Invalid request to ElasticSearch", ex);
                 return;
             }
 
@@ -122,7 +127,7 @@ namespace log4stash
             }
             catch (Exception ex)
             {
-                LogLog.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
+                _eventWriter.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
             }
 
         }
@@ -197,7 +202,7 @@ namespace log4stash
             }
 
             throw new InvalidOperationException(
-                string.Format("Some error occurred while sending request to Elasticsearch.{0}{1}",
+                string.Format("Some error occurred while sending request to ElasticSearch.{0}{1}",
                     Environment.NewLine, errString));
             
         }

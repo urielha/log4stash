@@ -83,6 +83,8 @@
     <Compile Include="ElasticClient\RequestDetails.cs" />
     <Compile Include="ElasticClient\RequestFactory.cs" />
     <Compile Include="ElasticClient\WebElasticClientFactory.cs" />
+    <Compile Include="ErrorHandling\IExternalEventWriter.cs" />
+    <Compile Include="ErrorHandling\LogLogEventWriter.cs" />
     <Compile Include="Extensions\ITolerateCallsFactory.cs" />
     <Compile Include="Extensions\TolerateCallsFactory.cs" />
     <Compile Include="Extensions\ToleratedCalls.cs" />
