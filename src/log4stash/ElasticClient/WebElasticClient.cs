@@ -4,15 +4,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
-using log4net.Util;
 using log4stash.Authentication;
 using log4stash.Configuration;
 using log4stash.ElasticClient;
 using log4stash.ElasticClient.RestSharp;
 using log4stash.ErrorHandling;
-using Newtonsoft.Json;
 using RestSharp;
 using RestSharp.Authenticators;
 
@@ -27,6 +24,7 @@ namespace log4stash
 
         private readonly IDictionary<string, IRestClient> _restClientByHost;
         private readonly IRequestFactory _requestFactory;
+        private readonly IResponseValidator _responseValidator;
         private readonly IExternalEventWriter _eventWriter;
 
         public WebElasticClient(IServerDataCollection servers, int timeout)
@@ -40,18 +38,19 @@ namespace log4stash
             bool allowSelfSignedServerCert,
             IAuthenticator authenticationMethod)
             : this(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod, new RestSharpClientFactory(),
-                new RequestFactory(), new LogLogEventWriter())
+                new RequestFactory(), new ResponseValidator(), new LogLogEventWriter())
         {
         }
 
         public WebElasticClient(IServerDataCollection servers, int timeout,
             bool ssl, bool allowSelfSignedServerCert, IAuthenticator authenticationMethod,
             IRestClientFactory restClientFactory, IRequestFactory requestFactory,
-            IExternalEventWriter eventWriter)
+            IResponseValidator responseValidator, IExternalEventWriter eventWriter)
             : base(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod)
         {
             _requestFactory = requestFactory;
             _eventWriter = eventWriter;
+            _responseValidator = responseValidator;
             if (Ssl && AllowSelfSignedServerCert)
             {
                 ServicePointManager.ServerCertificateValidationCallback += AcceptSelfSignedServerCertCallback;
@@ -92,7 +91,14 @@ namespace log4stash
                 return;
             }
 
-            ValidateResponse(response);
+            try
+            {
+                _responseValidator.ValidateResponse(response);
+            }
+            catch (Exception ex)
+            {
+                _eventWriter.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
+            }
         }
 
         private async Task SafeSendRequestAsync(RequestDetails request)
@@ -108,24 +114,19 @@ namespace log4stash
                 return;
             }
 
-            ValidateResponse(response);
-        }
-
-        private void ReportRequestError(Exception ex)
-        {
-            _eventWriter.Error(GetType(), "Invalid request to ElasticSearch", ex);
-        }
-
-        private void ValidateResponse(IRestResponse response)
-        {
             try
             {
-                CheckResponse(response);
+                _responseValidator.ValidateResponse(response);
             }
             catch (Exception ex)
             {
                 _eventWriter.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
             }
+        }
+
+        private void ReportRequestError(Exception ex)
+        {
+            _eventWriter.Error(GetType(), "Invalid request to ElasticSearch", ex);
         }
 
         private bool AcceptSelfSignedServerCertCallback(
@@ -150,57 +151,7 @@ namespace log4stash
             return false;
         }
 
-        private static string GetResponseErrorIfAny(IRestResponse response)
-        {
-            if (response == null)
-            {
-                return "Got null response";
-            }
-
-            // Handle network transport or framework exception
-            if (response.ErrorException != null)
-            {
-                return response.ErrorException.ToString();
-            }
-
-            // Handle request errors
-            if (!response.StatusCode.HasFlag(HttpStatusCode.OK))
-            {
-                var err = new StringBuilder();
-                err.AppendFormat("Got non ok status code: {0}.", response.StatusCode);
-                err.AppendLine(response.Content);
-                return err.ToString();
-            }
-
-            // Handle index error
-            try
-            {
-                var jsonResponse = JsonConvert.DeserializeObject<PartialElasticResponse>(response.Content);
-                if (jsonResponse != null && jsonResponse.Errors)
-                {
-                    return response.Content;
-                }
-            }
-            catch (JsonReaderException)
-            {
-                return string.Format("Can't parse Elastic response: {0}", response.Content);
-            }
-
-            return null;
-        }
-
-        private static void CheckResponse(IRestResponse response)
-        {
-            var errString = GetResponseErrorIfAny(response);
-            if (string.IsNullOrEmpty(errString))
-            {
-                return;
-            }
-
-            throw new InvalidOperationException(
-                string.Format("Some error occurred while sending request to ElasticSearch.{0}{1}",
-                    Environment.NewLine, errString));
-        }
+        
 
         public override void Dispose()
         {
