@@ -95,6 +95,7 @@
     <Compile Include="FileAccess\IFileAccessor.cs" />
     <Compile Include="Filters\ConvertFilter.cs" />
     <Compile Include="Filters\XmlFilter.cs" />
+    <Compile Include="IElasticAppenderCollection.cs" />
     <Compile Include="LogEvent\BasicLogEventConverter.cs" />
     <Compile Include="ElasticClient\WebElasticClient.cs" />
     <Compile Include="Filters\AddValueFilter.cs" />

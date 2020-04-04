@@ -25,7 +25,7 @@ namespace log4stash.Tests.Unit
         private ILogEventConverter _logEventConverter;
         private IFileAccessor _fileAccessor;
         private IExternalEventWriter _eventWriter;
-        private IElasticAppenderFilter _elasticFilters;
+        private ElasticAppenderFilters _elasticFilters;
 
         [SetUp]
         public void Setup()
@@ -37,7 +37,7 @@ namespace log4stash.Tests.Unit
             _bulk = Substitute.For<ILogBulkSet>();
             _logEventConverterFactory = Substitute.For<ILogEventConverterFactory>();
             _logEventConverter = Substitute.For<ILogEventConverter>();
-            _elasticFilters = Substitute.For<IElasticAppenderFilter>();
+            _elasticFilters = new ElasticAppenderFilters();
             _fileAccessor = Substitute.For<IFileAccessor>();
             _eventWriter = Substitute.For<IExternalEventWriter>();
             _elasticClientFactory.CreateClient(null, 0, false, false, null).ReturnsForAnyArgs(_elasticClient);

@@ -241,7 +241,7 @@ namespace log4stash.Tests.Integration
         public void Can_read_KvFilter_properties(string[] fieldSplit, string[] valueSplit, string trim,
             bool expectAnotherToBeNull)
         {
-            IElasticAppenderFilter oldFilters = null;
+            ElasticAppenderFilters oldFilters = null;
             QueryConfiguration(appender =>
             {
                 oldFilters = appender.ElasticFilters;
@@ -333,7 +333,7 @@ namespace log4stash.Tests.Integration
         {
             const string sourceKey = "UserName";
 
-            IElasticAppenderFilter oldFilters = null;
+            ElasticAppenderFilters oldFilters = null;
             QueryConfiguration(appender =>
             {
                 oldFilters = appender.ElasticFilters;
@@ -373,7 +373,7 @@ namespace log4stash.Tests.Integration
         public void parse_json_string_as_object(bool flatten, string separator = "_")
         {
             const string sourceKey = "jsonObject";
-            IElasticAppenderFilter oldFilters = null;
+            ElasticAppenderFilters oldFilters = null;
             QueryConfiguration(appender =>
             {
                 oldFilters = appender.ElasticFilters;
@@ -437,7 +437,7 @@ namespace log4stash.Tests.Integration
         {
             const string separator = "_";
             const string sourceKey = "xmlObject";
-            IElasticAppenderFilter oldFilters = null;
+            ElasticAppenderFilters oldFilters = null;
 
             QueryConfiguration(appender =>
             {
@@ -535,7 +535,7 @@ namespace log4stash.Tests.Integration
         [Ignore("the build agent have problems on running performance")]
         public static void Performance()
         {
-            IElasticAppenderFilter oldFilters = null;
+            ElasticAppenderFilters oldFilters = null;
             QueryConfiguration(appender =>
             {
                 appender.BulkSize = 4000;

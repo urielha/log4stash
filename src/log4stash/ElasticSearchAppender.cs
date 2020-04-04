@@ -61,14 +61,14 @@ namespace log4stash
         public string Server { get; set; }
         public int Port { get; set; }
         public string Path { get; set; }
-        public IServerDataCollection Servers { get; set; }
+        public ServerDataCollection Servers { get; set; }
         public int ElasticSearchTimeout { get; set; }
         public bool Ssl { get; set; }
         public bool AllowSelfSignedServerCert { get; set; }
         public IAuthenticationMethodChooser AuthenticationMethod { get; set; }
         public bool IndexAsync { get; set; }
         public TemplateInfo Template { get; set; }
-        public IElasticAppenderFilter ElasticFilters { get; set; }
+        public ElasticAppenderFilters ElasticFilters { get; set; }
         public bool DropEventsOverBulkLimit { get; set; }
         [Obsolete]
         public string BasicAuthUsername { get; set; }
@@ -91,14 +91,14 @@ namespace log4stash
             : this(new WebElasticClientFactory(), "LogEvent-%{+yyyy.MM.dd}",
                 "LogEvent", new IndexingTimer(Timeout.Infinite) { WaitTimeout = 5000 },
                 new TolerateCallsFactory(), new LogBulkSet(),
-                new BasicLogEventConverterFactory(), new ElasticAppenderFilters(),
+                new BasicLogEventConverterFactory(), new ElasticAppenderFilters(), 
                 new BasicFileAccessor(), new LogLogEventWriter())
         {
         }
 
         public ElasticSearchAppender(IElasticClientFactory clientFactory, LogEventSmartFormatter indexName,
             LogEventSmartFormatter indexType, IIndexingTimer timer, ITolerateCallsFactory tolerateCallsFactory,
-            ILogBulkSet bulk, ILogEventConverterFactory logEventConverterFactory, IElasticAppenderFilter elasticFilters,
+            ILogBulkSet bulk, ILogEventConverterFactory logEventConverterFactory, ElasticAppenderFilters elasticFilters,
             IFileAccessor fileAccessor, IExternalEventWriter eventWriter)
         {
             _logEventConverterFactory = logEventConverterFactory;
