@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Newtonsoft.Json;
@@ -9,13 +8,13 @@ namespace log4stash.ElasticClient
 {
     public class RequestFactory : IRequestFactory
     {
-        public RequestDetails PrepareRequest(IEnumerable<InnerBulkOperation> bulk)
+        public IRestRequest PrepareRequest(IEnumerable<InnerBulkOperation> bulk)
         {
             var requestString = PrepareBulk(bulk);
             var restRequest = new RestRequest("_bulk", Method.POST);
             restRequest.AddParameter("application/json", requestString, ParameterType.RequestBody);
 
-            return new RequestDetails(restRequest, requestString);
+            return restRequest;
         }
 
         public IRestRequest CreatePutTemplateRequest(string templateName, string rawBody)

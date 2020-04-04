@@ -81,7 +81,6 @@
     <Compile Include="ElasticClient\IRequestFactory.cs" />
     <Compile Include="ElasticClient\IResponseValidator.cs" />
     <Compile Include="ElasticClient\PartialElasticResponse.cs" />
-    <Compile Include="ElasticClient\RequestDetails.cs" />
     <Compile Include="ElasticClient\RequestFactory.cs" />
     <Compile Include="ElasticClient\ResponseValidator.cs" />
     <Compile Include="ElasticClient\RestSharp\IRestClientFactory.cs" />

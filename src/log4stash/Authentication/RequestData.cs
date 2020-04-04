@@ -4,7 +4,7 @@ namespace log4stash.Authentication
 {
     public class RequestData
     {
-        public RestRequest RestRequest { get; set; }
+        public IRestRequest RestRequest { get; set; }
 
         public string Url { get; set; }
 

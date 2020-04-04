@@ -5,7 +5,7 @@ namespace log4stash.ElasticClient
 {
     public interface IRequestFactory
     {
-        RequestDetails PrepareRequest(IEnumerable<InnerBulkOperation> bulk);
+        IRestRequest PrepareRequest(IEnumerable<InnerBulkOperation> bulk);
         IRestRequest CreatePutTemplateRequest(string templateName, string rawBody);
     }
 }

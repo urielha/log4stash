@@ -78,12 +78,12 @@ namespace log4stash
             await SafeSendRequestAsync(request);
         }
 
-        private void SafeSendRequest(RequestDetails request)
+        private void SafeSendRequest(IRestRequest request)
         {
             IRestResponse response;
             try
             {
-                response = RestClient.Execute(request.RestRequest);
+                response = RestClient.Execute(request);
             }
             catch (Exception ex)
             {
@@ -101,12 +101,12 @@ namespace log4stash
             }
         }
 
-        private async Task SafeSendRequestAsync(RequestDetails request)
+        private async Task SafeSendRequestAsync(IRestRequest request)
         {
             IRestResponse response;
             try
             {
-                response = await RestClient.ExecuteTaskAsync(request.RestRequest);
+                response = await RestClient.ExecuteTaskAsync(request);
             }
             catch (Exception ex)
             {
@@ -150,8 +150,6 @@ namespace log4stash
 
             return false;
         }
-
-        
 
         public override void Dispose()
         {
