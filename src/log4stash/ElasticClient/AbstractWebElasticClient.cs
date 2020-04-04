@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using log4stash.Authentication;
 using log4stash.Configuration;
 using RestSharp.Authenticators;
@@ -34,7 +35,7 @@ namespace log4stash
 
         public abstract void PutTemplateRaw(string templateName, string rawBody);
         public abstract void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
-        public abstract void IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
+        public abstract Task IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
         public abstract void Dispose();
 
         protected string GetServerUrl()

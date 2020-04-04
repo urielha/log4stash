@@ -73,10 +73,10 @@ namespace log4stash
             SafeSendRequest(request);
         }
 
-        public override void IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
+        public override async Task IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
         {
             var request = _requestFactory.PrepareRequest(bulk);
-            Task.Run(() => SafeSendRequestAsync(request));
+            await SafeSendRequestAsync(request);
         }
 
         private void SafeSendRequest(RequestDetails request)
