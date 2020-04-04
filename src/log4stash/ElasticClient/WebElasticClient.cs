@@ -88,18 +88,11 @@ namespace log4stash
             }
             catch (Exception ex)
             {
-                _eventWriter.Error(GetType(), "Invalid request to ElasticSearch", ex);
+                ReportRequestError(ex);
                 return;
             }
 
-            try
-            {
-                CheckResponse(response);
-            }
-            catch (Exception ex)
-            {
-                _eventWriter.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
-            }
+            ValidateResponse(response);
         }
 
         private async Task SafeSendRequestAsync(RequestDetails request)
@@ -111,10 +104,20 @@ namespace log4stash
             }
             catch (Exception ex)
             {
-                _eventWriter.Error(GetType(), "Invalid request to ElasticSearch", ex);
+                ReportRequestError(ex);
                 return;
             }
 
+            ValidateResponse(response);
+        }
+
+        private void ReportRequestError(Exception ex)
+        {
+            _eventWriter.Error(GetType(), "Invalid request to ElasticSearch", ex);
+        }
+
+        private void ValidateResponse(IRestResponse response)
+        {
             try
             {
                 CheckResponse(response);
