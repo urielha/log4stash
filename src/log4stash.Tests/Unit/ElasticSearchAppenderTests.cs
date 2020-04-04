@@ -146,9 +146,8 @@ namespace log4stash.Tests.Unit
             appender.ActivateOptions();
 
             //Act   
-            _timer.Elapsed += Raise.Event<EventHandler<object>>(this, null);
-
             //Assert
+            _timer.Elapsed += Raise.Event<EventHandler<object>>(this, null);
         }
 
         [Test]
@@ -164,9 +163,8 @@ namespace log4stash.Tests.Unit
             appender.ActivateOptions();
 
             //Act   
-            _timer.Elapsed += Raise.Event<EventHandler<object>>(this, null);
-
             //Assert
+            _timer.Elapsed += Raise.Event<EventHandler<object>>(this, null);
         }
 
         [Test]
