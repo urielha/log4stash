@@ -141,7 +141,14 @@ namespace log4stash
 
             if (Template != null && Template.IsValid)
             {
-                _client.PutTemplateRaw(Template.Name, _fileAccessor.ReadAllText(Template.FileName));
+                if (IndexAsync)
+                {
+                    _client.PutTemplateRaw(Template.Name, _fileAccessor.ReadAllText(Template.FileName));
+                }
+                else
+                {
+                    _client.PutTemplateRaw(Template.Name, _fileAccessor.ReadAllText(Template.FileName));
+                }
             }
 
             ElasticFilters.PrepareConfiguration(_client);

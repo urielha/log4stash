@@ -63,7 +63,13 @@ namespace log4stash
         public override void PutTemplateRaw(string templateName, string rawBody)
         {
             var request = _requestFactory.CreatePutTemplateRequest(templateName, rawBody);
-            RestClient.ExecuteAsync(request, response => { });
+            SafeSendRequest(request);
+        }
+
+        public override async Task PutTemplateRawAsync(string templateName, string rawBody)
+        {
+            var request = _requestFactory.CreatePutTemplateRequest(templateName, rawBody);
+            await SafeSendRequestAsync(request);
         }
 
         public override void IndexBulk(IEnumerable<InnerBulkOperation> bulk)

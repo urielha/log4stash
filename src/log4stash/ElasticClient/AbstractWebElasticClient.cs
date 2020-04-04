@@ -34,6 +34,7 @@ namespace log4stash
         }
 
         public abstract void PutTemplateRaw(string templateName, string rawBody);
+        public abstract Task PutTemplateRawAsync(string templateName, string rawBody);
         public abstract void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
         public abstract Task IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
         public abstract void Dispose();
