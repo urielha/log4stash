@@ -65,7 +65,7 @@ namespace log4stash
         public int ElasticSearchTimeout { get; set; }
         public bool Ssl { get; set; }
         public bool AllowSelfSignedServerCert { get; set; }
-        public IAuthenticationMethodChooser AuthenticationMethod { get; set; }
+        public AuthenticationMethodChooser AuthenticationMethod { get; set; }
         public bool IndexAsync { get; set; }
         public TemplateInfo Template { get; set; }
         public ElasticAppenderFilters ElasticFilters { get; set; }
