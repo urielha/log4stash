@@ -24,6 +24,11 @@ namespace log4stash.Authentication
             AddFilter(method);
         }
 
+        public void AddApiKey(ApiKeyAuthenticationMethod method)
+        {
+            AddFilter(method);
+        }
+
         #endregion
 
         public void Authenticate(IRestClient client, IRestRequest request)
