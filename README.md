@@ -113,6 +113,13 @@ You can also set any public property in the appender/filter which didn't appear 
           <Aws4SignerAccessKey>AccessKey</Aws4SignerAccessKey>
           <Aws4SignerRegion>Region</Aws4SignerRegion>
       </Aws>
+      <!-- For Api Key (X-Pack) authentication -->
+      <AuthenticationMethod>
+          <ApiKey>
+              <!-- base64('id:apikey') -->
+              <ApiKey>aWQ6YXBpa2V5</ApiKey>
+          </ApiKey>
+      </AuthenticationMethod>
     </AuthenticationMethod>
     
     <!-- all filters goes in ElasticFilters tag -->
