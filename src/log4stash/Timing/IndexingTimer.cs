@@ -7,7 +7,7 @@ namespace log4stash.Timing
     {
         private readonly Timer _timer;
 
-        public event EventHandler<object> Elapsed;
+        public event EventHandler Elapsed;
         public int WaitTimeout { get; set; }
 
         public IndexingTimer(int timeout)

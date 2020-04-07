@@ -54,7 +54,7 @@ namespace log4stash.Tests.Unit
             _bulk.ResetBulk().Returns(new List<InnerBulkOperation>());
 
             //Act
-            _timer.Elapsed += Raise.Event<EventHandler<object>>(this, null);
+            _timer.Elapsed += Raise.Event<EventHandler>(this, null);
 
             //Assert
             _bulk.Received().ResetBulk();
@@ -70,7 +70,7 @@ namespace log4stash.Tests.Unit
             _bulk.ResetBulk().Returns(new List<InnerBulkOperation>());
 
             //Act
-            _timer.Elapsed += Raise.Event<EventHandler<object>>(this, null);
+            _timer.Elapsed += Raise.Event<EventHandler>(this, null);
 
             //Assert
             _elasticClient.DidNotReceiveWithAnyArgs().IndexBulk(null);
@@ -90,7 +90,7 @@ namespace log4stash.Tests.Unit
             appender.ActivateOptions();
 
             //Act
-            _timer.Elapsed += Raise.Event<EventHandler<object>>(this, null);
+            _timer.Elapsed += Raise.Event<EventHandler>(this, null);
 
             //Assert
             _elasticClient.Received().IndexBulkAsync(bulk);
@@ -109,7 +109,7 @@ namespace log4stash.Tests.Unit
             appender.ActivateOptions();
 
             //Act   
-            _timer.Elapsed += Raise.Event<EventHandler<object>>(this, null);
+            _timer.Elapsed += Raise.Event<EventHandler>(this, null);
 
             //Assert
             _elasticClient.Received().IndexBulk(bulk);
@@ -147,7 +147,7 @@ namespace log4stash.Tests.Unit
 
             //Act   
             //Assert
-            _timer.Elapsed += Raise.Event<EventHandler<object>>(this, null);
+            _timer.Elapsed += Raise.Event<EventHandler>(this, null);
         }
 
         [Test]
@@ -164,7 +164,7 @@ namespace log4stash.Tests.Unit
 
             //Act   
             //Assert
-            _timer.Elapsed += Raise.Event<EventHandler<object>>(this, null);
+            _timer.Elapsed += Raise.Event<EventHandler>(this, null);
         }
 
         [Test]
