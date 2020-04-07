@@ -116,8 +116,11 @@ You can also set any public property in the appender/filter which didn't appear 
       <!-- For Api Key (X-Pack) authentication -->
       <AuthenticationMethod>
           <ApiKey>
-              <!-- base64('id:apikey') -->
-              <ApiKey>aWQ6YXBpa2V5</ApiKey>
+              <!-- ApiKeyBase64 takes precedence over Id/ApiKey  -->
+              <ApiKeyBase64>aWQ6YXBpa2V5</ApiKey>
+              <!-- Or -->
+              <Id>id</Id>
+              <ApiKey>apikey</ApiKey>
           </ApiKey>
       </AuthenticationMethod>
     </AuthenticationMethod>
