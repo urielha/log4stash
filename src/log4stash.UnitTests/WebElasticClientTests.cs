@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using log4stash.Configuration;
 using log4stash.ElasticClient;
@@ -11,7 +10,7 @@ using NUnit.Framework;
 using RestSharp;
 using RestSharp.Authenticators;
 
-namespace log4stash.Tests.Unit
+namespace log4stash.UnitTests
 {
     [TestFixture]
     class WebElasticClientTests

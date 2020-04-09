@@ -6,7 +6,7 @@ using log4stash.LogEvent;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace log4stash.Tests.Unit
+namespace log4stash.UnitTests
 {
     class LogEventConverterTests
     {

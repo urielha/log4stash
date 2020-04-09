@@ -11,7 +11,7 @@ using log4stash.Timing;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace log4stash.Tests.Unit
+namespace log4stash.UnitTests
 {
     [TestFixture]
     class ElasticSearchAppenderTests

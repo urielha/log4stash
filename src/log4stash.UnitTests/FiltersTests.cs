@@ -4,7 +4,7 @@ using log4stash.Filters;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
-namespace log4stash.Tests.Unit
+namespace log4stash.UnitTests
 {
     class FiltersTests
     {
