@@ -7,6 +7,8 @@ language: csharp
 
 solution: src/log4stash.sln
 
+dist: precise
+
 env:
  global:
   - EnableNuGetPackageRestore=true
