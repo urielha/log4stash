@@ -2,7 +2,7 @@
 <package>
   <metadata>
     <id>log4stash</id>
-    <version>2.2.2-pre</version>
+	<version>$version$</version>
     <authors>urielha</authors>
     <owners>urielha</owners>
     <title>log4stash - Elasticsearch log4net appender</title>
@@ -15,8 +15,7 @@
       You can configure few filters to analyze log events before they got sended to Elasticsearch similar to the filters on logstash.
     </description>
     <releaseNotes>
-      * Add option to dropping events when bulksize overflow, named: `DropEventsOverBulkLimit` default: false.
-      * Fix handling errors from server
+      * Added option for API Key authentication with Elasticsearch
 
       Thanks a lot to @erangil2 for his tremendous contributions :)
 
