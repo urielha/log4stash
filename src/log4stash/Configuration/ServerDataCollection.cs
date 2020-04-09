@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace log4stash.Configuration
 {
-    public class ServerDataCollection : IList<IServerData>
+    public class ServerDataCollection : IServerDataCollection
     {
         private readonly IList<IServerData> _serverDatas;
 

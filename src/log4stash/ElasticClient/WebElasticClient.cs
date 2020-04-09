@@ -4,171 +4,135 @@ using System.Linq;
 using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using System.Threading.Tasks;
-using log4net.Util;
 using log4stash.Authentication;
 using log4stash.Configuration;
-using Newtonsoft.Json;
+using log4stash.ElasticClient;
+using log4stash.ElasticClient.RestSharp;
+using log4stash.ErrorHandling;
 using RestSharp;
+using RestSharp.Authenticators;
 
 namespace log4stash
 {
-
     public class WebElasticClient : AbstractWebElasticClient
     {
-        private class RequestDetails
-        {
-            public RequestDetails(RestRequest restRequest, string content)
-            {
-                RestRequest = restRequest;
-                Content = content;
-            }
-
-            public RestRequest RestRequest { get; private set; }
-            public string Content { get; private set; }
-        }
-
-        public IRestClient RestClient
+        private IRestClient RestClient
         {
             get { return _restClientByHost[GetServerUrl()]; }
         }
 
-        private readonly IDictionary<string, RestClient> _restClientByHost;
+        private readonly IDictionary<string, IRestClient> _restClientByHost;
+        private readonly IRequestFactory _requestFactory;
+        private readonly IResponseValidator _responseValidator;
+        private readonly IExternalEventWriter _eventWriter;
 
-        public WebElasticClient(ServerDataCollection servers, int timeout)
+        public WebElasticClient(IServerDataCollection servers, int timeout)
             : this(servers, timeout, false, false, new AuthenticationMethodChooser())
         {
         }
 
-        public WebElasticClient(ServerDataCollection servers,
-                                int timeout,
-                                bool ssl,
-                                bool allowSelfSignedServerCert,
-                                AuthenticationMethodChooser authenticationMethod)
+        public WebElasticClient(IServerDataCollection servers,
+            int timeout,
+            bool ssl,
+            bool allowSelfSignedServerCert,
+            IAuthenticator authenticationMethod)
+            : this(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod, new RestSharpClientFactory(),
+                new RequestFactory(), new ResponseValidator(), new LogLogEventWriter())
+        {
+        }
+
+        public WebElasticClient(IServerDataCollection servers, int timeout,
+            bool ssl, bool allowSelfSignedServerCert, IAuthenticator authenticationMethod,
+            IRestClientFactory restClientFactory, IRequestFactory requestFactory,
+            IResponseValidator responseValidator, IExternalEventWriter eventWriter)
             : base(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod)
         {
+            _requestFactory = requestFactory;
+            _eventWriter = eventWriter;
+            _responseValidator = responseValidator;
             if (Ssl && AllowSelfSignedServerCert)
             {
                 ServicePointManager.ServerCertificateValidationCallback += AcceptSelfSignedServerCertCallback;
             }
 
             _restClientByHost = servers.ToDictionary(GetServerUrl,
-                serverData => new RestClient(GetServerUrl(serverData))
-                {
-                    Timeout = timeout,
-                    Authenticator = authenticationMethod
-                });
+                serverData => restClientFactory.Create(GetServerUrl(serverData), timeout, authenticationMethod));
         }
 
         public override void PutTemplateRaw(string templateName, string rawBody)
         {
-            var url = string.Concat("_template/", templateName);
-            var restRequest = new RestRequest(url, Method.PUT) {RequestFormat = DataFormat.Json};
-            restRequest.AddParameter("application/json", rawBody, ParameterType.RequestBody);
-            RestClient.ExecuteAsync(restRequest, response => { });
+            var request = _requestFactory.CreatePutTemplateRequest(templateName, rawBody);
+            SafeSendRequest(request);
+        }
+
+        public override async Task PutTemplateRawAsync(string templateName, string rawBody)
+        {
+            var request = _requestFactory.CreatePutTemplateRequest(templateName, rawBody);
+            await SafeSendRequestAsync(request);
         }
 
         public override void IndexBulk(IEnumerable<InnerBulkOperation> bulk)
         {
-            var request = PrepareRequest(bulk);
+            var request = _requestFactory.PrepareRequest(bulk);
             SafeSendRequest(request);
         }
 
-        public override void IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
+        public override async Task IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk)
         {
-            var request = PrepareRequest(bulk);
-
-            SafeSendRequestAsync(request);
+            var request = _requestFactory.PrepareRequest(bulk);
+            await SafeSendRequestAsync(request);
         }
 
-
-        private RequestDetails PrepareRequest(IEnumerable<InnerBulkOperation> bulk)
-        {
-            var requestString = PrepareBulk(bulk);
-            var restRequest = new RestRequest("_bulk", Method.POST);
-            restRequest.AddParameter("application/json", requestString, ParameterType.RequestBody);
-
-            return new RequestDetails(restRequest, requestString);
-        }
-
-        private static string PrepareBulk(IEnumerable<InnerBulkOperation> bulk)
-        {
-            var sb = new StringBuilder();
-            foreach (InnerBulkOperation operation in bulk)
-            {
-                AddOperationMetadata(operation, sb);
-                AddOperationDocument(operation, sb);
-            }
-            return sb.ToString();
-        }
-
-        private static void AddOperationMetadata(InnerBulkOperation operation, StringBuilder sb)
-        {
-            var indexParams = new Dictionary<string, string>(operation.IndexOperationParams)
-            {
-                { "_index", operation.IndexName },
-                { "_type", operation.IndexType },
-            };
-            var paramStrings = indexParams.Where(kv => kv.Value != null)
-                .Select(kv => string.Format(@"""{0}"" : ""{1}""", kv.Key, kv.Value));
-            var documentMetadata = string.Join(",", paramStrings.ToArray());
-            sb.AppendFormat(@"{{ ""index"" : {{ {0} }} }}", documentMetadata);
-            sb.Append("\n");
-        }
-
-        private static void AddOperationDocument(InnerBulkOperation operation, StringBuilder sb)
-        {
-            string json = JsonConvert.SerializeObject(operation.Document);
-            sb.Append(json);
-            sb.Append("\n");
-        }
-
-        private void SafeSendRequest(RequestDetails request)
+        private void SafeSendRequest(IRestRequest request)
         {
             IRestResponse response;
             try
             {
-                response = RestClient.Execute(request.RestRequest);
+                response = RestClient.Execute(request);
             }
             catch (Exception ex)
             {
-                LogLog.Error(GetType(), "Invalid request to ElasticSearch", ex);
+                ReportRequestError(ex);
                 return;
             }
 
             try
             {
-                CheckResponse(response);
+                _responseValidator.ValidateResponse(response);
             }
             catch (Exception ex)
             {
-                LogLog.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
+                _eventWriter.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
             }
         }
 
-        private async Task SafeSendRequestAsync(RequestDetails request)
+        private async Task SafeSendRequestAsync(IRestRequest request)
         {
             IRestResponse response;
             try
             {
-                response = await RestClient.ExecuteTaskAsync(request.RestRequest);
+                response = await RestClient.ExecuteTaskAsync(request);
             }
             catch (Exception ex)
             {
-                LogLog.Error(GetType(), "Invalid request to ElasticSearch", ex);
+                ReportRequestError(ex);
                 return;
             }
 
             try
             {
-                CheckResponse(response);
+                _responseValidator.ValidateResponse(response);
             }
             catch (Exception ex)
             {
-                LogLog.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
+                _eventWriter.Error(GetType(), "Got error while reading response from ElasticSearch", ex);
             }
+        }
 
+        private void ReportRequestError(Exception ex)
+        {
+            _eventWriter.Error(GetType(), "Invalid request to ElasticSearch", ex);
         }
 
         private bool AcceptSelfSignedServerCertCallback(
@@ -191,59 +155,6 @@ namespace log4stash
             }
 
             return false;
-        }
-
-        private static string GetResponseErrorIfAny(IRestResponse response)
-        {
-            if (response == null)
-            {
-                return "Got null response";
-            }
-
-            // Handle network transport or framework exception
-            if (response.ErrorException != null)
-            {
-                return response.ErrorException.ToString();
-            }
-
-            // Handle request errors
-            if (!response.StatusCode.HasFlag(HttpStatusCode.OK))
-            {
-                var err = new StringBuilder();
-                err.AppendFormat("Got non ok status code: {0}.", response.StatusCode);
-                err.AppendLine(response.Content);
-                return err.ToString();
-            }
-
-            // Handle index error
-            try
-            {
-                var jsonResponse = JsonConvert.DeserializeObject<PartialElasticResponse>(response.Content);
-                if (jsonResponse != null && jsonResponse.Errors)
-                {
-                    return response.Content;
-                }
-            }
-            catch (JsonReaderException)
-            {
-                return string.Format("Can't parse Elastic response: {0}", response.Content);
-            }
-
-            return null;
-        }
-
-        private static void CheckResponse(IRestResponse response)
-        {
-            var errString = GetResponseErrorIfAny(response);
-            if (string.IsNullOrEmpty(errString))
-            {
-                return;
-            }
-
-            throw new InvalidOperationException(
-                string.Format("Some error occurred while sending request to Elasticsearch.{0}{1}",
-                    Environment.NewLine, errString));
-            
         }
 
         public override void Dispose()

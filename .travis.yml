@@ -22,7 +22,7 @@ before_install:
 #- /tmp/elasticsearch/bin/elasticsearch --daemonize --path.data /tmp 
 
 script:
- - xbuild /p:Configuration=Release /p:Travis=True src/log4stash.sln	
+ - xbuild /p:Configuration=Debug /p:Travis=True src/log4stash.sln	
  - sh src/.ci/RunTests.sh
 
 branches:

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using log4net.Util;
+using log4stash.ErrorHandling;
 using log4stash.SmartFormatters;
 
 namespace log4stash.Filters
@@ -17,10 +18,16 @@ namespace log4stash.Filters
     {
 
         private readonly List<ConverterDetails> _converters;
+        private readonly IExternalEventWriter _eventWriter;
 
-        public ConvertFilter()
+        public ConvertFilter() : this(new LogLogEventWriter())
         {
             _converters = new List<ConverterDetails>();
+        }
+
+        public ConvertFilter(IExternalEventWriter eventWriter)
+        {
+            _eventWriter = eventWriter;
         }
 
         public void AddToString(string sourceKey)

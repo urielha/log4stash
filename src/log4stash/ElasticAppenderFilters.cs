@@ -7,9 +7,18 @@ using log4stash.InnerExceptions;
 
 namespace log4stash
 {
-    public class ElasticAppenderFilters : IElasticAppenderFilter
+    public class ElasticAppenderFilters : IElasticAppenderCollection
     {
         private readonly List<IElasticAppenderFilter> _filters = new List<IElasticAppenderFilter>();
+
+        public ElasticAppenderFilters()
+        {
+        }
+
+        public ElasticAppenderFilters(List<IElasticAppenderFilter> filters)
+        {
+            _filters = filters;
+        }
 
         public void PrepareConfiguration(IElasticsearchClient client)
         {

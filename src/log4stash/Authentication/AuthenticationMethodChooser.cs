@@ -3,7 +3,7 @@ using RestSharp.Authenticators;
 
 namespace log4stash.Authentication
 {
-    public class AuthenticationMethodChooser : IAuthenticator
+    public class AuthenticationMethodChooser : IAuthenticationMethodChooser
     {
         private IAuthenticator _innerMethod;
 

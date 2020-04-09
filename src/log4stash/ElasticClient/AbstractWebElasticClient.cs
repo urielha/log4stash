@@ -1,25 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using log4stash.Authentication;
 using log4stash.Configuration;
+using RestSharp.Authenticators;
 
 namespace log4stash
 {
     public abstract class AbstractWebElasticClient : IElasticsearchClient
     {
-        public ServerDataCollection Servers { get; private set; }
+        public IServerDataCollection Servers { get; private set; }
         public int Timeout { get; private set; }
         public bool Ssl { get; private set; }
         public bool AllowSelfSignedServerCert { get; private set; }
-        public AuthenticationMethodChooser AuthenticationMethod { get; set; }
+        public IAuthenticator AuthenticationMethod { get; set; }
         public string Url { get { return GetServerUrl(); } }
 
-        protected AbstractWebElasticClient(ServerDataCollection servers,
+        protected AbstractWebElasticClient(IServerDataCollection servers,
             int timeout,
             bool ssl,
             bool allowSelfSignedServerCert,
-            AuthenticationMethodChooser authenticationMethod)
+            IAuthenticator authenticationMethod)
         {
             Servers = servers;
             Timeout = timeout;
@@ -32,8 +34,9 @@ namespace log4stash
         }
 
         public abstract void PutTemplateRaw(string templateName, string rawBody);
+        public abstract Task PutTemplateRawAsync(string templateName, string rawBody);
         public abstract void IndexBulk(IEnumerable<InnerBulkOperation> bulk);
-        public abstract void IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
+        public abstract Task IndexBulkAsync(IEnumerable<InnerBulkOperation> bulk);
         public abstract void Dispose();
 
         protected string GetServerUrl()

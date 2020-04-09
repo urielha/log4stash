@@ -40,26 +40,11 @@ namespace log4stash.Extensions
             }
 
             var lastErr = _errorsHistory[tup];
-            if (now - lastErr > _tolerance)
+            if (now - lastErr <= _tolerance) return;
+            if (_errorsHistory.TryUpdate(tup, now, lastErr))
             {
-                if (_errorsHistory.TryUpdate(tup, now, lastErr))
-                {
-                    action();
-                }
+                action();
             }
-        }
-    }
-
-    public static class TolerateCallsFactory
-    {
-        public static TolerateCallsBase Create(int toleranceSec)
-        {
-            if (toleranceSec <= 0)
-            {
-                return new TolerateCallsBase();
-            }
-
-            return new TolerateCalls(TimeSpan.FromSeconds(toleranceSec));
         }
     }
 }
