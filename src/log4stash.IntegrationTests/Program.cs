@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace log4stash.Tests
+namespace log4stash.IntegrationTests
 {
     public static class Program
     {

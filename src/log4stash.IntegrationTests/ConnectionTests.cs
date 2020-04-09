@@ -3,7 +3,7 @@ using System.Linq;
 using Nest;
 using NUnit.Framework;
 
-namespace log4stash.Tests
+namespace log4stash.IntegrationTests
 {
     [TestFixture]
     public class ElasticsearchTests : TestsSetup

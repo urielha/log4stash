@@ -5,7 +5,7 @@ using log4net.Repository.Hierarchy;
 using Nest;
 using NUnit.Framework;
 
-namespace log4stash.Tests
+namespace log4stash.IntegrationTests
 {
     public class TestsSetup
     {

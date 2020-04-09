@@ -14,7 +14,7 @@ using Nest;
 using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 
-namespace log4stash.Tests
+namespace log4stash.IntegrationTests
 {
     [TestFixture]
     public class ElasticsearchAppenderTests : TestsSetup
