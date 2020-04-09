@@ -1,49 +1,49 @@
 <?xml version="1.0"?>
 <package>
-  <metadata>
-    <id>log4stash</id>
-	<version>$version$</version>
-    <authors>urielha</authors>
-    <owners>urielha</owners>
-    <title>log4stash - Elasticsearch log4net appender</title>
-    <iconUrl>https://i.imgur.com/9e8hEh5.png</iconUrl>
-    <licenseUrl>https://github.com/urielha/log4stash/blob/master/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/urielha/log4stash</projectUrl>
-    <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <description>
+	<metadata>
+		<id>log4stash</id>
+		<version>$version$</version>
+		<authors>urielha</authors>
+		<owners>urielha</owners>
+		<icon>https://i.imgur.com/9e8hEh5.png</icon>
+		<title>log4stash - Elasticsearch log4net appender</title>
+		<license>https://github.com/urielha/log4stash/blob/master/LICENSE</license>
+		<projectUrl>https://github.com/urielha/log4stash</projectUrl>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>
       log4stash is a log4net appender for easy logging of exceptions and messages to Elasticsearch indices.
       You can configure few filters to analyze log events before they got sended to Elasticsearch similar to the filters on logstash.
-    </description>
-    <releaseNotes>
+		</description>
+		<releaseNotes>
       * Added option for API Key authentication with Elasticsearch
 
       Thanks a lot to @erangil2 for his tremendous contributions :)
 
       And thanks to: @zhengziying, @triarc, @prime8, @henkish, @mfpalladino, @ignasv, @wpgh, @Thecentury, @pnumainville and @Aleksandre for their contributions.
-    </releaseNotes>
-    <copyright>Copyright 2019</copyright>
-    <tags>log logging exception elasticsearch log4net appender logstash filters</tags>
-    <dependencies>
-		
-		<group targetFramework=".NETFramework4.0">
-			<dependency id="log4net" version="2.0.8.0" />
-			<dependency id="RestSharp" version="105.2.3" />
-			<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
-		</group>
-		<group targetFramework=".NETFramework4.5">
-			<dependency id="log4net" version="2.0.8.0" />
-			<dependency id="RestSharp" version="105.2.3" />
-		</group>
-		<group targetFramework=".NETStandard2.0">
-			<dependency id="log4net" version="2.0.8.0" />
-			<dependency id="RestSharp" version="106.1.0" />
-			<dependency id="System.Security.Permissions" version="4.4.0" />
-		</group>
-    </dependencies>
-  </metadata>
-  <files>
-    <file src="lib\**\log4stash*.dll" target="lib"/>
-    <file src="lib\**\log4stash*.pdb" target="lib"/>
-    <file src="readme.txt" target="" />
-  </files>
+		</releaseNotes>
+		<copyright>Copyright 2019</copyright>
+		<tags>log logging exception elasticsearch log4net appender logstash filters</tags>
+		<dependencies>
+
+			<group targetFramework=".NETFramework4.0">
+				<dependency id="log4net" version="2.0.8.0" />
+				<dependency id="RestSharp" version="105.2.3" />
+				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
+			</group>
+			<group targetFramework=".NETFramework4.5">
+				<dependency id="log4net" version="2.0.8.0" />
+				<dependency id="RestSharp" version="105.2.3" />
+			</group>
+			<group targetFramework=".NETStandard2.0">
+				<dependency id="log4net" version="2.0.8.0" />
+				<dependency id="RestSharp" version="106.1.0" />
+				<dependency id="System.Security.Permissions" version="4.4.0" />
+			</group>
+		</dependencies>
+	</metadata>
+	<files>
+		<file src="lib\**\log4stash*.dll" target="lib"/>
+		<file src="lib\**\log4stash*.pdb" target="lib"/>
+		<file src="readme.txt" target="" />
+	</files>
 </package>
