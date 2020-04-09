@@ -183,7 +183,10 @@ namespace log4stash
 
             // let the timer finish its job
             _timer.Dispose();
-            _client.Dispose();
+            if (_client != null)
+            {
+                _client.Dispose();
+            }
         }
 
         /// <summary>
@@ -231,7 +234,7 @@ namespace log4stash
         private void DoIndexNow()
         {
             var bulkToSend = _bulk.ResetBulk();
-            if (bulkToSend.Count <= 0) return;
+            if (bulkToSend != null && bulkToSend.Count <= 0) return;
             try
             {
                 if (IndexAsync)
