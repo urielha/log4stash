@@ -6,8 +6,8 @@
 		<authors>urielha</authors>
 		<owners>urielha</owners>
 		<icon>https://i.imgur.com/9e8hEh5.png</icon>
+		<license type="expression">MIT</license>
 		<title>log4stash - Elasticsearch log4net appender</title>
-		<license>https://github.com/urielha/log4stash/blob/master/LICENSE</license>
 		<projectUrl>https://github.com/urielha/log4stash</projectUrl>
 		<requireLicenseAcceptance>false</requireLicenseAcceptance>
 		<description>
