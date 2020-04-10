@@ -24,15 +24,9 @@
 		<copyright>Copyright 2019</copyright>
 		<tags>log logging exception elasticsearch log4net appender logstash filters</tags>
 		<dependencies>
-
-			<group targetFramework=".NETFramework4.0">
+			<group targetFramework=".NETFramework4.5.2">
 				<dependency id="log4net" version="2.0.8.0" />
-				<dependency id="RestSharp" version="105.2.3" />
-				<dependency id="Microsoft.Bcl.Async" version="1.0.168" />
-			</group>
-			<group targetFramework=".NETFramework4.5">
-				<dependency id="log4net" version="2.0.8.0" />
-				<dependency id="RestSharp" version="105.2.3" />
+				<dependency id="RestSharp" version="106.1.0" />
 			</group>
 			<group targetFramework=".NETStandard2.0">
 				<dependency id="log4net" version="2.0.8.0" />
@@ -42,8 +36,10 @@
 		</dependencies>
 	</metadata>
 	<files>
-		<file src="lib\**\log4stash*.dll" target="lib"/>
-		<file src="lib\**\log4stash*.pdb" target="lib"/>
+		<file src="lib\net452\log4stash*.dll" target="lib\net452"/>
+		<file src="lib\net452\log4stash*.pdb" target="lib\net452"/>
+		<file src="lib\netstandard2.0\log4stash*.dll" target="lib\netstandard2.0"/>
+		<file src="lib\netstandard2.0\log4stash*.pdb" target="lib\netstandard2.0"/>
 		<file src="readme.txt" target="" />
 		<file src="icon.png" target="" />
 	</files>
