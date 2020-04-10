@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using Newtonsoft.Json;
 using RestSharp;
@@ -41,8 +42,11 @@ namespace log4stash.ElasticClient
             var indexParams = new Dictionary<string, string>(operation.IndexOperationParams)
             {
                 { "_index", operation.IndexName },
-                { "_type", operation.IndexType },
             };
+            if (!string.IsNullOrEmpty(operation.IndexType))
+            {
+                indexParams["_type"] = operation.IndexType;
+            }
             var paramStrings = indexParams.Where(kv => kv.Value != null)
                 .Select(kv => string.Format(@"""{0}"" : ""{1}""", kv.Key, kv.Value));
             var documentMetadata = string.Join(",", paramStrings.ToArray());

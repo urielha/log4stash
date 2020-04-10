@@ -26,9 +26,9 @@ namespace log4stash.IntegrationTests
         {
             _log.Info("loggingtest");
 
-            Client.Refresh(TestIndex);
+            Client.Indices.Refresh(TestIndex);
 
-            var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(q => q.Term("Message", "loggingtest")));
+            var searchResults = Client.Search<JObject>(s => s.AllIndices().Query(q => q.Term("Message", "loggingtest")));
 
             Assert.AreEqual(1, searchResults.Total);
         }
@@ -48,51 +48,13 @@ namespace log4stash.IntegrationTests
             ThreadContext.Properties["IdSource"] = "TEST_ID";
             _log.Info("loggingtest");
 
-            Client.Refresh(TestIndex);
+            Client.Indices.Refresh(TestIndex);
 
-            var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(q => q.Ids(descriptor => descriptor.Values("TEST_ID"))));
+            var searchResults = Client.Search<JObject>(s => s.AllIndices().Query(q => q.Ids(descriptor => descriptor.Values("TEST_ID"))));
 
             QueryConfiguration(appender =>
             {
                 appender.DocumentIdSource = oldDocId;
-            });
-
-            Assert.AreEqual(1, searchResults.Total);
-        }
-
-        [Test]
-        public void Log_With_Custom_Routing()
-        {
-            string oldRoutingSource = null;
-            QueryConfiguration(appender =>
-            {
-                if (!appender.IndexOperationParams.TryGetValue("_routing", out oldRoutingSource))
-                {
-                    oldRoutingSource = null;
-                }
-                appender.IndexOperationParams.AddParameter(new IndexOperationParam("_routing", "%{RoutingSource}"));
-            });
-            ThreadContext.Properties["RoutingSource"] = "ROUTING";
-            _log.Info("loggingtest");
-
-            Client.Refresh(TestIndex);
-            var query = new TermsQuery
-            {
-                Field = "_routing",
-                Terms = new[] { "ROUTING" }
-            };
-            var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(descriptor => query));
-
-            QueryConfiguration(appender =>
-            {
-                if (oldRoutingSource == null)
-                {
-                    appender.IndexOperationParams.Remove("_routing");
-                }
-                else
-                {
-                    appender.IndexOperationParams.AddParameter(new IndexOperationParam("_routing", oldRoutingSource));
-                }
             });
 
             Assert.AreEqual(1, searchResults.Total);
@@ -114,9 +76,9 @@ namespace log4stash.IntegrationTests
             ISearchResponse<JObject> searchResults = null;
             while (--tries >= 0)
             {
-                Client.Refresh(TestIndex);
+                Client.Indices.Refresh(TestIndex);
 
-                searchResults = Client.Search<JObject>(s => s.AllTypes().AllIndices());
+                searchResults = Client.Search<JObject>(s => s.AllIndices().AllIndices());
 
                 if (searchResults.Total > 0)
                 {
@@ -150,9 +112,9 @@ namespace log4stash.IntegrationTests
 
             _log.Logger.Repository.Log(loggingEvent);
 
-            Client.Refresh(TestIndex);
+            Client.Indices.Refresh(TestIndex);
 
-            var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(q => q.Term("Message", "loggingtest")));
+            var searchResults = Client.Search<JObject>(s => s.AllIndices().Query(q => q.Term("Message", "loggingtest")));
 
             Assert.AreEqual(1, searchResults.Total);
             var doc = searchResults.Documents.First();
@@ -164,9 +126,9 @@ namespace log4stash.IntegrationTests
         {
             _log.Info("loggingtest");
 
-            Client.Refresh(TestIndex);
+            Client.Indices.Refresh(TestIndex);
 
-            var searchResults = Client.Search<JObject>(s => s.AllTypes().Query(q => q.Term("Message", "loggingtest")));
+            var searchResults = Client.Search<JObject>(s => s.AllIndices().Query(q => q.Term("Message", "loggingtest")));
 
             Assert.AreEqual(1, searchResults.Total);
             var doc = searchResults.Documents.First();
@@ -183,8 +145,8 @@ namespace log4stash.IntegrationTests
             LogicalThreadContext.Properties["logicalThreadDynamicProperty"] = "local thread";
             _log.Info("loggingtest");
 
-            Client.Refresh(TestIndex);
-            var searchResults = Client.Search<dynamic>(s => s.AllTypes().Query(q => q.Term("Message", "loggingtest")));
+            Client.Indices.Refresh(TestIndex);
+            var searchResults = Client.Search<dynamic>(s => s.AllIndices().Query(q => q.Term("Message", "loggingtest")));
 
             Assert.AreEqual(1, searchResults.Total);
             var firstEntry = searchResults.Documents.First();
@@ -200,9 +162,9 @@ namespace log4stash.IntegrationTests
             log4net.LogicalThreadContext.Properties["Level"] = value;
             _log.Debug("debug kuku");
 
-            Client.Refresh(TestIndex);
+            Client.Indices.Refresh(TestIndex);
 
-            var searchResults = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
+            var searchResults = Client.Search<JObject>(s => s.AllIndices().Take(1));
 
             Assert.AreEqual(1, searchResults.Total);
             var doc = searchResults.Documents.First();
@@ -216,9 +178,9 @@ namespace log4stash.IntegrationTests
             log4net.LogicalThreadContext.Properties["NullProperty"] = null;
             _log.Debug("debug kuku");
 
-            Client.Refresh(TestIndex);
+            Client.Indices.Refresh(TestIndex);
 
-            var searchResults = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
+            var searchResults = Client.Search<JObject>(s => s.AllIndices().Take(1));
 
             Assert.AreEqual(1, searchResults.Total);
             var doc = searchResults.Documents.First();
@@ -261,8 +223,8 @@ namespace log4stash.IntegrationTests
                 "this is message{1}key{0}value{1}another {0} 'another'{1}object{0}[this is object :)]",
                 valueSplit[0].TrimStart('\\'), fieldSplit[0].TrimStart('\\'));
 
-            Client.Refresh(TestIndex);
-            var searchResults = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent").Take(1));
+            Client.Indices.Refresh(TestIndex);
+            var searchResults = Client.Search<dynamic>(s => s.AllIndices().Take(1));
 
             var entry = searchResults.Documents.First();
 
@@ -290,8 +252,8 @@ namespace log4stash.IntegrationTests
             var newGuid = Guid.NewGuid();
             _log.Error("error! name is UnknownError and guid " + newGuid);
 
-            Client.Refresh(TestIndex);
-            var res = Client.Search<dynamic>(s => s.AllIndices().Type("LogEvent").Take((1)));
+            Client.Indices.Refresh(TestIndex);
+            var res = Client.Search<dynamic>(s => s.AllIndices().Take((1)));
             var doc = res.Documents.First();
             Assert.AreEqual("UnknownError", doc.name.ToString());
             Assert.AreEqual(newGuid.ToString(), doc.the_guid.ToString());
@@ -303,9 +265,9 @@ namespace log4stash.IntegrationTests
         {
             _log.Info("someIds=[123, 124 ,125 , 007] anotherIds=[33]");
 
-            Client.Refresh(TestIndex);
+            Client.Indices.Refresh(TestIndex);
 
-            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
+            var res = Client.Search<JObject>(s => s.AllIndices().Take(1));
             var doc = res.Documents.First();
             Assert.AreEqual(true, doc["someIds"].HasValues);
             Assert.Contains("123", doc["someIds"].Values<string>().ToArray());
@@ -320,9 +282,9 @@ namespace log4stash.IntegrationTests
             log4net.GlobalContext.Properties["shouldBeString"] = sp;
             _log.Debug("dummy");
 
-            Client.Refresh(TestIndex);
+            Client.Indices.Refresh(TestIndex);
 
-            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
+            var res = Client.Search<JObject>(s => s.AllIndices().Take(1));
             var doc = res.Documents.First();
 
             Assert.AreEqual(doc["shouldBeString"].Value<string>(), sp.GetInnerGuid());
@@ -351,9 +313,9 @@ namespace log4stash.IntegrationTests
             LogicalThreadContext.Stacks[sourceKey].Push("name2");
             _log.Info("hi");
 
-            Client.Refresh(TestIndex);
+            Client.Indices.Refresh(TestIndex);
 
-            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
+            var res = Client.Search<JObject>(s => s.AllIndices().Take(1));
             var doc = res.Documents.First();
             var usrName = doc[sourceKey];
             Assert.NotNull(usrName);
@@ -389,8 +351,8 @@ namespace log4stash.IntegrationTests
             log4net.LogicalThreadContext.Properties[sourceKey] = jObject.ToString();
             _log.Info("logging jsonObject");
 
-            Client.Refresh(TestIndex);
-            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
+            Client.Indices.Refresh(TestIndex);
+            var res = Client.Search<JObject>(s => s.AllIndices().Take(1));
             var doc = res.Documents.First();
 
             QueryConfiguration(appender =>
@@ -466,9 +428,9 @@ namespace log4stash.IntegrationTests
             LogicalThreadContext.Properties[sourceKey] = xmlString;
             _log.Info("logging xmlObject");
 
-            Client.Refresh(TestIndex);
+            Client.Indices.Refresh(TestIndex);
 
-            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent").Take(1));
+            var res = Client.Search<JObject>(s => s.AllIndices().Take(1));
             var doc = res.Documents.First();
 
             QueryConfiguration(appender =>
@@ -518,9 +480,9 @@ namespace log4stash.IntegrationTests
 
             Thread.Sleep(timeout + 1000);
 
-            Client.Refresh(TestIndex);
+            Client.Indices.Refresh(TestIndex);
 
-            var res = Client.Search<JObject>(s => s.AllIndices().Type("LogEvent"));
+            var res = Client.Search<JObject>(s => s.AllIndices());
             Assert.AreEqual(1, res.Total);
 
             QueryConfiguration(appender =>
@@ -532,7 +494,7 @@ namespace log4stash.IntegrationTests
         }
 
         [Test]
-        [Ignore("the build agent have problems on running performance")]
+        [NUnit.Framework.Ignore("the build agent have problems on running performance")]
         public static void Performance()
         {
             ElasticAppenderFilters oldFilters = null;

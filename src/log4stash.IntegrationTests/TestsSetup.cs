@@ -1,8 +1,10 @@
 using System;
+using Elasticsearch.Net;
 using log4net;
 using log4net.Appender;
 using log4net.Repository.Hierarchy;
 using Nest;
+using Nest.JsonNetSerializer;
 using NUnit.Framework;
 
 namespace log4stash.IntegrationTests
@@ -25,22 +27,29 @@ namespace log4stash.IntegrationTests
                 port = serverData.Port;
                 path = serverData.Path;
            });
+            
+            var pool = new SingleNodeConnectionPool(new Uri(string.Format("http://{0}:{1}{2}", host, port, path)));
 
-            ConnectionSettings elasticSettings =
-                new ConnectionSettings(new Uri(string.Format("http://{0}:{1}{2}", host, port, path)))
+            var elasticSettings =
+                new ConnectionSettings(pool, SourceSerializer)
                     .DefaultIndex(TestIndex);
 
             Client = new Nest.ElasticClient(elasticSettings);
+        }
+
+        private IElasticsearchSerializer SourceSerializer(IElasticsearchSerializer builtin, IConnectionSettingsValues values)
+        {
+            return new JsonNetSerializer(builtin, values);
         }
 
         public void FixtureTearDown()
         {
             if (Client == null) return;
 
-            var response = Client.IndexExists(new IndexExistsRequest(TestIndex));
+            var response = Client.Indices.Exists(new IndexExistsRequest(TestIndex));
             if (response.Exists)
             {
-                Client.DeleteIndex(new DeleteIndexRequest(TestIndex));
+                Client.Indices.Delete(new DeleteIndexRequest(TestIndex));
             }
         }
 
