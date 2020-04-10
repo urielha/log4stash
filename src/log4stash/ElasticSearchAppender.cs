@@ -70,10 +70,6 @@ namespace log4stash
         public TemplateInfo Template { get; set; }
         public ElasticAppenderFilters ElasticFilters { get; set; }
         public bool DropEventsOverBulkLimit { get; set; }
-        [Obsolete]
-        public string BasicAuthUsername { get; set; }
-        [Obsolete]
-        public string BasicAuthPassword { get; set; }
 
         public string IndexName
         {
@@ -133,8 +129,6 @@ namespace log4stash
         public override void ActivateOptions()
         {
             AddOptionalServer();
-            CheckObsoleteAuth();
-
             _client = _elasticClientFactory.CreateClient(Servers, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
 
             _logEventConverter = _logEventConverterFactory.Create(FixedFields, SerializeObjects);
@@ -162,15 +156,6 @@ namespace log4stash
             {
                 var serverData = new ServerData { Address = Server, Port = Port, Path = Path };
                 Servers.Add(serverData);
-            }
-        }
-        private void CheckObsoleteAuth()
-        {
-            if(!string.IsNullOrEmpty(BasicAuthUsername) && !string.IsNullOrEmpty(BasicAuthPassword))
-            {
-                _eventWriter.Warn(GetType(), "BasicAuthUsername & BasicAuthPassword tags are obsolete, Please use AuthenticationMethod new tag");
-                var auth = new BasicAuthenticationMethod { Username = BasicAuthUsername, Password = BasicAuthPassword };
-                AuthenticationMethod.AddBasic(auth);
             }
         }
 
