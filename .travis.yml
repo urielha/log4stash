@@ -28,4 +28,3 @@ script:
 branches:
  only:
   - dev
-  - master
