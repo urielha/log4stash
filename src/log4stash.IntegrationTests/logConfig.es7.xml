@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+﻿<?xml version="1.0"?>
 <configuration>
   <configSections>
     <section name="log4net" type="log4net.Config.Log4NetConfigurationSectionHandler, log4net" />
@@ -15,7 +15,6 @@
         </Server>
       </Servers>
       <IndexName>log_test_%{+yyyy.MM.dd}</IndexName>
-      <IndexType>LogEvent</IndexType>
       <Bulksize>1</Bulksize>
       <BulkIdleTimeout>-1</BulkIdleTimeout>
       <IndexAsync>False</IndexAsync>

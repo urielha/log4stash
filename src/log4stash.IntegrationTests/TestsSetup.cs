@@ -3,9 +3,8 @@ using System.IO;
 using System.Reflection;
 using Elasticsearch.Net;
 using log4net;
-using log4net.Appender;
 using log4net.Config;
-using log4net.Repository.Hierarchy;
+using log4net.Repository;
 using Nest;
 using Nest.JsonNetSerializer;
 using NUnit.Framework;
@@ -16,11 +15,16 @@ namespace log4stash.IntegrationTests
     {
         public IElasticClient Client;
         public readonly string TestIndex = "log_test_" + DateTime.Now.ToString("yyyy.MM.dd");
+        private ILoggerRepository _repository;
 
+        [OneTimeSetUp]
         public void FixtureSetup()
         {
+            var configFile = TestContext.Parameters["configFile"];
+            _repository = LogManager.GetRepository(Assembly.GetCallingAssembly());
+            XmlConfigurator.Configure(_repository, new FileInfo(configFile));
             string host = null;
-            int port = 0;
+            var port = 0;
             string path = null;
             QueryConfiguration(appender =>
             {
@@ -60,8 +64,6 @@ namespace log4stash.IntegrationTests
         [SetUp]
         public void TestSetup()
         {
-            FixtureTearDown();
-            FixtureSetup();
             QueryConfiguration(appender =>
             {
                 appender.BulkSize = 1;
@@ -69,22 +71,17 @@ namespace log4stash.IntegrationTests
             });
         }
 
-        protected static void QueryConfiguration(Action<ElasticSearchAppender> action)
+        protected void QueryConfiguration(Action<ElasticSearchAppender> action)
         {
-            var repository = LogManager.GetRepository(Assembly.GetCallingAssembly());
-            XmlConfigurator.Configure(repository, new FileInfo("logConfig.xml"));
-            if (repository != null)
+            
+            if (_repository == null) return;
+            var appenders = _repository.GetAppenders();
+            foreach (var appender in appenders)
             {
-                IAppender[] appenders = repository.GetAppenders();
-                foreach (IAppender appender in appenders)
-                {
-                    var elsAppender = appender as ElasticSearchAppender;
-                    if (elsAppender != null && action != null)
-                    {
-                        action(elsAppender);
-                        elsAppender.ActivateOptions();
-                    }
-                }
+                var elsAppender = appender as ElasticSearchAppender;
+                if (elsAppender == null || action == null) continue;
+                action(elsAppender);
+                elsAppender.ActivateOptions();
             }
         }
     }

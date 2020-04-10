@@ -4,6 +4,8 @@
     <TargetFramework>netcoreapp2.1</TargetFramework>
 
     <IsPackable>false</IsPackable>
+
+    <NoWin32Manifest>true</NoWin32Manifest>
   </PropertyGroup>
 
   <ItemGroup>
@@ -21,6 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="logConfig.es7.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="logConfig.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
