@@ -26,12 +26,13 @@
 		<dependencies>
 			<group targetFramework=".NETFramework4.5.2">
 				<dependency id="log4net" version="2.0.8.0" />
+				<dependency id="Newtonsoft.Json" version="12.0.1" />
 				<dependency id="RestSharp" version="106.1.0" />
 			</group>
 			<group targetFramework=".NETStandard2.0">
 				<dependency id="log4net" version="2.0.8.0" />
+				<dependency id="Newtonsoft.Json" version="12.0.1" />
 				<dependency id="RestSharp" version="106.1.0" />
-				<dependency id="System.Security.Permissions" version="4.4.0" />
 			</group>
 		</dependencies>
 	</metadata>

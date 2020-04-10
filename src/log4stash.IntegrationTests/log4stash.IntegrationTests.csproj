@@ -22,7 +22,7 @@
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Nest" Version="7.6.1" />
     <PackageReference Include="Nest.JsonNetSerializer" Version="7.6.1" />
-    <PackageReference Include="Newtonsoft.json" Version="12.0.3" />
+    <PackageReference Include="Newtonsoft.json" Version="12.0.1" />
     <PackageReference Include="nunit" Version="3.12.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
