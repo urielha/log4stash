@@ -21,14 +21,11 @@
 		},
 
         "LogEvent" : {
-            "_timestamp": {
-                "enabled": true,
-                "path": "@timestamp"
-            },
+
 
 			"properties" : {
 				"Message" : {
-					"type":"string",
+					"type":"text",
 					"index": "analyzed"
 				},
 				"@timestamp" : {

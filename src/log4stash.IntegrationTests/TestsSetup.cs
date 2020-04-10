@@ -1,7 +1,10 @@
 using System;
+using System.IO;
+using System.Reflection;
 using Elasticsearch.Net;
 using log4net;
 using log4net.Appender;
+using log4net.Config;
 using log4net.Repository.Hierarchy;
 using Nest;
 using Nest.JsonNetSerializer;
@@ -12,7 +15,7 @@ namespace log4stash.IntegrationTests
     public class TestsSetup
     {
         public IElasticClient Client;
-        public readonly string TestIndex = "log_test_" + DateTime.Now.ToString("yyyy-MM-dd");
+        public readonly string TestIndex = "log_test_" + DateTime.Now.ToString("yyyy.MM.dd");
 
         public void FixtureSetup()
         {
@@ -41,7 +44,8 @@ namespace log4stash.IntegrationTests
         {
             return new JsonNetSerializer(builtin, values);
         }
-
+        
+        [OneTimeTearDown]
         public void FixtureTearDown()
         {
             if (Client == null) return;
@@ -67,10 +71,11 @@ namespace log4stash.IntegrationTests
 
         protected static void QueryConfiguration(Action<ElasticSearchAppender> action)
         {
-            var hierarchy = LogManager.GetRepository() as Hierarchy;
-            if (hierarchy != null)
+            var repository = LogManager.GetRepository(Assembly.GetCallingAssembly());
+            XmlConfigurator.Configure(repository, new FileInfo("logConfig.xml"));
+            if (repository != null)
             {
-                IAppender[] appenders = hierarchy.GetAppenders();
+                IAppender[] appenders = repository.GetAppenders();
                 foreach (IAppender appender in appenders)
                 {
                     var elsAppender = appender as ElasticSearchAppender;

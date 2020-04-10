@@ -10,7 +10,7 @@
     <appender name="ElasticSearchAppender" type="log4stash.ElasticSearchAppender, log4stash">
       <Servers>
         <Server>
-          <Address>localhost</Address>
+          <Address>127.0.0.1</Address>
           <Port>9200</Port>
         </Server>
       </Servers>

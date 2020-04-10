@@ -1,155 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\ILRepack.2.0.13\build\ILRepack.props" Condition="Exists('..\packages\ILRepack.2.0.13\build\ILRepack.props')" />
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{22964CB0-8A39-41EA-807D-B5216D27DF70}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>log4stash</RootNamespace>
-    <AssemblyName>log4stash</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\</SolutionDir>
-    <RestorePackages>true</RestorePackages>
-    <NuGetPackageImportStamp>2ba16708</NuGetPackageImportStamp>
+    <TargetFrameworks>netstandard2.1;net452</TargetFrameworks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>..\..\bin\lib\net45\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NET45</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
+    <OutputPath>..\bin\lib\</OutputPath>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>..\..\bin\lib\net45\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+    <OutputPath>..\bin\lib\</OutputPath>
+    <WarningLevel>3</WarningLevel>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
-      <HintPath>..\packages\log4net.2.0.8\lib\net45-full\log4net.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
-    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\RestSharp.105.2.3\lib\net45\RestSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
+    <PackageReference Include="log4net" Version="2.0.8" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="RestSharp" Version="106.1.0" />
   </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Authentication\AuthenticationMethodChooser.cs" />
-    <Compile Include="Authentication\AwsAuthenticationMethod.cs" />
-    <Compile Include="Authentication\ApiKeyAuthenticationMethod.cs" />
-    <Compile Include="Authentication\BasicAuthenticationMethod.cs" />
-    <Compile Include="Authentication\IAuthenticationMethodChooser.cs" />
-    <Compile Include="Authentication\RequestData.cs" />
-    <Compile Include="Authentication\Aws\AWS4SignerForAuthorizationHeader.cs" />
-    <Compile Include="Authentication\Aws\AWS4SignerBase.cs" />
-    <Compile Include="Bulk\ILogBulkSet.cs" />
-    <Compile Include="Bulk\LogBulkSet.cs" />
-    <Compile Include="Configuration\IServerData.cs" />
-    <Compile Include="Configuration\IndexOperationParam.cs" />
-    <Compile Include="Configuration\IndexOperationParamsDictionary.cs" />
-    <Compile Include="Configuration\IServerDataCollection.cs" />
-    <Compile Include="Configuration\ServerData.cs" />
-    <Compile Include="Configuration\ServerDataCollection.cs" />
-    <Compile Include="ElasticClient\AbstractWebElasticClient.cs" />
-    <Compile Include="ElasticClient\IElasticClientFactory.cs" />
-    <Compile Include="ElasticClient\IElasticsearchClient.cs" />
-    <Compile Include="ElasticClient\InnerBulkOperation.cs" />
-    <Compile Include="ElasticClient\IRequestFactory.cs" />
-    <Compile Include="ElasticClient\IResponseValidator.cs" />
-    <Compile Include="ElasticClient\PartialElasticResponse.cs" />
-    <Compile Include="ElasticClient\RequestFactory.cs" />
-    <Compile Include="ElasticClient\ResponseValidator.cs" />
-    <Compile Include="ElasticClient\RestSharp\IRestClientFactory.cs" />
-    <Compile Include="ElasticClient\RestSharp\RestSharpClientFactory.cs" />
-    <Compile Include="ElasticClient\WebElasticClientFactory.cs" />
-    <Compile Include="ErrorHandling\IExternalEventWriter.cs" />
-    <Compile Include="ErrorHandling\LogLogEventWriter.cs" />
-    <Compile Include="Extensions\ITolerateCallsFactory.cs" />
-    <Compile Include="Extensions\TolerateCallsFactory.cs" />
-    <Compile Include="Extensions\ToleratedCalls.cs" />
-    <Compile Include="FileAccess\BasicFileAccessor.cs" />
-    <Compile Include="FileAccess\IFileAccessor.cs" />
-    <Compile Include="Filters\ConvertFilter.cs" />
-    <Compile Include="Filters\XmlFilter.cs" />
-    <Compile Include="IElasticAppenderCollection.cs" />
-    <Compile Include="LogEvent\BasicLogEventConverter.cs" />
-    <Compile Include="ElasticClient\WebElasticClient.cs" />
-    <Compile Include="Filters\AddValueFilter.cs" />
-    <Compile Include="Filters\JsonFilter.cs" />
-    <Compile Include="AssemblyVersionInfo.cs" />
-    <Compile Include="ElasticSearchAppender.cs" />
-    <Compile Include="ElasticAppenderFilters.cs" />
-    <Compile Include="Filters\ConvertToArrayFilter.cs" />
-    <Compile Include="Filters\GrokFilter.cs" />
-    <Compile Include="Filters\KvFilter.cs" />
-    <Compile Include="IElasticAppenderFilter.cs" />
-    <Compile Include="LogEvent\IJsonSerializableExceptionFactory.cs" />
-    <Compile Include="LogEvent\ILogEventConverter.cs" />
-    <Compile Include="InnerExceptions\InvalidFilterConfigurationException.cs" />
-    <Compile Include="Extensions\FixFlagsExtensions.cs" />
-    <Compile Include="LogEvent\ILogEventConverterFactory.cs" />
-    <Compile Include="LogEvent\ILoggingEventParser.cs" />
-    <Compile Include="LogEvent\JsonSerializableException.cs" />
-    <Compile Include="LogEvent\BasicLoggingEventParser.cs" />
-    <Compile Include="LogEvent\JsonSerializableExceptionFactory.cs" />
-    <Compile Include="LogEvent\LogEventConverterFactory.cs" />
-    <Compile Include="SmartFormatters\GrokSmartFormatter.cs" />
-    <Compile Include="SmartFormatters\LogEventSmartFormatter.cs" />
-    <Compile Include="SmartFormatters\SmartFormatter.cs" />
-    <Compile Include="Extensions\LoggingEventExtensions.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Filters\RemoveKeyFilter.cs" />
-    <Compile Include="Filters\RenameKeyFilter.cs" />
-    <Compile Include="TemplateInfo.cs" />
-    <Compile Include="Timing\IIndexingTimer.cs" />
-    <Compile Include="Timing\IndexingTimer.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="log4stash.props" />
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
-  <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
-  </PropertyGroup>
-  <Import Project="log4stash.ilRepack.targets" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\ILRepack.2.0.13\build\ILRepack.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILRepack.2.0.13\build\ILRepack.props'))" />
-  </Target>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
-       Other similar extension points exist, see Microsoft.Common.targets.
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
-  -->
+
 </Project>
