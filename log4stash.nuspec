@@ -5,7 +5,7 @@
 		<version>$version$</version>
 		<authors>urielha</authors>
 		<owners>urielha</owners>
-		<icon>https://i.imgur.com/9e8hEh5.png</icon>
+		<icon>icon.png</icon>
 		<license type="expression">MIT</license>
 		<title>log4stash - Elasticsearch log4net appender</title>
 		<projectUrl>https://github.com/urielha/log4stash</projectUrl>
@@ -45,5 +45,6 @@
 		<file src="lib\**\log4stash*.dll" target="lib"/>
 		<file src="lib\**\log4stash*.pdb" target="lib"/>
 		<file src="readme.txt" target="" />
+		<file src="icon.png" target="" />
 	</files>
 </package>
