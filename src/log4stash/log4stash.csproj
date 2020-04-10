@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net452</TargetFrameworks>
+	  <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -15,11 +16,35 @@
     <WarningLevel>3</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
+	
 
 	<ItemGroup>
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
     <PackageReference Include="RestSharp" Version="106.1.0" />
-  </ItemGroup>
+    <PackageReference Include="ILRepack.MSBuild.Task" Version="2.0.13" PrivateAssets="All"/>
+	</ItemGroup>
+
+	<Target Name="ILRepack" AfterTargets="Build" Condition="'$(Configuration)|$(TargetFramework)' == 'Release|netstandard2.0' Or '$(Configuration)|$(TargetFramework)' == 'Release|net452'">
+		<PropertyGroup>
+			<WorkingDirectory>$(OutputPath)</WorkingDirectory>
+		</PropertyGroup>
+		<ItemGroup>
+			<InputAssemblies Include="RestSharp.dll" />
+			<InputAssemblies Include="Newtonsoft.Json.dll" />
+		</ItemGroup>
+		<ItemGroup>
+			<!-- Dot not internalize any types inside this assembly -->
+			<InternalizeExcludeAssemblies Include="log4stash.dll" />
+		</ItemGroup>
+		<Message Text="MERGING: @(InputAssemblies->'%(Filename)') into $(OutputAssembly)" Importance="High" />
+		<ILRepack
+			OutputType="$(OutputType)"
+			MainAssembly="$(AssemblyName).dll"
+			OutputAssembly="$(OutputPath)\$(AssemblyName).dll"
+			InputAssemblies="@(InputAssemblies)"
+			InternalizeExcludeAssemblies="@(InternalizeExcludeAssemblies)"
+			WorkingDirectory="$(OutputPath)" />
+	</Target>
 
 </Project>
