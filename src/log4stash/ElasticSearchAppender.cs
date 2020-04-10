@@ -89,7 +89,7 @@ namespace log4stash
 
         public ElasticSearchAppender()
             : this(new WebElasticClientFactory(), "LogEvent-%{+yyyy.MM.dd}",
-                "LogEvent", new IndexingTimer(Timeout.Infinite) { WaitTimeout = 5000 },
+                string.Empty, new IndexingTimer(Timeout.Infinite) { WaitTimeout = 5000 },
                 new TolerateCallsFactory(), new LogBulkSet(),
                 new BasicLogEventConverterFactory(), new ElasticAppenderFilters(), 
                 new BasicFileAccessor(), new LogLogEventWriter())

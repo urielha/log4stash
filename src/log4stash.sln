@@ -30,6 +30,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".ci", ".ci", "{DB38FCDE-D40
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "log4stash.UnitTests", "log4stash.UnitTests\log4stash.UnitTests.csproj", "{14A81F04-BB13-490C-9CC0-B9EA8FCD8850}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "log4stash.IntegrationTests.Es7", "log4stash.IntegrationTests.Es7\log4stash.IntegrationTests.Es7.csproj", "{A3697AE9-8ABF-43F7-B7CA-56292F50E143}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,9 @@ Global
 		{14A81F04-BB13-490C-9CC0-B9EA8FCD8850}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{14A81F04-BB13-490C-9CC0-B9EA8FCD8850}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{14A81F04-BB13-490C-9CC0-B9EA8FCD8850}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A3697AE9-8ABF-43F7-B7CA-56292F50E143}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A3697AE9-8ABF-43F7-B7CA-56292F50E143}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A3697AE9-8ABF-43F7-B7CA-56292F50E143}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
