@@ -60,7 +60,8 @@ You can also set any public property in the appender/filter which didn't appear 
     <!-- optional: in case elasticsearch is located behind a reverse proxy the URL is like http://Server:Port/Path, default = empty string -->
     <Path>/es5</Path>
     <IndexName>log_test_%{+yyyy-MM-dd}</IndexName>
-    <IndexType>LogEvent</IndexType>
+    <!-- optional: type support was removed in ElasticSearch 7, so if not defined in configuration there won't be a type in the request -->
+	<IndexType>LogEvent</IndexType>
     <Bulksize>2000</Bulksize>
     <BulkIdleTimeout>10000</BulkIdleTimeout>
     <IndexAsync>False</IndexAsync>
@@ -213,6 +214,8 @@ Many thanks to [@mpdreamz](https://github.com/Mpdreamz) and the team for their g
 The inspiration to the filters and style had taken from [elasticsearch/logstash](https://github.com/elasticsearch/logstash) project.
 
 ### Build status:
+
+The CI will be soon to Azure DevOps and will be tested against ElasticSearch 5,6,7 every time.
 
 | Status | Provider |
 | ------ | -------- |
