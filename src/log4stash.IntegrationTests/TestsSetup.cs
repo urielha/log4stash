@@ -64,6 +64,7 @@ namespace log4stash.IntegrationTests
         [SetUp]
         public void TestSetup()
         {
+            FixtureTearDown();
             QueryConfiguration(appender =>
             {
                 appender.BulkSize = 1;

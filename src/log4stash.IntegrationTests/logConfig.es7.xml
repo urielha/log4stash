@@ -20,10 +20,6 @@
       <IndexAsync>False</IndexAsync>
       <_fixedFields>Partial</_fixedFields>
       <TolerateLogLogInSec>5</TolerateLogLogInSec>
-      <Template>
-        <Name>template1</Name>
-        <FileName>template.json</FileName>
-      </Template>
       <ElasticFilters>
         <Add>
           <Key>@type</Key>
