@@ -7,7 +7,7 @@
 
   <PropertyGroup>
     <OutputPath>..\..\bin\lib\</OutputPath>
-    <WarningLevel>3</WarningLevel>
+    <WarningLevel>4</WarningLevel>
     <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
 	
