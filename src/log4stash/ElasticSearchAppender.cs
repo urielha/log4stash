@@ -33,15 +33,6 @@ namespace log4stash
         private readonly ITolerateCallsFactory _tolerateCallsFactory;
 
         
-
-        [Obsolete]
-        public string DocumentIdSource
-        {
-            set
-            {
-                IndexOperationParams.AddParameter(new IndexOperationParam("_id", string.Format("{0}{1}{2}", "%{", value, "}" )));
-            }
-        }
         public FixFlags FixedFields { get; set; }
         public bool SerializeObjects { get; set; }
         public IndexOperationParamsDictionary IndexOperationParams { get; set; }

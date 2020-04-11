@@ -3,14 +3,18 @@ log4stash
 
 log4stash is a [log4net](http://logging.apache.org/log4net/) appender to log messages to the [ElasticSearch](http://www.elasticsearch.org) document database. ElasticSearch offers robust full-text search engine and analyzation so that errors and messages can be indexed quickly and searched easily.
 
-log4stash provide few logging filters similar to the filters on [logstash](http://logstash.net).
+log4stash provides a few logging filters similar to the filters on [logstash](http://logstash.net).
 
 The origin of log4stash is [@jptoto](https://github.com/jptoto)'s [log4net.ElasticSearch](https://github.com/jptoto/log4net.ElasticSearch) repository.
 
+log4stash is based on RestSharp and Newtonsoft.Json but uses ILRepack to avoid nuget dependencies.
+
+**log4stash is fully open source, MIT licensed.**
+
 ### Features:
-* Supports .NET 4.0+ and .NET Core
+* Supports .NET 4.5.2+ and .NET Core 2.0+
 * Easy installation and setup via [Nuget](https://nuget.org/packages/log4stash/)
-* Ability to analyze the log event before sending it to elasticsearch using built-in filters and custom filters similar to [logstash](http://logstash.net/docs/1.4.2/).
+* Ability to analyze the log event before sending it to ElasticSearch using built-in filters and custom filters similar to [logstash](http://logstash.net/docs/1.4.2/).
 
 ### Breaking Changes:
 Navigate to breaking changes page [here](https://github.com/urielha/log4stash/blob/master/docs/breaking.md). See also [Version notes](https://github.com/urielha/log4stash/blob/master/docs/version_notes.md) page.
@@ -37,7 +41,7 @@ I do my best to reply to issues or questions ASAP. Please use the [ISSUES](https
 
 ### Configuration Examples:
 
-Almost all the parameters are optional, to see the default values check the [c'tor](https://github.com/urielha/log4stash/blob/master/src/log4stash/ElasticSearchAppender.cs#L52) of the appender and the c'tor of every filter. 
+Almost all the parameters are optional, to see the default values check the [c'tor](https://github.com/urielha/log4stash/blob/master/src/log4stash/ElasticSearchAppender.cs#L86) of the appender and the c'tor of every filter. 
 You can also set any public property in the appender/filter which didn't appear in the example.
 
 ##### Simple configuration:
@@ -60,12 +64,12 @@ You can also set any public property in the appender/filter which didn't appear 
     <!-- optional: in case elasticsearch is located behind a reverse proxy the URL is like http://Server:Port/Path, default = empty string -->
     <Path>/es5</Path>
     <IndexName>log_test_%{+yyyy-MM-dd}</IndexName>
-    <!-- optional: type support was removed in ElasticSearch 7, so if not defined in configuration there won't be a type in the request -->
+    <!-- type support was removed in ElasticSearch 7, so if not defined in configuration there won't be a type in the request -->
 	<IndexType>LogEvent</IndexType>
     <Bulksize>2000</Bulksize>
     <BulkIdleTimeout>10000</BulkIdleTimeout>
     <IndexAsync>False</IndexAsync>
-    <DocumentIdSource>IdSource</DocumentIdSource> <!-- obsolete! use IndexOperationParams -->
+    <DropEventsOverBulkLimit>False</DropEventsOverBulkLimit>
     
     <!-- Serialize log object as json (default is true).
       -- This in case you log the object this way: `logger.Debug(obj);` and not: `logger.Debug("string");` -->
@@ -74,14 +78,14 @@ You can also set any public property in the appender/filter which didn't appear 
     <!-- optional: elasticsearch timeout for the request, default = 10000 -->
     <ElasticSearchTimeout>10000</ElasticSearchTimeout>
 
+	<!-- optional: ssl connection -->
+	<Ssl>False</Ssl>
+	<AllowSelfSignedServerCert>False</AllowSelfSignedServerCert>
+
     <!--You can add parameters to the request to control the parameters sent to ElasticSearch.
     for example, as you can see here, you can add a routing specification to the appender.
     The Key is the key to be added to the request, and the value is the parameter's name in the log event properties.-->
     <IndexOperationParams>
-      <Parameter>
-        <Key>_routing</Key>
-        <Value>%{RoutingSource}</Value>
-      </Parameter>
       <Parameter>
         <Key>_id</Key>
         <Value>%{IdSource}</Value>
@@ -100,7 +104,7 @@ You can also set any public property in the appender/filter which didn't appear 
       <FileName>path2template.json</FileName>
     </Template>
 
-    <!--Only one credential type can used at once-->
+    <!--Only one credential type can be used at once-->
     <!--Here we list all possible types-->
     <AuthenticationMethod>
       <!--For basic authentication purposes-->
@@ -115,15 +119,13 @@ You can also set any public property in the appender/filter which didn't appear 
           <Aws4SignerRegion>Region</Aws4SignerRegion>
       </Aws>
       <!-- For Api Key (X-Pack) authentication -->
-      <AuthenticationMethod>
-          <ApiKey>
-              <!-- ApiKeyBase64 takes precedence over Id/ApiKey  -->
-              <ApiKeyBase64>aWQ6YXBpa2V5</ApiKey>
-              <!-- Or -->
-              <Id>id</Id>
-              <ApiKey>apikey</ApiKey>
-          </ApiKey>
-      </AuthenticationMethod>
+	  <ApiKey>
+		  <!-- ApiKeyBase64 takes precedence over Id/ApiKey  -->
+		  <ApiKeyBase64>aWQ6YXBpa2V5</ApiKey>
+		  <!-- Or -->
+		  <Id>id</Id>
+		  <ApiKey>apikey</ApiKey>
+	  </ApiKey>
     </AuthenticationMethod>
     
     <!-- all filters goes in ElasticFilters tag -->
@@ -215,7 +217,8 @@ The inspiration to the filters and style had taken from [elasticsearch/logstash]
 
 ### Build status:
 
-The CI will be soon to Azure DevOps and will be tested against ElasticSearch 5,6,7 every time.
+The CI will be move soon to Azure DevOps and will be tested against ElasticSearch 5,6,7 every time.
+Support for lower ElasticSearch versions is no longer maintained.
 
 | Status | Provider |
 | ------ | -------- |
@@ -237,6 +240,6 @@ The CI will be soon to Azure DevOps and will be tested against ElasticSearch 5,6
 [docs-filters-remove]:https://github.com/urielha/log4stash/blob/master/docs/Filters/Remove.md
 [docs-filters-rename]:https://github.com/urielha/log4stash/blob/master/docs/Filters/Rename.md
 
+[erangil2]:https://github.com/erangil2
 [ignasv]:https://github.com/ignasv
-[erangil]:https://github.com/erangil2
 [mfpalladino]:https://github.com/mfpalladino
