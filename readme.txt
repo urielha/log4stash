@@ -1,7 +1,7 @@
 log4stash
 =====================
 
-Breaking chages on 3.0.0 version:
+Breaking changes on 3.0.0 version:
 BasicAuthUsername and BasicAuthPassword no longer exist as parameters and now needs to be configured through an authentication method.
 DocumentIdSource no longer exists as a parameter and now needs to be configured through IndexOperationParams
 Stopped support of .net 4.0
