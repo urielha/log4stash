@@ -20,9 +20,9 @@
 
 	<ItemGroup>
     <PackageReference Include="log4net" Version="2.0.8" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
-    <PackageReference Include="RestSharp" Version="106.1.0" />
-    <PackageReference Include="ILRepack.MSBuild.Task" Version="2.0.13" PrivateAssets="All"/>
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="RestSharp" Version="106.10.1" />
+    <PackageReference Include="ILRepack.MSBuild.Task" Version="2.0.13" PrivateAssets="All" />
 	</ItemGroup>
 
 	<Target Name="ILRepack" AfterTargets="Build" Condition="'$(Configuration)|$(TargetFramework)' == 'Release|netstandard2.0' Or '$(Configuration)|$(TargetFramework)' == 'Release|net452'">
@@ -38,13 +38,7 @@
 			<InternalizeExcludeAssemblies Include="log4stash.dll" />
 		</ItemGroup>
 		<Message Text="MERGING: @(InputAssemblies->'%(Filename)') into $(OutputAssembly)" Importance="High" />
-		<ILRepack
-			OutputType="$(OutputType)"
-			MainAssembly="$(AssemblyName).dll"
-			OutputAssembly="$(OutputPath)\$(AssemblyName).dll"
-			InputAssemblies="@(InputAssemblies)"
-			InternalizeExcludeAssemblies="@(InternalizeExcludeAssemblies)"
-			WorkingDirectory="$(OutputPath)" />
+		<ILRepack OutputType="$(OutputType)" MainAssembly="$(AssemblyName).dll" OutputAssembly="$(OutputPath)\$(AssemblyName).dll" InputAssemblies="@(InputAssemblies)" InternalizeExcludeAssemblies="@(InternalizeExcludeAssemblies)" WorkingDirectory="$(OutputPath)" />
 	</Target>
 
 </Project>
