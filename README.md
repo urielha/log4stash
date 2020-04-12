@@ -1,6 +1,8 @@
 log4stash
 =====================
 
+[![Build status][AzureDevOpsImg]][azure-devops]
+
 log4stash is a [log4net](http://logging.apache.org/log4net/) appender to log messages to the [ElasticSearch](http://www.elasticsearch.org) document database. ElasticSearch offers robust full-text search engine and analyzation so that errors and messages can be indexed quickly and searched easily.
 
 log4stash provides a few logging filters similar to the filters on [logstash](http://logstash.net).
@@ -217,21 +219,12 @@ The inspiration to the filters and style had taken from [elasticsearch/logstash]
 
 ### Build status:
 
-The CI will be move soon to Azure DevOps and will be tested against ElasticSearch 5,6,7 every time.
+The CI is running on Azure DevOps and tested against ElasticSearch 5,6,7 every time.
 Support for lower ElasticSearch versions is no longer maintained.
 
-| Status | Provider |
-| ------ | -------- |
-| [![Build status][TravisImg]][TravisLink] | Mono CI provided by [travis-ci][] |
-| [![Build Status][AppVeyorImg]][AppVeyorLink] | Windows CI provided by [AppVeyor][] (without tests for now) |
+[AzureDevOpsImg]:https://erangil.visualstudio.com/log4stash/_apis/build/status/log4stash%20CI?branchName=master
 
-[TravisImg]:https://travis-ci.org/urielha/log4stash.svg?branch=master
-[TravisLink]:https://travis-ci.org/urielha/log4stash
-[AppVeyorImg]:https://ci.appveyor.com/api/projects/status/byp4s7vl8cuhyae0
-[AppVeyorLink]:https://ci.appveyor.com/project/urielha/log4stash
-
-[travis-ci]:https://travis-ci.org/
-[AppVeyor]:http://www.appveyor.com/
+[azure-devops]:https://azure.microsoft.com/en-us/services/devops/
 
 [config-example]:https://github.com/urielha/log4stash#almost-full-configuration
 [filters-section]:https://github.com/urielha/log4stash#filters
