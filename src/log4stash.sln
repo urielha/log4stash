@@ -13,13 +13,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{A113BBCF-B1A1-4597-B7AD-0A58C882598A}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\NuGet.Config = .nuget\NuGet.Config
-		.nuget\NuGet.exe = .nuget\NuGet.exe
-		.nuget\NuGet.targets = .nuget\NuGet.targets
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".ci", ".ci", "{DB38FCDE-D40E-4280-91D2-F46099B430F8}"
-	ProjectSection(SolutionItems) = preProject
-		.ci\RunTests.sh = .ci\RunTests.sh
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "log4stash", "log4stash\log4stash.csproj", "{4BFF06CA-BEF8-4EFD-845D-F3C6DDBE29D2}"
