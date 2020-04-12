@@ -1,0 +1,79 @@
+﻿<?xml version="1.0"?>
+<configuration>
+  <configSections>
+    <section name="log4net" type="log4net.Config.Log4NetConfigurationSectionHandler, log4net" />
+  </configSections>
+  <startup>
+    <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.0"/>
+  </startup>
+  <log4net>
+    <appender name="ElasticSearchAppender" type="log4stash.ElasticSearchAppender, log4stash">
+      <Servers>
+        <Server>
+          <Address>127.0.0.1</Address>
+          <Port>9200</Port>
+        </Server>
+      </Servers>
+      <IndexName>log_test_%{+yyyy.MM.dd}</IndexName>
+      <Bulksize>1</Bulksize>
+      <BulkIdleTimeout>-1</BulkIdleTimeout>
+      <IndexAsync>False</IndexAsync>
+      <_fixedFields>Partial</_fixedFields>
+      <TolerateLogLogInSec>5</TolerateLogLogInSec>
+      <ElasticFilters>
+        <Add>
+          <Key>@type</Key>
+          <Value>Special</Value>
+        </Add>
+        <Add>
+          <Key>SmartValue</Key>
+          <Value>the type is %{@type}</Value>
+        </Add>
+        <Remove>
+          <Key>keyNotExists</Key>
+        </Remove>
+        <Remove>
+          <Key>@type</Key>
+        </Remove>
+        <Filter type="log4stash.Filters.RenameKeyFilter, log4stash">
+          <Key>SmartValue</Key>
+          <RenameTo>SmartValue2</RenameTo>
+        </Filter>
+
+        <Kv/>
+
+        <Grok>
+          <SourceKey>Message</SourceKey>
+          <Pattern>name is %{WORD:name} and guid %{UUID:the_guid}</Pattern>
+        </Grok>
+        <Grok>
+          <SourceKey>aa</SourceKey>
+          <Pattern>this is id %{INT:tId}</Pattern>
+        </Grok>
+
+        <ConvertToArray>
+          <SourceKey>someIds</SourceKey>
+        </ConvertToArray>
+        
+        <Convert>
+          <ToString>shouldBeString</ToString>
+          <ToArray>
+             <SourceKey>anotherIds</SourceKey>
+          </ToArray>
+          <!-- For stack objects 
+          <ToString>UserName</ToString>
+          <ToArray>
+            <SourceKey>UserName</SourceKey>
+          </ToArray>
+          -->
+        </Convert>
+        
+      </ElasticFilters>
+    </appender>
+
+    <root>
+      <level value="ALL"/>
+      <appender-ref ref="ElasticSearchAppender" />
+    </root>
+  </log4net>
+</configuration>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0"?>
+<?xml version="1.0"?>
 <configuration>
   <configSections>
     <section name="log4net" type="log4net.Config.Log4NetConfigurationSectionHandler, log4net" />
@@ -10,7 +10,7 @@
     <appender name="ElasticSearchAppender" type="log4stash.ElasticSearchAppender, log4stash">
       <Servers>
         <Server>
-          <Address>localhost</Address>
+          <Address>127.0.0.1</Address>
           <Port>9200</Port>
         </Server>
       </Servers>

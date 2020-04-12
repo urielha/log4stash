@@ -11,9 +11,7 @@ namespace log4stash.LogEvent
 
             var serializable = new JsonSerializableException
             {
-#if NET45
                 HResult = exception.HResult,
-#endif
                 Type = exception.GetType().FullName,
                 Message = exception.Message,
                 HelpLink = exception.HelpLink,

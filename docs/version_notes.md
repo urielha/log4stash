@@ -8,6 +8,9 @@ description: List of version notes
 redirect_from: "/version_notes/"
 --- -->
 
+### Versions 3.*
+* :green_book: log4stash 3.0.0 targets .net standard natively, removed RestSharp dependency and added API Key authentication
+
 ### Versions 2.*
 
 * :green_book: log4stash 2.0.4 has new filters see [filters section][filters-section] for more information. Added support for AWS Version 4 authorization header thanks to [@Marcelo Palladino][mfpalladino]. Support configuring multiple elastic nodes. Add document id source so you can decide your own doc id (instead of getting generated one from the elastic). Add Timeout option for requests. Many thanks to [@eran gil][erangil] for the efforts and the pull requests.

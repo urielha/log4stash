@@ -28,7 +28,8 @@ namespace log4stash.IntegrationTests
 
             Client.Indices.Refresh(TestIndex);
 
-            var searchResults = Client.Search<JObject>(s => s.AllIndices().Query(q => q.Term("Message", "loggingtest")));
+            var searchResults =
+                Client.Search<JObject>(s => s.AllIndices().Query(q => q.Term("Message", "loggingtest")));
 
             Assert.AreEqual(1, searchResults.Total);
         }
@@ -37,24 +38,35 @@ namespace log4stash.IntegrationTests
         public void Log_With_Custom_Id()
         {
             string oldDocId = null;
+            const string idSource = "IdSource";
+            const string idKey = "_id";
+            const string idValue = "TEST_ID";
             QueryConfiguration(appender =>
             {
-                if(!appender.IndexOperationParams.TryGetValue("_id", out oldDocId)) 
+                if (!appender.IndexOperationParams.TryGetValue(idKey, out oldDocId))
                 {
                     oldDocId = null;
                 }
-                appender.DocumentIdSource = "IdSource";
+
+                appender.IndexOperationParams.AddOrSetParameter(new IndexOperationParam(idKey, "%{" + idSource + "}"));
             });
-            ThreadContext.Properties["IdSource"] = "TEST_ID";
+            ThreadContext.Properties[idSource] = idValue;
             _log.Info("loggingtest");
 
             Client.Indices.Refresh(TestIndex);
 
-            var searchResults = Client.Search<JObject>(s => s.AllIndices().Query(q => q.Ids(descriptor => descriptor.Values("TEST_ID"))));
-
+            var searchResults = Client.Search<JObject>(s =>
+                s.AllIndices().Query(q => q.Ids(descriptor => descriptor.Values(idValue))));
             QueryConfiguration(appender =>
             {
-                appender.DocumentIdSource = oldDocId;
+                if (oldDocId == null)
+                {
+                    appender.IndexOperationParams.Remove(idKey);
+                }
+                else
+                {
+                    appender.IndexOperationParams.AddOrSetParameter(new IndexOperationParam(idKey, oldDocId));
+                }
             });
 
             Assert.AreEqual(1, searchResults.Total);
@@ -84,15 +96,13 @@ namespace log4stash.IntegrationTests
                 {
                     break;
                 }
+
                 Thread.Sleep(100);
             }
+
             Assert.AreEqual(1, searchResults.Total);
 
-            QueryConfiguration(appender =>
-            {
-                appender.IndexAsync = originIndexAsync;
-            });
-
+            QueryConfiguration(appender => { appender.IndexAsync = originIndexAsync; });
         }
 
         [Test]
@@ -105,7 +115,7 @@ namespace log4stash.IntegrationTests
                 ExceptionString = exceptionString,
                 Level = Level.Error,
                 Message = "loggingtest",
-                TimeStamp = DateTime.Now,
+                TimeStampUtc = DateTime.UtcNow,
                 Domain = "Domain",
             };
             var loggingEvent = new LoggingEvent(eventData);
@@ -114,7 +124,8 @@ namespace log4stash.IntegrationTests
 
             Client.Indices.Refresh(TestIndex);
 
-            var searchResults = Client.Search<JObject>(s => s.AllIndices().Query(q => q.Term("Message", "loggingtest")));
+            var searchResults =
+                Client.Search<JObject>(s => s.AllIndices().Query(q => q.Term("Message", "loggingtest")));
 
             Assert.AreEqual(1, searchResults.Total);
             var doc = searchResults.Documents.First();
@@ -128,7 +139,8 @@ namespace log4stash.IntegrationTests
 
             Client.Indices.Refresh(TestIndex);
 
-            var searchResults = Client.Search<JObject>(s => s.AllIndices().Query(q => q.Term("Message", "loggingtest")));
+            var searchResults =
+                Client.Search<JObject>(s => s.AllIndices().Query(q => q.Term("Message", "loggingtest")));
 
             Assert.AreEqual(1, searchResults.Total);
             var doc = searchResults.Documents.First();
@@ -146,7 +158,8 @@ namespace log4stash.IntegrationTests
             _log.Info("loggingtest");
 
             Client.Indices.Refresh(TestIndex);
-            var searchResults = Client.Search<dynamic>(s => s.AllIndices().Query(q => q.Term("Message", "loggingtest")));
+            var searchResults =
+                Client.Search<dynamic>(s => s.AllIndices().Query(q => q.Term("Message", "loggingtest")));
 
             Assert.AreEqual(1, searchResults.Total);
             var firstEntry = searchResults.Documents.First();
@@ -194,7 +207,7 @@ namespace log4stash.IntegrationTests
         [TestCase(new[] {";"}, new[] {"="}, "", true,
             TestName =
                 "Can_read_KvFilter_properties: No whiteSpace on fieldSplit causes the 'another ' key and raise spaces issue"
-            )]
+        )]
         [TestCase(new[] {";"}, new[] {"="}, " ", false,
             TestName = "Can_read_KvFilter_properties: No whiteSpace but with trimming, fix the 'another' key")]
         [TestCase(new[] {"\\|", " "}, new[] {"\\>"}, "", false,
@@ -208,7 +221,7 @@ namespace log4stash.IntegrationTests
             {
                 oldFilters = appender.ElasticFilters;
                 var newFilters = new ElasticAppenderFilters();
-                
+
                 newFilters.AddFilter(new KvFilter()
                 {
                     FieldSplit = string.Join("", fieldSplit),
@@ -303,7 +316,7 @@ namespace log4stash.IntegrationTests
                 var convert = new ConvertFilter();
                 convert.AddToString(sourceKey);
 
-                var toArray = new ConvertToArrayFilter { SourceKey = sourceKey };
+                var toArray = new ConvertToArrayFilter {SourceKey = sourceKey};
                 convert.AddToArray(toArray);
                 newFilters.AddConvert(convert);
                 appender.ElasticFilters = newFilters;
@@ -322,10 +335,7 @@ namespace log4stash.IntegrationTests
             Assert.AreEqual("name1", usrName[0].Value<string>());
             Assert.AreEqual("name2", usrName[1].Value<string>());
 
-            QueryConfiguration(appender =>
-            {
-                appender.ElasticFilters = oldFilters;
-            });
+            QueryConfiguration(appender => { appender.ElasticFilters = oldFilters; });
         }
 
         [Test]
@@ -340,13 +350,17 @@ namespace log4stash.IntegrationTests
             {
                 oldFilters = appender.ElasticFilters;
                 var newFilters = new ElasticAppenderFilters();
-                newFilters.AddFilter(new JsonFilter() { FlattenJson = flatten, Separator = separator, SourceKey = sourceKey });
+                newFilters.AddFilter(new JsonFilter()
+                    {FlattenJson = flatten, Separator = separator, SourceKey = sourceKey});
                 appender.ElasticFilters = newFilters;
             });
             var jObject = new JObject
             {
-                { "key", "value\r\nnewline" },
-                { "Data", new JObject{{"Type","Url"}, {"Host","localhost"}, { "Array", new JArray(Enumerable.Range(0, 5)) }} }
+                {"key", "value\r\nnewline"},
+                {
+                    "Data",
+                    new JObject {{"Type", "Url"}, {"Host", "localhost"}, {"Array", new JArray(Enumerable.Range(0, 5))}}
+                }
             };
             log4net.LogicalThreadContext.Properties[sourceKey] = jObject.ToString();
             _log.Info("logging jsonObject");
@@ -355,10 +369,7 @@ namespace log4stash.IntegrationTests
             var res = Client.Search<JObject>(s => s.AllIndices().Take(1));
             var doc = res.Documents.First();
 
-            QueryConfiguration(appender =>
-            {
-                appender.ElasticFilters = oldFilters;
-            });
+            QueryConfiguration(appender => { appender.ElasticFilters = oldFilters; });
 
             JToken actualObj;
             string key;
@@ -384,6 +395,7 @@ namespace log4stash.IntegrationTests
                 dataArrayFirst = actualObj["Data"]["Array"][0].ToString();
                 dataArrayLast = actualObj["Data"]["Array"][4].ToString();
             }
+
             Assert.IsNotNull(actualObj);
             Assert.AreEqual("value\r\nnewline", key);
             Assert.AreEqual("Url", dataType);
@@ -405,7 +417,8 @@ namespace log4stash.IntegrationTests
             {
                 oldFilters = appender.ElasticFilters;
                 var newFilters = new ElasticAppenderFilters();
-                newFilters.AddFilter(new XmlFilter { SourceKey = sourceKey, FlattenXml = flatten, Separator = separator });
+                newFilters.AddFilter(new XmlFilter
+                    {SourceKey = sourceKey, FlattenXml = flatten, Separator = separator});
                 appender.ElasticFilters = newFilters;
             });
 
@@ -433,17 +446,16 @@ namespace log4stash.IntegrationTests
             var res = Client.Search<JObject>(s => s.AllIndices().Take(1));
             var doc = res.Documents.First();
 
-            QueryConfiguration(appender =>
-            {
-                appender.ElasticFilters = oldFilters;
-            });
+            QueryConfiguration(appender => { appender.ElasticFilters = oldFilters; });
 
             if (flatten)
             {
                 Assert.NotNull(doc);
                 Assert.AreEqual(doc["Parent" + separator + "@key"].ToString(), "value\r\nnewline");
-                Assert.AreEqual(doc["Parent" + separator + "Child" + separator + "0" + separator + "@id"].ToString(), "0");
-                Assert.AreEqual(doc["Parent" + separator + "Child" + separator + "1" + separator + "@id"].ToString(), "1");
+                Assert.AreEqual(doc["Parent" + separator + "Child" + separator + "0" + separator + "@id"].ToString(),
+                    "0");
+                Assert.AreEqual(doc["Parent" + separator + "Child" + separator + "1" + separator + "@id"].ToString(),
+                    "1");
             }
             else
             {
@@ -495,7 +507,7 @@ namespace log4stash.IntegrationTests
 
         [Test]
         [NUnit.Framework.Ignore("the build agent have problems on running performance")]
-        public static void Performance()
+        public void Performance()
         {
             ElasticAppenderFilters oldFilters = null;
             QueryConfiguration(appender =>
@@ -504,7 +516,8 @@ namespace log4stash.IntegrationTests
                 appender.BulkIdleTimeout = -1;
                 oldFilters = appender.ElasticFilters;
                 var newFilters = new ElasticAppenderFilters();
-                newFilters.AddFilter(new GrokFilter() { Pattern = "testNum: {INT:testNum}, name is {WORD:name} and guid {UUID:guid}" });
+                newFilters.AddFilter(new GrokFilter()
+                    {Pattern = "testNum: {INT:testNum}, name is {WORD:name} and guid {UUID:guid}"});
                 appender.ElasticFilters = newFilters;
             });
 
@@ -539,6 +552,7 @@ namespace log4stash.IntegrationTests
                 int i1 = i;
                 tasks.Add(Task.Run(() => Runner(i1, numberOfCycles)));
             }
+
             Task.WaitAll(tasks.ToArray());
         }
 
@@ -550,10 +564,11 @@ namespace log4stash.IntegrationTests
             {
                 Logger.InfoFormat("testNum: {0}, name is someName and guid {1}", i, Guid.NewGuid());
             }
+
             sw.Stop();
 
             Console.WriteLine("Ellapsed: {0}, numPerSec: {1}",
-                sw.ElapsedMilliseconds, numberOfCycles / (sw.ElapsedMilliseconds / (double)1000));
+                sw.ElapsedMilliseconds, numberOfCycles / (sw.ElapsedMilliseconds / (double) 1000));
         }
     }
 

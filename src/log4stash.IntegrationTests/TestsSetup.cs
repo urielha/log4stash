@@ -1,8 +1,10 @@
 using System;
+using System.IO;
+using System.Reflection;
 using Elasticsearch.Net;
 using log4net;
-using log4net.Appender;
-using log4net.Repository.Hierarchy;
+using log4net.Config;
+using log4net.Repository;
 using Nest;
 using Nest.JsonNetSerializer;
 using NUnit.Framework;
@@ -12,12 +14,17 @@ namespace log4stash.IntegrationTests
     public class TestsSetup
     {
         public IElasticClient Client;
-        public readonly string TestIndex = "log_test_" + DateTime.Now.ToString("yyyy-MM-dd");
+        public readonly string TestIndex = "log_test_" + DateTime.Now.ToString("yyyy.MM.dd");
+        private ILoggerRepository _repository;
 
+        [OneTimeSetUp]
         public void FixtureSetup()
         {
+            var configFile = TestContext.Parameters["configFile"];
+            _repository = LogManager.GetRepository(Assembly.GetCallingAssembly());
+            XmlConfigurator.Configure(_repository, new FileInfo(configFile));
             string host = null;
-            int port = 0;
+            var port = 0;
             string path = null;
             QueryConfiguration(appender =>
             {
@@ -41,7 +48,8 @@ namespace log4stash.IntegrationTests
         {
             return new JsonNetSerializer(builtin, values);
         }
-
+        
+        [OneTimeTearDown]
         public void FixtureTearDown()
         {
             if (Client == null) return;
@@ -57,7 +65,6 @@ namespace log4stash.IntegrationTests
         public void TestSetup()
         {
             FixtureTearDown();
-            FixtureSetup();
             QueryConfiguration(appender =>
             {
                 appender.BulkSize = 1;
@@ -65,21 +72,17 @@ namespace log4stash.IntegrationTests
             });
         }
 
-        protected static void QueryConfiguration(Action<ElasticSearchAppender> action)
+        protected void QueryConfiguration(Action<ElasticSearchAppender> action)
         {
-            var hierarchy = LogManager.GetRepository() as Hierarchy;
-            if (hierarchy != null)
+            
+            if (_repository == null) return;
+            var appenders = _repository.GetAppenders();
+            foreach (var appender in appenders)
             {
-                IAppender[] appenders = hierarchy.GetAppenders();
-                foreach (IAppender appender in appenders)
-                {
-                    var elsAppender = appender as ElasticSearchAppender;
-                    if (elsAppender != null && action != null)
-                    {
-                        action(elsAppender);
-                        elsAppender.ActivateOptions();
-                    }
-                }
+                var elsAppender = appender as ElasticSearchAppender;
+                if (elsAppender == null || action == null) continue;
+                action(elsAppender);
+                elsAppender.ActivateOptions();
             }
         }
     }

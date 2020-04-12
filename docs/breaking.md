@@ -8,6 +8,11 @@ description: List of breaking changes
 redirect_from: "/breaking/"
 --- -->
 
+### __Upgrading to 3.0.0__
+* BasicAuthUsername and BasicAuthPassword no longer exists as parameters and now needs to be configured through an authentication method.
+* DocumentIdSource no longer exists as a parameter and now needs to be configured through IndexOperationParams
+* Stopped support of .net 4.0
+
 
 ### __Upgrading to 2.0.4__ 
 BasicAuthUsername and BasicAuthPassword moved under AuthenticationMethod.

@@ -12,8 +12,7 @@
                         "match" : "*",
     					"match_mapping_type" : "string",
                         "mapping" : {
-                            "type" : "string",
-                            "index" : "not_analyzed"
+                            "type" : "text"
                         }
                     }
                 } 
@@ -21,15 +20,11 @@
 		},
 
         "LogEvent" : {
-            "_timestamp": {
-                "enabled": true,
-                "path": "@timestamp"
-            },
+
 
 			"properties" : {
 				"Message" : {
-					"type":"string",
-					"index": "analyzed"
+					"type":"text"
 				},
 				"@timestamp" : {
 					"type":"date"

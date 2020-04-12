@@ -13,7 +13,7 @@ namespace log4stash.Configuration
             _parametersDictionary = new Dictionary<string, LogEventSmartFormatter>();
         }
 
-        public void AddParameter(IndexOperationParam parameter)
+        public void AddOrSetParameter(IndexOperationParam parameter)
         {
             _parametersDictionary[parameter.Key] = parameter.Value;
         }
