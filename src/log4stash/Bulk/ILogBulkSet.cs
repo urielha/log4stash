@@ -7,10 +7,12 @@ namespace log4stash.Bulk
     public interface ILogBulkSet
     {
         int Count { get; }
+        int TotalCount { get; }
 
         void AddEventToBulk(Dictionary<string, object> logEvent, LogEventSmartFormatter indexNameFormat,
             LogEventSmartFormatter indexTypeFormat, IndexOperationParamsDictionary indexOperationParams);
 
         List<InnerBulkOperation> ResetBulk();
+        void CommitBulk(List<InnerBulkOperation> bulkToSend);
     }
 }

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using log4stash.Configuration;
 using log4stash.SmartFormatters;
 
@@ -11,15 +7,28 @@ namespace log4stash.Bulk
 {
     public class LogBulkSet : ILogBulkSet
     {
-        private List<InnerBulkOperation> _bulk = new List<InnerBulkOperation>();
+        private List<List<InnerBulkOperation>> _allBulks = new List<List<InnerBulkOperation>>();
+        private List<InnerBulkOperation> _currentBulk = new List<InnerBulkOperation>();
+        private object _lock = new object();
 
         public int Count
         {
             get
             {
-                lock (_bulk)
+                lock (_lock)
                 {
-                    return _bulk.Count;
+                    return _currentBulk.Count;
+                }
+            }
+        }
+
+        public int TotalCount
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _allBulks.Sum(b => b.Count);
                 }
             }
         }
@@ -39,19 +48,28 @@ namespace log4stash.Bulk
                 IndexOperationParams = indexOperationParamValues
             };
 
-            lock (_bulk)
+            lock (_lock)
             {
-                _bulk.Add(operation);
+                _currentBulk.Add(operation);
             }
         }
 
         public List<InnerBulkOperation> ResetBulk()
         {
-            var currentBulk = Interlocked.Exchange(ref _bulk, new List<InnerBulkOperation>());
-            return currentBulk;
+            List<InnerBulkOperation> result;
+            lock (_lock)
+            {
+                result = _currentBulk;
+                _currentBulk = new List<InnerBulkOperation>();
+                _allBulks.Add(_currentBulk);
+            }
+
+            return result;
         }
 
-
-
+        public void CommitBulk(List<InnerBulkOperation> bulkToSend)
+        {
+            _allBulks.Remove(_currentBulk);
+        }
     }
 }

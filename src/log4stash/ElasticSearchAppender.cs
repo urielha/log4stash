@@ -61,6 +61,7 @@ namespace log4stash
         public TemplateInfo Template { get; set; }
         public ElasticAppenderFilters ElasticFilters { get; set; }
         public bool DropEventsOverBulkLimit { get; set; }
+        public int? TotalDropEventLimit { get; set; }
 
         public string IndexName
         {
@@ -104,6 +105,7 @@ namespace log4stash
             BulkSize = 2000;
             BulkIdleTimeout = 5000;
             DropEventsOverBulkLimit = false;
+            TotalDropEventLimit = null;
             TimeoutToWaitForTimer = 5000;
             ElasticSearchTimeout = 10000;
             IndexAsync = true;
@@ -176,22 +178,38 @@ namespace log4stash
                 return;
             }
 
-            if (DropEventsOverBulkLimit && _bulk.Count >= BulkSize)
+            if (HasOverflowState())
             {
-                _tolerateCalls.Call(() =>
-                    _eventWriter.Warn(GetType(),
-                        "Message lost due to bulk overflow! Set DropEventsOverBulkLimit to false in order to prevent that."),
-                    GetType(), 0);
+                ReportOverflow();
                 return;
             }
 
             var logEvent = _logEventConverter.ConvertLogEventToDictionary(loggingEvent);
             PrepareAndAddToBulk(logEvent);
 
-            if (!DropEventsOverBulkLimit && _bulk.Count >= BulkSize && BulkSize > 0)
+            if (HasOverflowState())
+            {
+                ReportOverflow();
+            }
+            else if (BulkSize > 0)
             {
                 DoIndexNow();
             }
+        }
+
+        private void ReportOverflow()
+        {
+            _tolerateCalls.Call(() =>
+                    _eventWriter.Warn(GetType(),
+                        "Message lost due to bulk overflow! Set DropEventsOverBulkLimit to false in order to prevent that."),
+                GetType(), 0);
+        }
+
+        private bool HasOverflowState()
+        {
+            return DropEventsOverBulkLimit &&
+                   ((TotalDropEventLimit.HasValue && _bulk.TotalCount >= TotalDropEventLimit.Value)
+                    || (!TotalDropEventLimit.HasValue && _bulk.Count >= BulkSize));
         }
 
         /// <summary>
@@ -215,11 +233,13 @@ namespace log4stash
             {
                 if (IndexAsync)
                 {
-                    _client.IndexBulkAsync(bulkToSend);
+                    _client.IndexBulkAsync(bulkToSend)
+                        .ContinueWith(_ => _bulk.CommitBulk(bulkToSend));
                 }
                 else
                 {
                     _client.IndexBulk(bulkToSend);
+                    _bulk.CommitBulk(bulkToSend);
                 }
             }
             catch (Exception ex)

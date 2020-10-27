@@ -494,12 +494,51 @@ namespace log4stash.IntegrationTests
 
             Client.Indices.Refresh(TestIndex);
 
-            var res = Client.Search<JObject>(s => s.AllIndices());
+            var res = Client.Search<JObject>(s => s.Index(TestIndex));
             Assert.AreEqual(1, res.Total);
 
             QueryConfiguration(appender =>
             {
                 appender.DropEventsOverBulkLimit = false;
+                appender.BulkSize = oldBulkSize;
+                appender.BulkIdleTimeout = oldTimeout;
+            });
+        }
+        
+        [Test]
+        public void DropEventsOverBulkLimitWithTotalLimit()
+        {
+            const int timeout = 1000;
+            const int bulkSize = 2;
+            const int totalDropEventLimit = bulkSize * 2;
+            int oldBulkSize = 0;
+            int oldTimeout = 0;
+            QueryConfiguration(appender =>
+            {
+                appender.DropEventsOverBulkLimit = true;
+                appender.TotalDropEventLimit = totalDropEventLimit; 
+                oldBulkSize = appender.BulkSize;
+                oldTimeout = appender.BulkIdleTimeout;
+                appender.BulkSize = bulkSize;
+                appender.BulkIdleTimeout = timeout;
+            });
+
+            for (int i = 0; i < 10; i++)
+            {
+                _log.Info("info...");
+            }
+
+            Thread.Sleep(timeout + 1000);
+
+            Client.Indices.Refresh(TestIndex);
+
+            var res = Client.Search<JObject>(s => s.Index(TestIndex));
+            Assert.AreEqual(totalDropEventLimit, res.Total);
+
+            QueryConfiguration(appender =>
+            {
+                appender.DropEventsOverBulkLimit = false;
+                appender.TotalDropEventLimit = null;
                 appender.BulkSize = oldBulkSize;
                 appender.BulkIdleTimeout = oldTimeout;
             });
