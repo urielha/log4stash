@@ -68,7 +68,7 @@ You can also set any public property in the appender/filter which didn't appear 
 	<IndexName>log_test_%{+yyyy-MM-dd}</IndexName>
 	<!-- type support was removed in ElasticSearch 7, so if not defined in configuration there won't be a type in the request -->
 	<IndexType>LogEvent</IndexType>
-	<Bulksize>2000</Bulksize>
+	<BulkSize>2000</BulkSize>
 	<BulkIdleTimeout>10000</BulkIdleTimeout>
 	<IndexAsync>False</IndexAsync>
 	<DropEventsOverBulkLimit>False</DropEventsOverBulkLimit>
