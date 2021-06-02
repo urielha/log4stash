@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using log4net.Util;
 
 namespace log4stash.Authentication.Aws
 {
@@ -93,7 +94,7 @@ namespace log4stash.Authentication.Aws
                 canonicalizedHeaderNames,
                 canonicalizedHeaders,
                 bodyHash);
-            Console.WriteLine("\nCanonicalRequest:\n{0}", canonicalRequest);
+            LogLog.Debug(this.GetType(), string.Format("\nCanonicalRequest:\n{0}", canonicalRequest));
 
             // generate a hash of the canonical request, to go into signature computation
             var canonicalRequestHashBytes
