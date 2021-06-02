@@ -28,5 +28,14 @@ namespace log4stash.ErrorHandling
         {
             LogLog.Warn(type, message, ex);
         }
+        public void Debug(Type type, string message)
+        {
+            LogLog.Debug(type, message);
+        }
+
+        public void Debug(Type type, string message, Exception ex)
+        {
+            LogLog.Debug(type, message, ex);
+        }
     }
 }

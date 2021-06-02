@@ -113,7 +113,7 @@ namespace log4stash
             _tolerateCalls = _tolerateCallsFactory.Create(0);
             Servers = new ServerDataCollection();
             ElasticFilters = elasticFilters;
-            AuthenticationMethod = new AuthenticationMethodChooser();
+            AuthenticationMethod = new AuthenticationMethodChooser(eventWriter);
             IndexOperationParams = new IndexOperationParamsDictionary();
         }
 

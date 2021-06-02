@@ -8,5 +8,7 @@ namespace log4stash.ErrorHandling
         void Error(Type type, string message, Exception ex);
         void Warn(Type type, string message);
         void Warn(Type type, string message, Exception ex);
+        void Debug(Type type, string message);
+        void Debug(Type type, string message, Exception ex);
     }
 }

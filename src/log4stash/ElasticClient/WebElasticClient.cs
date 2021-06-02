@@ -27,8 +27,8 @@ namespace log4stash
         private readonly IResponseValidator _responseValidator;
         private readonly IExternalEventWriter _eventWriter;
 
-        public WebElasticClient(IServerDataCollection servers, int timeout)
-            : this(servers, timeout, false, false, new AuthenticationMethodChooser())
+        public WebElasticClient(IServerDataCollection servers, IExternalEventWriter eventWriter, int timeout)
+            : this(servers, timeout, false, false, new AuthenticationMethodChooser(eventWriter))
         {
         }
 
