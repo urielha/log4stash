@@ -33,6 +33,12 @@ namespace log4stash.SmartFormatters
                 replacementString = DateTime.Now.ToString(innerMatch.Substring(1), CultureInfo.InvariantCulture);
                 return true;
             }
+            //the "~" is an arbitrary choice, could be any character that means utc
+            if (innerMatch.StartsWith("~"))
+            {
+                replacementString = DateTime.UtcNow.ToString(innerMatch.Substring(1), CultureInfo.InvariantCulture);
+                return true;
+            }
 
             object token;
             if (logEvent.TryGetValue(innerMatch, out token))
