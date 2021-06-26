@@ -48,7 +48,7 @@ namespace log4stash.IntegrationTests
                     oldDocId = null;
                 }
 
-                appender.IndexOperationParams.AddOrSetParameter(new IndexOperationParam(idKey, "%{" + idSource + "}"));
+                appender.IndexOperationParams.AddParameter(new IndexOperationParam(idKey, "%{" + idSource + "}"));
             });
             ThreadContext.Properties[idSource] = idValue;
             _log.Info("loggingtest");
@@ -65,7 +65,7 @@ namespace log4stash.IntegrationTests
                 }
                 else
                 {
-                    appender.IndexOperationParams.AddOrSetParameter(new IndexOperationParam(idKey, oldDocId));
+                    appender.IndexOperationParams.AddParameter(new IndexOperationParam(idKey, oldDocId));
                 }
             });
 
