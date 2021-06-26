@@ -25,7 +25,7 @@ namespace log4stash.UnitTests
             result.Should().Be(expected);
         }
 
-        private const string DateFormat = "HH";
+        private const string DateFormat = "HH:mm";
 
         private static readonly string UtcHour = DateTime.UtcNow.ToString(DateFormat, CultureInfo.InvariantCulture);
         private static readonly string LocalHour = DateTime.Now.ToString(DateFormat, CultureInfo.InvariantCulture);
