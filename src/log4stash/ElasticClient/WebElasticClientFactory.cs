@@ -1,4 +1,5 @@
 ﻿using log4stash.Configuration;
+using log4stash.ErrorHandling;
 using RestSharp.Authenticators;
 
 namespace log4stash.ElasticClient
@@ -9,9 +10,10 @@ namespace log4stash.ElasticClient
             int timeout,
             bool ssl,
             bool allowSelfSignedServerCert,
+            IExternalEventWriter eventWriter,
             IAuthenticator authenticationMethod)
         {
-            return new WebElasticClient(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod);
+            return new WebElasticClient(servers, timeout, ssl, allowSelfSignedServerCert, eventWriter, authenticationMethod);
         }
     }
 }

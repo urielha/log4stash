@@ -120,7 +120,7 @@ namespace log4stash
         public override void ActivateOptions()
         {
             AddOptionalServer();
-            _client = _elasticClientFactory.CreateClient(Servers, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
+            _client = _elasticClientFactory.CreateClient(Servers, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, _eventWriter, AuthenticationMethod);
 
             _logEventConverter = _logEventConverterFactory.Create(FixedFields, SerializeObjects);
 

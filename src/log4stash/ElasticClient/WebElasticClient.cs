@@ -27,8 +27,8 @@ namespace log4stash
         private readonly IResponseValidator _responseValidator;
         private readonly IExternalEventWriter _eventWriter;
 
-        public WebElasticClient(IServerDataCollection servers, IExternalEventWriter eventWriter, int timeout)
-            : this(servers, timeout, false, false, new AuthenticationMethodChooser(eventWriter))
+        public WebElasticClient(IServerDataCollection servers, int timeout, IExternalEventWriter eventWriter)
+            : this(servers, timeout, false, false, eventWriter, new AuthenticationMethodChooser(eventWriter))
         {
         }
 
@@ -36,9 +36,10 @@ namespace log4stash
             int timeout,
             bool ssl,
             bool allowSelfSignedServerCert,
+            IExternalEventWriter eventWriter,
             IAuthenticator authenticationMethod)
             : this(servers, timeout, ssl, allowSelfSignedServerCert, authenticationMethod, new RestSharpClientFactory(),
-                new RequestFactory(), new ResponseValidator(), new LogLogEventWriter())
+                new RequestFactory(), new ResponseValidator(), eventWriter)
         {
         }
 

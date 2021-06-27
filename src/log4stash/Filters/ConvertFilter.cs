@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using log4net.Util;
 using log4stash.ErrorHandling;
 using log4stash.SmartFormatters;
 
@@ -95,9 +94,8 @@ namespace log4stash.Filters
             {
                 return num;
             }
-
-            LogLog.Warn(GetType(), 
-                string.Format("Could not convert {0} of type: {1} to int", arg, arg.GetType()));
+            _eventWriter.Warn(GetType(),
+                $"Could not convert {arg} of type: {arg.GetType()} to int");
             return 0;
         }
     }
