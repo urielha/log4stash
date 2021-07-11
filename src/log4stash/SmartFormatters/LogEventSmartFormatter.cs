@@ -13,6 +13,8 @@ namespace log4stash.SmartFormatters
     /// </summary>
     public class LogEventSmartFormatter : SmartFormatter
     {
+        private const string LocalDateSymbol = "+";
+        private const string UtcDateSymbol = "~";
         private static readonly Regex InnerRegex = new Regex(@"%\{([^\}]+)\}", RegexOptions.Compiled);
         
 
@@ -28,9 +30,15 @@ namespace log4stash.SmartFormatters
             string innerMatch = match.Groups[1].Value;
 
             // "+" means dateTime format
-            if (innerMatch.StartsWith("+"))
+            if (innerMatch.StartsWith(LocalDateSymbol))
             {
                 replacementString = DateTime.Now.ToString(innerMatch.Substring(1), CultureInfo.InvariantCulture);
+                return true;
+            }
+            //the "~" is an arbitrary choice, could be any character that means utc
+            if (innerMatch.StartsWith(UtcDateSymbol))
+            {
+                replacementString = DateTime.UtcNow.ToString(innerMatch.Substring(1), CultureInfo.InvariantCulture);
                 return true;
             }
 
