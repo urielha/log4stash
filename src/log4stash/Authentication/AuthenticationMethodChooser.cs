@@ -1,11 +1,18 @@
-﻿using RestSharp;
+﻿using log4stash.ErrorHandling;
+using RestSharp;
 using RestSharp.Authenticators;
 
 namespace log4stash.Authentication
 {
     public class AuthenticationMethodChooser : IAuthenticationMethodChooser
     {
+        private readonly IExternalEventWriter _eventWriter;
         private IAuthenticator _innerMethod;
+
+        public AuthenticationMethodChooser(IExternalEventWriter eventWriter)
+        {
+            _eventWriter = eventWriter;
+        }
 
         public void AddFilter(IAuthenticator method)
         {
@@ -21,6 +28,7 @@ namespace log4stash.Authentication
 
         public void AddAws(AwsAuthenticationMethod method)
         {
+            method.EventWriter = _eventWriter;
             AddFilter(method);
         }
 

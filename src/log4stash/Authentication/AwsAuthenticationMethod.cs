@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using log4stash.Authentication.Aws;
+using log4stash.ErrorHandling;
 using RestSharp;
 using RestSharp.Authenticators;
 
@@ -16,6 +17,8 @@ namespace log4stash.Authentication
 
         public string Aws4SignerRegion { get; set; }
 
+        public IExternalEventWriter EventWriter { private get; set; }
+
         public void Authenticate(IRestClient client, IRestRequest request)
         {
             var body = request.Parameters.First(p => p.Type == ParameterType.RequestBody).Value.ToString();
@@ -28,7 +31,7 @@ namespace log4stash.Authentication
                 {"content-type", "application/json"}
             };
 
-            var signer = new Aws4SignerForAuthorizationHeader
+            var signer = new Aws4SignerForAuthorizationHeader(EventWriter)
             {
                 EndpointUri = new Uri(client.BaseUrl + request.Resource),
                 HttpMethod = request.Method.ToString(),

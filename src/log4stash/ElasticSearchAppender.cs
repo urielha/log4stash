@@ -113,14 +113,14 @@ namespace log4stash
             _tolerateCalls = _tolerateCallsFactory.Create(0);
             Servers = new ServerDataCollection();
             ElasticFilters = elasticFilters;
-            AuthenticationMethod = new AuthenticationMethodChooser();
+            AuthenticationMethod = new AuthenticationMethodChooser(eventWriter);
             IndexOperationParams = new IndexOperationParamsDictionary();
         }
 
         public override void ActivateOptions()
         {
             AddOptionalServer();
-            _client = _elasticClientFactory.CreateClient(Servers, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, AuthenticationMethod);
+            _client = _elasticClientFactory.CreateClient(Servers, ElasticSearchTimeout, Ssl, AllowSelfSignedServerCert, _eventWriter, AuthenticationMethod);
 
             _logEventConverter = _logEventConverterFactory.Create(FixedFields, SerializeObjects);
 

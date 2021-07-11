@@ -4,6 +4,8 @@ using System.Globalization;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using log4net.Util;
+using log4stash.ErrorHandling;
 
 namespace log4stash.Authentication.Aws
 {
@@ -14,6 +16,13 @@ namespace log4stash.Authentication.Aws
     /// </summary>
     public class Aws4SignerForAuthorizationHeader : Aws4SignerBase
     {
+        private readonly IExternalEventWriter _eventWriter;
+
+        public Aws4SignerForAuthorizationHeader(IExternalEventWriter eventWriter)
+        {
+            _eventWriter = eventWriter;
+        }
+
         /// <summary>
         /// Computes an AWS4 signature for a request, ready for inclusion as an 
         /// 'Authorization' header.
@@ -93,7 +102,7 @@ namespace log4stash.Authentication.Aws
                 canonicalizedHeaderNames,
                 canonicalizedHeaders,
                 bodyHash);
-            Console.WriteLine("\nCanonicalRequest:\n{0}", canonicalRequest);
+            _eventWriter.Debug(GetType(), string.Format("\nCanonicalRequest:\n{0}", canonicalRequest));
 
             // generate a hash of the canonical request, to go into signature computation
             var canonicalRequestHashBytes
@@ -112,7 +121,7 @@ namespace log4stash.Authentication.Aws
             stringToSign.AppendFormat("{0}-{1}\n{2}\n{3}\n", Scheme, Algorithm, dateTimeStamp, scope);
             stringToSign.Append(ToHexString(canonicalRequestHashBytes, true));
 
-            Console.WriteLine("\nStringToSign:\n{0}", stringToSign);
+            _eventWriter.Debug(GetType(), string.Format("\nStringToSign:\n{0}", stringToSign));
 
             // compute the signing key
             var hashAlgorithm = KeyedHashAlgorithm.Create(HMACSHA256);
@@ -121,7 +130,7 @@ namespace log4stash.Authentication.Aws
             // compute the AWS4 signature and return it
             var signature = hashAlgorithm.ComputeHash(Encoding.UTF8.GetBytes(stringToSign.ToString()));
             var signatureString = ToHexString(signature, true);
-            Console.WriteLine("\nSignature:\n{0}", signatureString);
+            _eventWriter.Debug(GetType(), string.Format("\nSignature:\n{0}", signatureString));
 
             var authString = new StringBuilder();
             authString.AppendFormat("{0}-{1} ", Scheme, Algorithm);
@@ -130,7 +139,7 @@ namespace log4stash.Authentication.Aws
             authString.AppendFormat("Signature={0}", signatureString);
 
             var authorization = authString.ToString();
-            Console.WriteLine("\nAuthorization:\n{0}", authorization);
+            _eventWriter.Debug(GetType(), string.Format("\nAuthorization:\n{0}", authorization));
 
             return authorization;
         }

@@ -40,7 +40,7 @@ namespace log4stash.UnitTests
             _elasticFilters = new ElasticAppenderFilters();
             _fileAccessor = Substitute.For<IFileAccessor>();
             _eventWriter = Substitute.For<IExternalEventWriter>();
-            _elasticClientFactory.CreateClient(null, 0, false, false, null).ReturnsForAnyArgs(_elasticClient);
+            _elasticClientFactory.CreateClient(null, 0, false, false, _eventWriter, null).ReturnsForAnyArgs(_elasticClient);
             _logEventConverterFactory.Create(FixFlags.All, false).ReturnsForAnyArgs(_logEventConverter);
         }
 
