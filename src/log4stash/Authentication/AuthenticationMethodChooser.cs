@@ -1,4 +1,5 @@
 ﻿using log4stash.ErrorHandling;
+
 using RestSharp;
 using RestSharp.Authenticators;
 
@@ -8,6 +9,10 @@ namespace log4stash.Authentication
     {
         private readonly IExternalEventWriter _eventWriter;
         private IAuthenticator _innerMethod;
+
+        public AuthenticationMethodChooser()
+        {
+        }
 
         public AuthenticationMethodChooser(IExternalEventWriter eventWriter)
         {
@@ -37,7 +42,7 @@ namespace log4stash.Authentication
             AddFilter(method);
         }
 
-        #endregion
+        #endregion Helpers for common authentication methods
 
         public void Authenticate(IRestClient client, IRestRequest request)
         {
