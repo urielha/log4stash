@@ -1,6 +1,8 @@
 log4stash
 =====================
 
+> **NOTE:** This package is no longer maintained, I will be happy to get help with maintaing it.
+
 [![Build status][AzureDevOpsImg]][azure-devops]
 
 log4stash is a [log4net](http://logging.apache.org/log4net/) appender to log messages to the [ElasticSearch](http://www.elasticsearch.org) document database. ElasticSearch offers robust full-text search engine and analyzation so that errors and messages can be indexed quickly and searched easily.
@@ -214,6 +216,9 @@ You can follow the link to read more about [dynamic mappings](https://www.elasti
 [MIT License](https://github.com/urielha/log4stash/blob/master/LICENSE)
 
 ### Thanks:
+
+Thanks to [@eran-gil](https://github.com/eran-gil) for helping me updating this package to support newer versions of ES, creating continous deployment and fixing issues.
+
 Thanks to [@jptoto](https://github.com/jptoto) for the idea and the first working ElasticAppender.
 Many thanks to [@mpdreamz](https://github.com/Mpdreamz) and the team for their great work on the NEST library!
 The inspiration to the filters and style had taken from [elasticsearch/logstash](https://github.com/elasticsearch/logstash) project.
